@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_ACWR_THRESHOLDS,
   acuteLoad,
   chronicWeeklyAvg,
   acwr,
@@ -356,12 +357,19 @@ describe("flagFor", () => {
     expect(flagFor(loads, ASOF)).toBe("ok");
   });
 
-  it("treats an ACWR of exactly 1.5 (redHigh) as watch", () => {
-    // acute = 1500, older = 2500 -> chronic = (1500 + 2500) / 4 = 1000
-    // ratio = 1500 / 1000 = 1.50, and red starts strictly ABOVE redHigh.
-    const loads = historyWith(1500, 2500);
-    expect(acwr(loads, ASOF)).toEqual({ kind: "ratio", value: 1.5 });
-    expect(flagFor(loads, ASOF)).toBe("watch");
+  it("treats an ACWR exactly at redHigh as watch, strictly above as red", () => {
+    // acute = 1400, older = 2600 -> chronic = (1400 + 2600) / 4 = 1000
+    // ratio = 1400 / 1000 = 1.40 = DEFAULT redHigh; red starts strictly ABOVE.
+    const atBoundary = historyWith(1400, 2600);
+    expect(acwr(atBoundary, ASOF)).toEqual({ kind: "ratio", value: 1.4 });
+    expect(flagFor(atBoundary, ASOF)).toBe("watch");
+    // acute = 1500 -> ratio 1.50 > 1.40 -> red under the shipped default.
+    const above = historyWith(1500, 2500);
+    expect(flagFor(above, ASOF)).toBe("red");
+  });
+
+  it("ships redHigh 1.4, the value the scripts/grid.ts sweep selected", () => {
+    expect(DEFAULT_ACWR_THRESHOLDS.redHigh).toBe(1.4);
   });
 
   it("treats an ACWR of exactly 0.8 (watchLow) as ok", () => {
