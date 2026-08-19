@@ -75,12 +75,17 @@ function entryFor(squadNumber: number, s: Sess): { rpe: number; minutes: number 
   }
   // Kofi (7): sent off vs London Colney (daysAgo 2) - suspended, misses training since
   if (squadNumber === SUSPENDED && s.daysAgo < 2) return null;
-  // Theo (10): the spike - never misses, high minutes, extra intensity in the last 10 days
+  // Theo (10): the spike. Pre-spike he is MANAGED (capped 75min, steady
+  // RPE) so his chronic base sits mid-pack; the last 10 days he plays
+  // everything flat out. ACWR needs the low-then-high shape - a player
+  // who is always maxed cannot red-flag on a ratio (found by T4 on the
+  // live board: spiking only intensity lifted acute AND chronic, 1.17).
   if (squadNumber === SPIKE) {
     const hot = s.daysAgo <= 10;
-    return isMatch
-      ? { rpe: hot ? 9 : pick(7, 8), minutes: 90 }
-      : { rpe: hot ? 8 : pick(6, 7), minutes: hot ? 85 : pick(60, 75) };
+    if (!hot) {
+      return isMatch ? { rpe: 6, minutes: 55 } : { rpe: 6, minutes: 60 };
+    }
+    return isMatch ? { rpe: 9, minutes: 90 } : { rpe: 8, minutes: 85 };
   }
   // Tommy (13): backup GK - trains lightly, rarely plays
   if (squadNumber === LOWLOAD) {

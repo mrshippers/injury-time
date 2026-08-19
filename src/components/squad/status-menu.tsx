@@ -213,17 +213,17 @@ export function StatusMenu({
 
           <form onSubmit={submit}>
             <fieldset className="border-0 p-0">
-              <legend className="mb-1.5 text-[11px] text-ink-faint">availability</legend>
+              <legend className="mb-1.5 text-[11px] text-ink-dim">availability</legend>
               <div className="grid grid-cols-2 gap-1.5">
                 {AVAILABILITY_STATUSES.map((option) => (
-                  <label key={option} className="block">
+                  <label key={option} className="relative block">
                     <input
                       type="radio"
                       name={`${id}-status`}
                       value={option}
                       checked={status === option}
                       onChange={() => setStatus(option)}
-                      className="peer sr-only"
+                      className="peer absolute inset-0 z-10 m-0 h-full w-full cursor-pointer appearance-none opacity-0"
                     />
                     <span className="pressable block cursor-pointer rounded-[2px] border border-line bg-panel px-2 py-1.5 text-center text-[12px] text-ink-dim peer-checked:border-mint peer-checked:text-mint peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-mint peer-focus-visible:-outline-offset-1 hover:border-line-strong hover:text-ink">
                       {STATUS_OPTION_LABEL[option]}
@@ -235,7 +235,7 @@ export function StatusMenu({
 
             {status === "injured" ? (
               <div className="mt-3 grid gap-2">
-                <label className="grid gap-1 text-[11px] text-ink-faint">
+                <label className="grid gap-1 text-[11px] text-ink-dim">
                   body region
                   <select
                     required
@@ -256,7 +256,7 @@ export function StatusMenu({
                   </select>
                 </label>
                 <div className="grid grid-cols-2 gap-2">
-                  <label className="grid gap-1 text-[11px] text-ink-faint">
+                  <label className="grid gap-1 text-[11px] text-ink-dim">
                     side
                     <select
                       value={side}
@@ -270,7 +270,7 @@ export function StatusMenu({
                       ))}
                     </select>
                   </label>
-                  <label className="grid gap-1 text-[11px] text-ink-faint">
+                  <label className="grid gap-1 text-[11px] text-ink-dim">
                     severity
                     <select
                       value={severity}
@@ -289,7 +289,7 @@ export function StatusMenu({
             ) : null}
 
             {wantsReturnDate ? (
-              <label className="mt-2 grid gap-1 text-[11px] text-ink-faint">
+              <label className="mt-2 grid gap-1 text-[11px] text-ink-dim">
                 expected return
                 <input
                   type="date"
