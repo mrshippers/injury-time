@@ -3,12 +3,12 @@ import type { LoadFlag } from "@/lib/load-engine";
 import { STATUS_META, formatDate } from "./labels";
 
 const FLAG_META: Record<LoadFlag, { label: string; color: string }> = {
-  ok: { label: "load: ok", color: "var(--fit)" },
+  ok: { label: "load: steady", color: "var(--fit)" },
   watch: { label: "load: watch", color: "var(--doubt)" },
-  // shouted, because a red flag is the one thing on this page that should
+  // shouted, because a red zone is the one thing on this page that should
   // change what the gaffer does on Tuesday.
-  red: { label: "load: RED", color: "var(--out)" },
-  cold: { label: "load: no data yet", color: "var(--cold)" },
+  red: { label: "load: RED ZONE", color: "var(--out)" },
+  cold: { label: "load: no reading yet", color: "var(--cold)" },
 };
 
 const POSITION_LABEL: Record<string, string> = {

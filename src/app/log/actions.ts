@@ -41,7 +41,22 @@ export async function logSessionAction(input: LogSessionInput): Promise<void> {
     if (!Number.isInteger(e.minutes) || e.minutes < 1 || e.minutes > 180) {
       throw new Error("minutes must be an integer 1-180");
     }
-    return { playerId: e.playerId, rpe: e.rpe, minutes: e.minutes };
+    const stat = (v: unknown, max: number, name: string): number => {
+      if (v === undefined) return 0;
+      if (!Number.isInteger(v) || (v as number) < 0 || (v as number) > max) {
+        throw new Error(`${name} must be an integer 0-${max}`);
+      }
+      return v as number;
+    };
+    return {
+      playerId: e.playerId,
+      rpe: e.rpe,
+      minutes: e.minutes,
+      goals: stat(e.goals, 20, "goals"),
+      assists: stat(e.assists, 20, "assists"),
+      yellow: stat(e.yellow, 2, "yellow"),
+      red: stat(e.red, 1, "red"),
+    };
   });
 
   const opponent =

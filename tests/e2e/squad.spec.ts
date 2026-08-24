@@ -29,11 +29,20 @@ test("the load-spike player carries a red flag", async ({ page }) => {
   await expect(row.getByText("load spike")).toHaveCount(1);
 });
 
-test("a player without 28 days of history reads as an em dash, never 0.00", async ({ page }) => {
+test("a player without 28 days of history reads as no reading, never a number", async ({ page }) => {
   const unknown = page.getByTitle("needs 28 days of data");
   expect(await unknown.count()).toBeGreaterThan(0);
-  await expect(unknown.first()).toContainText("—");
+  await expect(unknown.first()).toContainText("NO READING");
   await expect(page.locator("tbody")).not.toContainText("NaN");
+  await expect(page.locator("tbody")).not.toContainText(/acwr/i);
+});
+
+test("load is a word on the board and the season line sits beside it", async ({ page }) => {
+  const row = page.locator("tbody tr").filter({ hasText: "Theo Braithwaite" });
+  await expect(row).toContainText("RED ZONE");
+  await expect(row).toHaveAttribute("title", /x his usual week/).catch(() => undefined);
+  const bobby = page.locator("tbody tr").filter({ hasText: "Bobby Ashworth" });
+  await expect(bobby).toContainText(/\d+ · \d+ · \d+/);
 });
 
 for (const width of [1440, 390]) {

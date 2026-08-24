@@ -28,7 +28,14 @@
   --doubt: #f5a623;
   --out: #e5484d;
   --susp: #ffd60a;             /* card yellow */
-  --cold: #6b7f92;             /* insufficient data */
+  --cold: #8fa3b6;             /* insufficient data: light enough to pass 4.5:1 on panel */
+
+  /* 3D surfaces (lineup pitch, body figure) */
+  --turf: #14301f;
+  --turf-2: #183a25;
+  --chalk: rgba(238, 242, 238, 0.72);
+  --skin: #4a6a58;             /* the figure at rest: turf-toned, not flesh */
+  --skin-hi: #7fb397;
 
   /* motion */
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
@@ -55,6 +62,7 @@
   --color-out: var(--out);
   --color-susp: var(--susp);
   --color-cold: var(--cold);
+  --color-turf: var(--turf);
   --font-sans: var(--font-manrope);
   --font-mono: var(--font-plex-mono);
 }

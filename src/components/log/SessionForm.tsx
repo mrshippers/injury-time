@@ -5,17 +5,16 @@ import { logSessionAction } from "@/app/log/actions";
 import type { Club, SessionKind } from "@/lib/types";
 import {
   defaultMinutesFor,
+  effective,
   initialRowState,
   isIncluded,
   type RosterPlayer,
   type RowState,
+  type SessionDefault,
 } from "./session-state";
 import { SessionHeader } from "./SessionHeader";
 import { PlayerRow } from "./PlayerRow";
 import { StickyBar } from "./StickyBar";
-
-const MIN_MINUTES = 15;
-const MAX_MINUTES = 150;
 
 export function SessionForm({
   club,
@@ -29,6 +28,7 @@ export function SessionForm({
   const [kind, setKind] = useState<SessionKind>("training");
   const [sessionDate, setSessionDate] = useState(today);
   const [opponent, setOpponent] = useState("");
+  const [def, setDef] = useState<SessionDefault>({ rpe: null, minutes: defaultMinutesFor("training") });
   const [rows, setRows] = useState<Record<string, RowState>>(() =>
     Object.fromEntries(players.map((p) => [p.id, initialRowState()])),
   );
@@ -41,50 +41,29 @@ export function SessionForm({
 
   function handleKindChange(next: SessionKind) {
     setKind(next);
-    setRows((prev) => {
-      const updated = { ...prev };
-      for (const id of Object.keys(updated)) {
-        if (!updated[id].minutesTouched) {
-          updated[id] = { ...updated[id], minutes: defaultMinutesFor(next) };
-        }
-      }
-      return updated;
-    });
+    // the session default follows the kind; per-row overrides are kept
+    setDef((d) => ({ ...d, minutes: defaultMinutesFor(next) }));
   }
 
-  function handleMinutesPreset(playerId: string, minutes: number) {
-    updateRow(playerId, { minutes, minutesTouched: true, stepperOpen: false });
-  }
-
-  function handleMinutesStep(playerId: string, delta: number) {
-    setRows((prev) => {
-      const row = prev[playerId];
-      const minutes = Math.min(MAX_MINUTES, Math.max(MIN_MINUTES, row.minutes + delta));
-      return { ...prev, [playerId]: { ...row, minutes, minutesTouched: true } };
-    });
-  }
-
-  function handleToggleAbsent(playerId: string) {
-    setRows((prev) => {
-      const row = prev[playerId];
-      const nextAbsent = !row.absent;
-      return {
-        ...prev,
-        [playerId]: { ...row, absent: nextAbsent, rpe: nextAbsent ? null : row.rpe },
-      };
-    });
-  }
-
-  const includedPlayers = players.filter((p) => isIncluded(p.status, rows[p.id]));
-  const loggedPlayers = includedPlayers.filter((p) => rows[p.id].rpe !== null);
+  const included = players.filter((p) => isIncluded(p.status, rows[p.id]));
+  const logged = included.filter((p) => effective(rows[p.id], def).rpe !== null);
+  const inheriting = included.filter((p) => rows[p.id].rpe === null && rows[p.id].minutes === null).length;
 
   function handleSave() {
-    if (loggedPlayers.length < 1 || isPending) return;
-    const entries = loggedPlayers.map((p) => ({
-      playerId: p.id,
-      rpe: rows[p.id].rpe as number,
-      minutes: rows[p.id].minutes,
-    }));
+    if (logged.length < 1 || isPending) return;
+    const entries = logged.map((p) => {
+      const row = rows[p.id];
+      const eff = effective(row, def);
+      return {
+        playerId: p.id,
+        rpe: eff.rpe as number,
+        minutes: eff.minutes,
+        goals: row.goals,
+        assists: row.assists,
+        yellow: row.yellow,
+        red: row.red,
+      };
+    });
     setError(null);
     startTransition(async () => {
       try {
@@ -109,27 +88,28 @@ export function SessionForm({
         onDateChange={setSessionDate}
         opponent={opponent}
         onOpponentChange={setOpponent}
+        def={def}
+        onDefaultChange={(patch) => setDef((d) => ({ ...d, ...patch }))}
+        inheriting={inheriting}
+        total={included.length}
       />
       <h2 className="sr-only">{club.name} roster</h2>
-      <div>
+      <div className="mx-auto w-full max-w-[1240px]">
         {players.map((p) => (
           <PlayerRow
             key={p.id}
             player={p}
             row={rows[p.id]}
-            onRpeChange={(rpe) => updateRow(p.id, { rpe })}
-            onMinutesPreset={(m) => handleMinutesPreset(p.id, m)}
-            onMinutesStep={(d) => handleMinutesStep(p.id, d)}
-            onToggleStepper={() => updateRow(p.id, { stepperOpen: !rows[p.id].stepperOpen })}
-            onToggleAbsent={() => handleToggleAbsent(p.id)}
-            onToggleExpanded={() => updateRow(p.id, { expanded: !rows[p.id].expanded })}
+            def={def}
+            kind={kind}
+            onChange={(patch) => updateRow(p.id, patch)}
           />
         ))}
       </div>
       {error && <p className="px-3 pt-3 text-sm text-out">{error}</p>}
       <StickyBar
-        loggedCount={loggedPlayers.length}
-        totalCount={includedPlayers.length}
+        loggedCount={logged.length}
+        totalCount={included.length}
         kind={kind}
         sessionDate={sessionDate}
         isPending={isPending}

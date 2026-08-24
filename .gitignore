@@ -43,3 +43,6 @@ next-env.d.ts
 .env*.local
 test-results/
 playwright-report/
+
+# supabase cli link state
+supabase/.temp/

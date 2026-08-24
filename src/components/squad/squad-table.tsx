@@ -7,8 +7,8 @@ const HEAD =
 
 /**
  * The board. Column widths are fixed so 22 rows scan as columns rather than as
- * ragged text, and the three widest columns fall away below `sm`/`md` so the
- * table never needs a horizontal scroller on a phone.
+ * ragged text, and the wider columns fall away below `sm`/`md` so the table
+ * never needs a horizontal scroller on a phone.
  */
 export function SquadTable({ rows }: { rows: SquadRowData[] }) {
   const maxLoad = rows.reduce((max, row) => Math.max(max, row.weekLoad), 0);
@@ -24,9 +24,8 @@ export function SquadTable({ rows }: { rows: SquadRowData[] }) {
           <col />
           <col className="hidden sm:table-column sm:w-14" />
           <col className="w-[78px] sm:w-[186px]" />
-          <col className="w-[64px] sm:w-[136px]" />
-          <col className="hidden sm:table-column sm:w-[76px]" />
-          <col className="hidden md:table-column md:w-[86px]" />
+          <col className="hidden sm:table-column sm:w-[150px]" />
+          <col className="hidden md:table-column md:w-[118px]" />
           <col className="w-11 sm:w-12" />
           <col className="w-9 sm:w-14" />
         </colgroup>
@@ -44,14 +43,11 @@ export function SquadTable({ rows }: { rows: SquadRowData[] }) {
             <th scope="col" className={HEAD}>
               status
             </th>
-            <th scope="col" className={`${HEAD} text-right`}>
-              7d load
+            <th scope="col" className={`${HEAD} hidden sm:table-cell`}>
+              load this week
             </th>
-            <th scope="col" className={`${HEAD} hidden text-right sm:table-cell`}>
-              acwr
-            </th>
-            <th scope="col" className={`${HEAD} hidden text-right md:table-cell`}>
-              &Delta; wk
+            <th scope="col" className={`${HEAD} hidden whitespace-nowrap text-right md:table-cell`} title="appearances · goals · assists">
+              app·g·a
             </th>
             <th scope="col" className={`${HEAD} text-center`}>
               flag

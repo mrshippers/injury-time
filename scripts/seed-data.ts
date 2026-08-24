@@ -69,3 +69,11 @@ export const FIXTURES: SeedFixture[] = [
 export const TRAINING_DAYS_AGO: number[] = [
   1, 4, 8, 11, 15, 18, 22, 25, 29, 32, 36, 39, 42,
 ];
+
+/** Matches still to come, soonest first. `daysAhead` counts from "today". */
+export const UPCOMING: { daysAhead: number; kickoff: string; opponent: string; venue: "H" | "A"; competition: string }[] = [
+  { daysAhead: 4, kickoff: "15:00", opponent: "Dunstable Town", venue: "A", competition: "Spartan South Midlands Premier" },
+  { daysAhead: 8, kickoff: "19:45", opponent: "Tring Athletic", venue: "A", competition: "Spartan South Midlands Premier" },
+  { daysAhead: 11, kickoff: "15:00", opponent: "New Salamis", venue: "H", competition: "FA Vase First Qualifying" },
+  { daysAhead: 18, kickoff: "15:00", opponent: "Winslow United", venue: "H", competition: "Spartan South Midlands Premier" },
+];

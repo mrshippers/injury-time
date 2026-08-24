@@ -52,8 +52,9 @@ export default async function SquadPage() {
       <SquadTable rows={rows} />
 
       <p className="annot mt-5">
-        acwr = 7-day load / 28-day weekly average&ensp;·&ensp;&mdash; means not
-        enough history yet&ensp;·&ensp;click a row for the player
+        load this week vs his usual: steady · pushing it · undercooked · red
+        zone&ensp;·&ensp;no reading = under four weeks logged&ensp;·&ensp;click a
+        row for the player
       </p>
     </main>
   );

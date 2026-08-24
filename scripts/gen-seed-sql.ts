@@ -4,7 +4,7 @@
  * red spike (#10), current injury (#9), returner (#18), doubt (#5),
  * suspension (#7), undertraining watch (#13), steady ok (rest).
  */
-import { DEMO_CLUB, FIXTURES, SQUAD, TRAINING_DAYS_AGO } from "./seed-data";
+import { DEMO_CLUB, FIXTURES, SQUAD, TRAINING_DAYS_AGO, UPCOMING } from "./seed-data";
 
 // mulberry32, fixed seed: reruns produce identical SQL
 function rng(seed: number) {
@@ -35,6 +35,7 @@ lines.push(`  pids uuid[] := '{}'; -- by squad index`);
 lines.push(`begin`);
 lines.push(`select id into cid from public.clubs where is_demo and name = ${q(DEMO_CLUB.name)};`);
 lines.push(`if cid is null then raise exception 'demo club missing'; end if;`);
+lines.push(`delete from public.fixtures where club_id = cid;`);
 lines.push(`delete from public.session_loads where club_id = cid;`);
 lines.push(`delete from public.sessions where club_id = cid;`);
 lines.push(`delete from public.availability_events where club_id = cid;`);
@@ -62,7 +63,7 @@ const sessions: Sess[] = [
 ].sort((a, b) => b.daysAgo - a.daysAgo);
 
 // per-player narrative rules
-const SPIKE = 10, INJURED = 9, RETURNER = 18, DOUBT = 5, SUSPENDED = 7, LOWLOAD = 13;
+const SPIKE = 10, INJURED = 9, RETURNER = 18, SUSPENDED = 7, LOWLOAD = 13;
 function entryFor(squadNumber: number, s: Sess): { rpe: number; minutes: number } | null {
   const isMatch = s.kind === "match";
   // Bobby (9): injured 2 days ago in the London Colney match - plays up to and including daysAgo 2, nothing after
@@ -104,6 +105,33 @@ function entryFor(squadNumber: number, s: Sess): { rpe: number; minutes: number 
   return attended ? { rpe: pick(5, 7), minutes: pick(60, 75) } : null;
 }
 
+/**
+ * Goals, assists and cards for a match row. Storylines: Bobby (#9) is the
+ * top scorer until the hamstring goes; Theo (#10) creates; Kofi (#7) walks
+ * for two yellows in the last match, which is why he is suspended.
+ */
+function statsFor(
+  squadNumber: number,
+  s: Sess,
+  e: { rpe: number; minutes: number },
+): { goals: number; assists: number; yellow: number; red: number } {
+  const none = { goals: 0, assists: 0, yellow: 0, red: 0 };
+  if (s.kind !== "match") return none;
+  const started = e.minutes >= 60;
+  let goals = 0, assists = 0, yellow = 0, red = 0;
+  if (squadNumber === 9) goals = rand() < 0.6 ? 1 : rand() < 0.2 ? 2 : 0;
+  else if (squadNumber === 10) { goals = rand() < 0.3 ? 1 : 0; assists = rand() < 0.5 ? 1 : 0; }
+  else if (squadNumber === 19) goals = rand() < 0.28 ? 1 : 0;
+  else if (squadNumber === 18 || squadNumber === 21) goals = rand() < 0.22 ? 1 : 0;
+  else if (squadNumber === 11 || squadNumber === 8) assists = rand() < 0.28 ? 1 : 0;
+  else if (squadNumber === 4 && rand() < 0.1) goals = 1;
+  if (!started) { goals = Math.min(goals, 1); assists = Math.min(assists, 1); }
+  if (squadNumber === 7 && s.daysAgo === 2) { yellow = 2; red = 1; }
+  else if (squadNumber === 2 || squadNumber === 5 || squadNumber === 7) yellow = rand() < 0.25 ? 1 : 0;
+  else yellow = rand() < 0.06 ? 1 : 0;
+  return { goals, assists, yellow, red };
+}
+
 for (const s of sessions) {
   lines.push(
     `insert into public.sessions (club_id, session_date, kind, opponent) values (cid, ${q(iso(s.daysAgo))}, ${q(s.kind)}, ${s.opponent ? q(s.opponent) : "null"}) returning id into sid;`,
@@ -111,12 +139,24 @@ for (const s of sessions) {
   const values: string[] = [];
   for (const p of SQUAD) {
     const e = entryFor(p.squadNumber, s);
-    if (e) values.push(`(cid, sid, ${idx(p.squadNumber)}, ${e.rpe}, ${e.minutes})`);
+    if (e) {
+      const st = statsFor(p.squadNumber, s, e);
+      values.push(
+        `(cid, sid, ${idx(p.squadNumber)}, ${e.rpe}, ${e.minutes}, ${st.goals}, ${st.assists}, ${st.yellow}, ${st.red})`,
+      );
+    }
   }
   if (values.length)
     lines.push(
-      `insert into public.session_loads (club_id, session_id, player_id, rpe, minutes) values ${values.join(", ")};`,
+      `insert into public.session_loads (club_id, session_id, player_id, rpe, minutes, goals, assists, yellow, red) values ${values.join(", ")};`,
     );
+}
+
+// fixtures still to play
+for (const f of UPCOMING) {
+  lines.push(
+    `insert into public.fixtures (club_id, match_date, kickoff, opponent, venue, competition) values (cid, ${q(iso(-f.daysAhead))}, ${q(f.kickoff)}, ${q(f.opponent)}, ${q(f.venue)}, ${q(f.competition)});`,
+  );
 }
 
 // injuries: current + season history for the body map

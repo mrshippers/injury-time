@@ -35,7 +35,8 @@ export default async function PlayerPage(props: PageProps<"/player/[id]">) {
           weekLoad={profile.weekLoad}
           acwr={profile.acwr}
           weekChange={profile.weekChange}
-          flag={profile.flag}
+          readiness={profile.readiness}
+          stats={profile.stats}
         />
       </div>
 
