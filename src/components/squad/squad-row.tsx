@@ -67,7 +67,7 @@ export function SquadRow({ row, maxLoad }: { row: SquadRowData; maxLoad: number 
         <span className={stats.assists > 0 ? "text-ink" : ""}>{stats.assists}</span>
       </td>
 
-      <td className={`${CELL} text-center`}>
+      <td className={`${CELL} text-center sm:hidden`}>
         <FlagDot flag={flag} />
       </td>
 

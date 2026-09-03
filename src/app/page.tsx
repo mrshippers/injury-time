@@ -124,7 +124,7 @@ export default async function Home() {
       </div>
 
       <p className="annot mt-6 text-gold-dim">
-        load words: steady · pushing it · undercooked · red zone&ensp;·&ensp;a red zone is the week a hamstring goes
+        steady · pushing it · undercooked · red zone: this week against his usual&ensp;·&ensp;red zone is the week a hamstring goes
       </p>
     </main>
   );

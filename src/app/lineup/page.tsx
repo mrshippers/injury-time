@@ -26,7 +26,7 @@ export default async function LineupPage() {
               {nextFixture.kickoff ? <span className="num"> · {nextFixture.kickoff}</span> : null}
               {" · "}
               {nextFixture.venue === "H" ? "home" : "away"} · {nextFixture.competition}
-              {daysUntil !== null ? <span className="num"> · {daysUntil === 0 ? "today" : `in ${daysUntil} days`}</span> : null}
+              {daysUntil !== null ? <span className="num"> · {daysUntil === 0 ? "today" : daysUntil === 1 ? "tomorrow" : `in ${daysUntil} days`}</span> : null}
             </>
           ) : (
             "no fixture in the diary; picking on today's availability"

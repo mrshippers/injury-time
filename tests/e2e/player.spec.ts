@@ -67,8 +67,9 @@ test.describe("player profile", () => {
     const card = page.getByRole("region", { name: /load this week/i });
     await expect(card).toContainText(/red zone/i);
     await expect(card).toContainText("big jump on his usual load");
-    // the ratio survives as a footnote, never a fabricated 1.00 and never the no-reading glyph
-    await expect(card).toContainText(/\d\.\d{2}x his usual week/);
+    // the week reads as sessions and a phrase; the ratio survives only in the title, never a fabricated 1.00
+    await expect(card).toContainText(/\d sessions? this week · (well )?(over|under|about) his usual week/);
+    await expect(card.locator("[title]")).toHaveAttribute("title", /\d\.\d{2}x his usual week/);
     await expect(card).not.toContainText("\u2014");
     // a season line off the match log
     const season = page.getByRole("region", { name: /this season/i });

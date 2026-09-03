@@ -1,15 +1,5 @@
 import type { CurrentAvailability, Player } from "@/lib/types";
-import type { LoadFlag } from "@/lib/load-engine";
 import { STATUS_META, formatDate } from "./labels";
-
-const FLAG_META: Record<LoadFlag, { label: string; color: string }> = {
-  ok: { label: "load: steady", color: "var(--fit)" },
-  watch: { label: "load: watch", color: "var(--doubt)" },
-  // shouted, because a red zone is the one thing on this page that should
-  // change what the gaffer does on Tuesday.
-  red: { label: "load: RED ZONE", color: "var(--out)" },
-  cold: { label: "load: no reading yet", color: "var(--cold)" },
-};
 
 const POSITION_LABEL: Record<string, string> = {
   GK: "goalkeeper",
@@ -21,14 +11,11 @@ const POSITION_LABEL: Record<string, string> = {
 export default function PlayerHeader({
   player,
   availability,
-  flag,
 }: {
   player: Player;
   availability: CurrentAvailability | null;
-  flag: LoadFlag;
 }) {
   const status = availability ? STATUS_META[availability.status] : null;
-  const flagMeta = FLAG_META[flag];
 
   return (
     <header className="border-b border-line-strong pb-8">
@@ -63,15 +50,6 @@ export default function PlayerHeader({
               back {formatDate(availability.return_date)}
             </span>
           ) : null}
-        </span>
-
-        <span className="flex items-center gap-2">
-          <span
-            aria-hidden
-            className="block w-2 h-2"
-            style={{ background: flagMeta.color }}
-          />
-          <span className="text-sm text-ink-dim">{flagMeta.label}</span>
         </span>
       </div>
     </header>

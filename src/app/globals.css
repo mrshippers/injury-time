@@ -6,9 +6,13 @@
    condition colours. Tokens only; never hardcode literals. */
 :root {
   /* surfaces */
-  --pitch: #0a0d0b;            /* green-tinted near-black ground */
+  --pitch: #070b09;            /* green-tinted near-black ground */
+  --pitch-pool: #10211a;       /* where the floodlight lands on the turf */
+  --flood: rgba(226, 240, 232, 0.1); /* the lamp itself, from the top of the page */
   --panel: #111612;
   --panel-2: #161d17;          /* elevated */
+  --sheen: rgba(238, 242, 238, 0.045); /* wet perspex: a catchlight down the top of a panel */
+  --sheen-edge: rgba(238, 242, 238, 0.085);
   --line: rgba(238, 242, 238, 0.08);
   --line-strong: rgba(238, 242, 238, 0.16);
 
@@ -18,9 +22,9 @@
   --ink-faint: rgba(238, 242, 238, 0.38);
 
   /* brand */
-  --gold: #c9a94f;             /* // annotation gold */
-  --gold-dim: rgba(201, 169, 79, 0.55);
-  --mint: #8fe3c0;             /* the full-stop accent */
+  --gold: #d2b156;             /* // annotation gold */
+  --gold-dim: rgba(210, 177, 86, 0.55);
+  --mint: #95ecc8;             /* the full-stop accent */
   --mint-ink: #0a0d0b;
 
   /* condition (FM) */
@@ -31,8 +35,8 @@
   --cold: #8fa3b6;             /* insufficient data: light enough to pass 4.5:1 on panel */
 
   /* 3D surfaces (lineup pitch, body figure) */
-  --turf: #14301f;
-  --turf-2: #183a25;
+  --turf: #163a26;
+  --turf-2: #1b452c;
   --chalk: rgba(238, 242, 238, 0.72);
   --skin: #4a6a58;             /* the figure at rest: turf-toned, not flesh */
   --skin-hi: #7fb397;
@@ -67,12 +71,26 @@
   --font-mono: var(--font-plex-mono);
 }
 
+/* Floodlit: one lamp at the top of the page, a pool of green where it lands,
+   near-black beyond. A light source, not a colour wash. */
 body {
-  background: var(--pitch);
+  background-color: var(--pitch);
+  background-image:
+    radial-gradient(110% 46% at 50% -4%, var(--flood), transparent 64%),
+    radial-gradient(74% 40% at 50% 2%, var(--pitch-pool), transparent 74%);
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--font-manrope), system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.5;
+}
+
+/* Panels are wet dugout perspex: a hairline catchlight along the top edge and
+   a few percent of sheen falling away beneath it. Colour still comes from the
+   utility; this only adds the material. Table headers are cells, not panels. */
+.bg-panel:not(th) {
+  background-image: linear-gradient(180deg, var(--sheen) 0, transparent 42%);
+  box-shadow: inset 0 1px 0 0 var(--sheen-edge);
 }
 
 /* display: heavy lowercase, tight tracking as it grows */
