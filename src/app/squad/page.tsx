@@ -52,8 +52,8 @@ export default async function SquadPage() {
       <SquadTable rows={rows} />
 
       <p className="annot mt-5">
-        load this week vs his usual: steady · pushing it · undercooked · red
-        zone&ensp;·&ensp;no reading = under four weeks logged&ensp;·&ensp;click a
+        training is this week against his usual: steady · pushing it · undercooked · red
+        zone&ensp;·&ensp;no reading until four weeks are logged&ensp;·&ensp;tap a
         row for the player
       </p>
     </main>

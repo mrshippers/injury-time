@@ -109,6 +109,11 @@ export default function BodyMap({ injuries, asOf }: BodyMapProps) {
           onPointerUp={onUp}
           onPointerCancel={onUp}
         >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "radial-gradient(58% 34% at 50% 90%, var(--turf-2) 0, transparent 72%)", opacity: 0.55 }}
+          />
           {tokens ? (
             <BodyFigure
               injuries={injuries}

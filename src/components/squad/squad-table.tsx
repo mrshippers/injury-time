@@ -26,7 +26,7 @@ export function SquadTable({ rows }: { rows: SquadRowData[] }) {
           <col className="w-[78px] sm:w-[186px]" />
           <col className="hidden sm:table-column sm:w-[150px]" />
           <col className="hidden md:table-column md:w-[118px]" />
-          <col className="w-11 sm:w-12" />
+          <col className="w-11 sm:hidden" />
           <col className="w-9 sm:w-14" />
         </colgroup>
         <thead>
@@ -44,13 +44,14 @@ export function SquadTable({ rows }: { rows: SquadRowData[] }) {
               status
             </th>
             <th scope="col" className={`${HEAD} hidden sm:table-cell`}>
-              load this week
+              training
             </th>
-            <th scope="col" className={`${HEAD} hidden whitespace-nowrap text-right md:table-cell`} title="appearances · goals · assists">
-              app·g·a
+            <th scope="col" className={`${HEAD} hidden whitespace-nowrap text-right md:table-cell`} title="games · goals · assists">
+              played
             </th>
-            <th scope="col" className={`${HEAD} text-center`}>
-              flag
+            {/* the square repeats the training word in colour; it only earns its column on a phone, where the word is hidden */}
+            <th scope="col" className={`${HEAD} text-center sm:hidden`}>
+              <span className="sr-only">training</span>
             </th>
             <th scope="col" className={`${HEAD} text-right`}>
               <span className="sr-only">change availability</span>

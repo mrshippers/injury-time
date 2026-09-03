@@ -166,7 +166,7 @@ export default function LoadSparkline({
         </text>
       </svg>
       <figcaption className="annot mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
-        <span>{"// last 6 weeks · bars = sessions · line = 7-day load"}</span>
+        <span>{"// last six weeks · each bar a session · the line is his week"}</span>
         {flag === "red" ? (
           <span className="text-out">{"// acute spike"}</span>
         ) : null}

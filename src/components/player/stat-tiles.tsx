@@ -4,10 +4,30 @@
  * one person in the club who wants it. `insufficient_data` renders "no
  * reading" and no number at all: a fabricated 1.0 here would read as "fine".
  */
-import type { AcwrResult, WeekOnWeekResult } from "@/lib/load-engine";
+import type { AcwrResult, LoadEntry, WeekOnWeekResult } from "@/lib/load-engine";
 import { READINESS_TEXT, READINESS_VAR, type Readiness } from "@/lib/readiness";
 import type { SeasonStats } from "@/lib/stats";
 import { NO_VALUE } from "./labels";
+
+/** The ratio as a phrase a gaffer would say, the number itself kept for the title. */
+export function usualPhrase(acwr: AcwrResult): string {
+  if (acwr.kind !== "ratio") return "no comparison yet";
+  const r = acwr.value;
+  if (r < 0.8) return "well under his usual week";
+  if (r < 1.2) return "about his usual week";
+  if (r < 1.5) return "over his usual week";
+  return "well over his usual week";
+}
+
+/** Sessions in the seven days ending `asOf`, inclusive. */
+export function sessionsThisWeek(loads: readonly LoadEntry[], asOf: string): number {
+  const end = Date.parse(`${asOf}T00:00:00Z`);
+  const start = end - 6 * 86_400_000;
+  return loads.filter((l) => {
+    const t = Date.parse(`${l.date}T00:00:00Z`);
+    return t >= start && t <= end;
+  }).length;
+}
 
 function Cell({ label, value, dim }: { label: string; value: string; dim?: boolean }) {
   return (
@@ -24,18 +44,30 @@ export default function StatTiles({
   weekChange,
   readiness,
   stats,
+  loads,
+  asOf,
 }: {
   weekLoad: number;
   acwr: AcwrResult;
   weekChange: WeekOnWeekResult;
   readiness: Readiness;
   stats: SeasonStats;
+  loads: readonly LoadEntry[];
+  asOf: string;
 }) {
-  const ratio = acwr.kind === "ratio" ? `${acwr.value.toFixed(2)}x his usual week` : "needs four weeks of sessions";
-  const pct =
+  const sessions = sessionsThisWeek(loads, asOf);
+  const line =
+    sessions === 0
+      ? "nothing logged this week"
+      : `${sessions} session${sessions === 1 ? "" : "s"} this week · ${usualPhrase(acwr)}`;
+  // the numbers for the one person in the club who wants them
+  const detail = [
+    weekLoad > 0 ? `${weekLoad.toLocaleString("en-GB")} load (rpe x minutes)` : "no load",
+    acwr.kind === "ratio" ? `${acwr.value.toFixed(2)}x his usual week` : "needs four weeks of sessions",
     weekChange.kind === "pct"
-      ? `${weekChange.value >= 0 ? "+" : "−"}${Math.abs(weekChange.value * 100).toFixed(0)}% on last week`
-      : "no last week to compare";
+      ? `${weekChange.value >= 0 ? "+" : "-"}${Math.abs(weekChange.value * 100).toFixed(0)}% on last week`
+      : "no last week to compare",
+  ].join(" · ");
 
   return (
     <div className="grid grid-cols-1 gap-px bg-line lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
@@ -49,8 +81,8 @@ export default function StatTiles({
           {readiness.word}
         </p>
         <p className="mt-2 max-w-[36ch] text-[13px] leading-snug text-ink">{readiness.gloss}</p>
-        <p className="num mt-3 text-[11.5px] text-ink-dim">
-          {weekLoad > 0 ? `${weekLoad.toLocaleString("en-GB")} load points` : "no sessions"} · {ratio} · {pct}
+        <p className="mt-3 text-[12px] text-ink-dim" title={detail}>
+          {line}
         </p>
       </section>
 

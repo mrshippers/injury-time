@@ -1,20 +1,21 @@
 "use client";
 
 /**
- * The figure in three.js: one smooth mesh per part, coloured by what has
- * happened to that part this season. Hover (or focus a chip) lights one
- * region and nothing else. Drag turns him; the front/back buttons turn him
+ * The clay athlete in three.js: one continuous surface, painted per region by
+ * what has happened to that region this season. Hover (or focus a chip) lights
+ * one region and nothing else. Drag turns him; the front/back buttons turn him
  * for you. Every motion starts from where he is now and can be interrupted.
  */
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { ContactShadows, Environment, Html, Lightformer } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import type { Injury } from "@/lib/types";
 
 import { opaque, type SceneTokens } from "@/components/three/tokens";
-import { PARTS, partKey, type Part, type Shape } from "./body-geometry";
+import { PARTS, partKey, type Part } from "./body-geometry";
+import { buildBodyMesh, type BodyMesh } from "./body-mesh";
 import { REGION_LABEL, daysOut, formatMonthYear } from "./labels";
 
 /** Cumulative days out drives the tint. Three steps, so a knock never reads like a cruciate. */
@@ -25,49 +26,6 @@ export function tintStep(days: number): 0 | 1 | 2 | 3 {
   return 3;
 }
 const TINT = [0, 0.35, 0.6, 0.85];
-
-/** Front or back half of a capsule, lathed so the flat face is exactly on z = 0. */
-function halfCapsule(r: number, len: number, face: "front" | "back"): THREE.BufferGeometry {
-  const pts: THREE.Vector2[] = [];
-  const seg = 10;
-  for (let i = 0; i <= seg; i += 1) {
-    const a = -Math.PI / 2 + (i / seg) * (Math.PI / 2);
-    pts.push(new THREE.Vector2(Math.cos(a) * r, -len / 2 + Math.sin(a) * r));
-  }
-  for (let i = 0; i <= seg; i += 1) {
-    const a = (i / seg) * (Math.PI / 2);
-    pts.push(new THREE.Vector2(Math.cos(a) * r, len / 2 + Math.sin(a) * r));
-  }
-  // lathe sweeps +x through +z to -x for phi 0..PI; rotate so it faces +z or -z
-  const g = new THREE.LatheGeometry(pts, 28, 0, Math.PI);
-  g.rotateY(face === "front" ? -Math.PI / 2 : Math.PI / 2);
-  g.computeVertexNormals();
-  return g;
-}
-
-function geometryFor(s: Shape): THREE.BufferGeometry {
-  switch (s.kind) {
-    case "sphere": {
-      const g = new THREE.SphereGeometry(s.r, 40, 28);
-      if (s.scale) g.scale(...s.scale);
-      return g;
-    }
-    case "capsule": {
-      const g = new THREE.CapsuleGeometry(s.r, s.len, 8, 28);
-      if (s.tilt) {
-        g.rotateX(s.tilt[0]);
-        g.rotateY(s.tilt[1]);
-        g.rotateZ(s.tilt[2]);
-      }
-      return g;
-    }
-    case "half": {
-      const g = halfCapsule(s.r, s.len, s.face);
-      if (s.scale) g.scale(...s.scale);
-      return g;
-    }
-  }
-}
 
 export type Mark = {
   key: string;
@@ -97,73 +55,132 @@ export function marksFor(injuries: Injury[], asOf: string): Mark[] {
   });
 }
 
-function PartMesh({
-  mark,
+/** A palette in linear colour, built once per token set. */
+function usePalette(t: SceneTokens) {
+  return useMemo(
+    () => ({
+      skin: new THREE.Color(opaque(t.skin)),
+      skinHi: new THREE.Color(opaque(t.skinHi)),
+      out: new THREE.Color(opaque(t.out)),
+      ink: new THREE.Color(opaque(t.ink)),
+    }),
+    [t],
+  );
+}
+
+function Figure({
+  mesh,
+  marks,
   t,
   hovered,
   reduced,
   asOf,
   onHover,
 }: {
-  mark: Mark;
+  mesh: BodyMesh;
+  marks: Map<string, Mark>;
   t: SceneTokens;
-  hovered: boolean;
+  hovered: string | null;
   reduced: boolean;
   asOf: string;
   onHover: (key: string | null) => void;
 }) {
-  const geometry = useMemo(() => geometryFor(mark.part.shape), [mark.part.shape]);
-  const material = useRef<THREE.MeshStandardMaterial>(null);
-  const live = mark.own.length > 0;
+  const pal = usePalette(t);
+  const meshRef = useRef<THREE.Mesh>(null);
 
-  const { current: liveInjury, step } = mark;
-  const base = useMemo(() => {
-    const skin = new THREE.Color(opaque(t.skin));
-    if (liveInjury) return new THREE.Color(opaque(t.out));
-    if (step > 0) return skin.clone().lerp(new THREE.Color(opaque(t.out)), TINT[step]);
-    return skin;
-  }, [t, liveInjury, step]);
-  const hi = useMemo(() => new THREE.Color(opaque(t.skinHi)), [t]);
-  const mint = useMemo(() => new THREE.Color(opaque(t.mint)), [t]);
-  const out = useMemo(() => new THREE.Color(opaque(t.out)), [t]);
+  // rest colour per part, from the season: skin, or skin pulled toward red by days out
+  const rest = useMemo(
+    () =>
+      mesh.parts.map((p) => {
+        const m = marks.get(p.key);
+        if (!m || m.own.length === 0) return pal.skin.clone();
+        if (m.current) return pal.out.clone();
+        return pal.skin.clone().lerp(pal.out, TINT[m.step]);
+      }),
+    [mesh, marks, pal],
+  );
+  const live = useMemo(() => mesh.parts.map((p) => (marks.get(p.key)?.own.length ?? 0) > 0), [mesh, marks]);
+  const current = useMemo(() => mesh.parts.map((p) => Boolean(marks.get(p.key)?.current)), [mesh, marks]);
 
-  // colour and emissive glide toward their targets every frame: a hover that
-  // ends halfway through just turns around, no snap either way
+  // the colour each part is showing right now; glides toward its target every frame
+  const shown = useMemo(() => rest.map((c) => c.clone()), [rest]);
+  // the first frame after a change paints every part, whether or not anything has moved
+  const painted = useRef(false);
+  useEffect(() => {
+    painted.current = false;
+  }, [rest]);
+  const target = useMemo(() => new THREE.Color(), []);
+  const hot = useMemo(() => pal.out.clone().lerp(pal.ink, 0.3), [pal]);
+
   useFrame(({ clock }, dt) => {
-    const m = material.current;
-    if (!m) return;
-    const k = reduced ? 1 : 1 - Math.exp(-dt * 16);
-    const targetColour = hovered ? (live ? base.clone().lerp(hi, 0.35) : hi) : base;
-    m.color.lerp(targetColour, k);
-    const pulse = mark.current && !reduced ? 0.25 + 0.25 * (0.5 + 0.5 * Math.sin(clock.elapsedTime * 2.6)) : mark.current ? 0.35 : 0;
-    const targetEm = hovered ? 0.45 : pulse;
-    m.emissive.lerp(hovered ? (live ? out : mint) : out, k);
-    m.emissiveIntensity += (targetEm - m.emissiveIntensity) * k;
+    const geom = meshRef.current?.geometry;
+    if (!geom) return;
+    const colour = geom.getAttribute("color") as THREE.BufferAttribute;
+    const arr = colour.array as Float32Array;
+    const k = reduced ? 1 : 1 - Math.exp(-dt * 14);
+    const pulse = reduced ? 0.5 : 0.5 + 0.5 * Math.sin(clock.elapsedTime * 2.4);
+    let dirty = false;
+    for (let p = 0; p < mesh.parts.length; p += 1) {
+      const isHover = hovered === mesh.parts[p].key;
+      if (isHover) target.copy(live[p] ? rest[p] : pal.skinHi).lerp(pal.skinHi, live[p] ? 0.35 : 1);
+      else if (current[p]) target.copy(rest[p]).lerp(hot, 0.35 * pulse);
+      else target.copy(rest[p]);
+      const c = shown[p];
+      const still = Math.abs(c.r - target.r) + Math.abs(c.g - target.g) + Math.abs(c.b - target.b) < 0.002;
+      if (still && painted.current) continue;
+      c.lerp(target, k);
+      const verts = mesh.partVerts[p];
+      for (let i = 0; i < verts.length; i += 1) {
+        const o = verts[i] * 3;
+        arr[o] = c.r;
+        arr[o + 1] = c.g;
+        arr[o + 2] = c.b;
+      }
+      dirty = true;
+    }
+    if (dirty) colour.needsUpdate = true;
+    painted.current = true;
   });
 
-  const [x, y, z] = mark.part.pos;
-  const label = mark.part.region ? REGION_LABEL[mark.part.region] : "";
-  const sideNote = mark.part.side !== "central" ? ` · ${mark.part.side}` : "";
+  const partAt = (e: ThreeEvent<PointerEvent>) => {
+    const a = e.face?.a;
+    if (a === undefined) return null;
+    return mesh.parts[mesh.vertexPart[a]];
+  };
+
+  const hoveredPart = hovered ? mesh.parts.find((p) => p.key === hovered) ?? null : null;
+  const hoveredMark = hovered ? marks.get(hovered) ?? null : null;
+  const label = hoveredPart?.region ? REGION_LABEL[hoveredPart.region] : "";
+  const sideNote = hoveredPart && hoveredPart.side !== "central" ? ` · ${hoveredPart.side}` : "";
 
   return (
-    <mesh
-      geometry={geometry}
-      position={[x, y, z]}
-      castShadow
-      onPointerOver={(e) => {
-        if (!mark.part.region) return;
-        e.stopPropagation();
-        onHover(mark.key);
-        document.body.style.cursor = live ? "pointer" : "default";
-      }}
-      onPointerOut={() => {
-        onHover(null);
-        document.body.style.cursor = "";
-      }}
-    >
-      <meshStandardMaterial ref={material} color={base} roughness={0.55} metalness={0.0} emissive={out} emissiveIntensity={0} />
-      {hovered && mark.part.region ? (
-        <Html position={[0, 0, 0]} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
+    <>
+      <mesh
+        ref={meshRef}
+        geometry={mesh.geometry}
+        onPointerMove={(e) => {
+          e.stopPropagation();
+          const p = partAt(e);
+          const key = p?.region ? p.key : null;
+          if (key !== hovered) onHover(key);
+          document.body.style.cursor = key && (marks.get(key)?.own.length ?? 0) > 0 ? "pointer" : "default";
+        }}
+        onPointerOut={() => {
+          onHover(null);
+          document.body.style.cursor = "";
+        }}
+      >
+        <meshPhysicalMaterial
+          vertexColors
+          roughness={0.46}
+          metalness={0}
+          clearcoat={0.55}
+          clearcoatRoughness={0.32}
+          envMapIntensity={1.35}
+        />
+      </mesh>
+      {hoveredPart && hoveredMark && hoveredPart.region ? (
+        <Html position={hoveredPart.centre} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
           <div
             role="tooltip"
             className="min-w-44 max-w-60 -translate-x-1/2 -translate-y-[calc(100%+14px)] border border-line-strong bg-panel px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
@@ -172,11 +189,11 @@ function PartMesh({
               {label}
               <span className="font-normal text-ink-dim">{sideNote}</span>
             </p>
-            {mark.own.length === 0 ? (
+            {hoveredMark.own.length === 0 ? (
               <p className="mt-1 text-[11px] text-ink-dim">no injuries this season</p>
             ) : (
               <ul className="mt-1.5 space-y-1">
-                {mark.own.map((i) => (
+                {hoveredMark.own.map((i) => (
                   <li key={i.id} className="num text-[11px] leading-tight text-ink-dim">
                     {i.severity} · {formatMonthYear(i.occurred_on)} · {daysOut(i, asOf)} days
                     {i.resolved_on === null ? <span className="text-out"> · ongoing</span> : null}
@@ -187,7 +204,7 @@ function PartMesh({
           </div>
         </Html>
       ) : null}
-    </mesh>
+    </>
   );
 }
 
@@ -203,7 +220,7 @@ function Rig({
   const group = useRef<THREE.Group>(null);
   const { camera } = useThree();
   useEffect(() => {
-    camera.position.set(0, 1.05, 4.0);
+    camera.position.set(0, 1.02, 4.1);
     camera.lookAt(0, 0.9, 0);
   }, [camera]);
   useFrame((_, dt) => {
@@ -231,23 +248,28 @@ export type BodyFigureProps = {
 };
 
 export default function BodyFigure({ injuries, asOf, tokens: t, reduced, hovered, onHover, yawTarget }: BodyFigureProps) {
-  const marks = useMemo(() => marksFor(injuries, asOf), [injuries, asOf]);
+  const marks = useMemo(() => {
+    const byKey = new Map<string, Mark>();
+    for (const m of marksFor(injuries, asOf)) if (!byKey.has(m.key)) byKey.set(m.key, m);
+    return byKey;
+  }, [injuries, asOf]);
+  // built once per mount: ~a quarter second of geometry, then it is just a mesh
+  const mesh = useMemo(() => buildBodyMesh(), []);
+  useEffect(() => () => mesh.geometry.dispose(), [mesh]);
+
   return (
-    <Canvas dpr={[1, 2]} gl={{ antialias: true, alpha: true }} style={{ background: "transparent" }} camera={{ fov: 31, near: 0.1, far: 50 }}>
-      {/* soft studio: a warm-ish key from the front-right, a cool rim from behind, sky fill */}
-      <hemisphereLight args={[opaque(t.ink), opaque(t.pitch), 1.1]} />
-      <directionalLight position={[2.2, 3.4, 3.0]} intensity={2.1} />
-      <directionalLight position={[-3, 2.0, 1.5]} intensity={0.7} />
-      <directionalLight position={[0, 2.2, -3.5]} intensity={1.2} color={opaque(t.mint)} />
+    <Canvas dpr={[1, 2]} gl={{ antialias: true, alpha: true }} style={{ background: "transparent" }} camera={{ fov: 30, near: 0.1, far: 50 }}>
+      {/* a small studio, no files: one soft key, a fill, a mint rim, a turf bounce off the floor */}
+      <Environment resolution={256} frames={1}>
+        <Lightformer form="rect" intensity={3.2} position={[2.4, 3.4, 3.2]} scale={[3, 3, 1]} target={[0, 1, 0]} color={opaque(t.ink)} />
+        <Lightformer form="rect" intensity={0.8} position={[-3.2, 1.6, 1.6]} scale={[2, 4, 1]} target={[0, 1, 0]} color={opaque(t.ink)} />
+        <Lightformer form="ring" intensity={3.2} position={[0.4, 2.4, -4]} scale={2.4} target={[0, 1, 0]} color={opaque(t.mint)} />
+        <Lightformer form="rect" intensity={0.4} position={[0, -2, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[6, 6, 1]} color={opaque(t.turf2)} />
+      </Environment>
+      <directionalLight position={[2.2, 3.4, 3.0]} intensity={1.1} color={opaque(t.ink)} />
       <Rig yawTarget={yawTarget} reduced={reduced}>
-        {marks.map((m, i) => (
-          <PartMesh key={`${m.key}-${i}`} mark={m} t={t} hovered={hovered === m.key} reduced={reduced} asOf={asOf} onHover={onHover} />
-        ))}
-        {/* a soft pool under the feet so he stands on something */}
-        <mesh position={[0, 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.42, 40]} />
-          <meshBasicMaterial color={opaque(t.pitch)} transparent opacity={0.55} />
-        </mesh>
+        <Figure mesh={mesh} marks={marks} t={t} hovered={hovered} reduced={reduced} asOf={asOf} onHover={onHover} />
+        <ContactShadows position={[0, 0.002, 0]} opacity={0.75} scale={1.7} blur={2.4} far={1.4} resolution={512} frames={1} color={opaque(t.pitch)} />
       </Rig>
     </Canvas>
   );
