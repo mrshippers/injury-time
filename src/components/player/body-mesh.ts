@@ -8,17 +8,11 @@ import * as THREE from "three";
 import { MarchingCubes } from "three/examples/jsm/objects/MarchingCubes.js";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
-import type { BodyRegion, Side } from "@/lib/types";
+import { classifyRegions, type PartRef } from "@/lib/body/regions";
 
-import { SCULPT, partKey, type Ball } from "./body-geometry";
+import { SCULPT, type Ball } from "./body-geometry";
 
-export type PartRef = {
-  key: string;
-  region: BodyRegion | null;
-  side: Side;
-  /** mean of the part's balls: where a tooltip anchors */
-  centre: [number, number, number];
-};
+export type { PartRef };
 
 export type BodyMesh = {
   geometry: THREE.BufferGeometry;
@@ -129,59 +123,8 @@ export function buildBodyMesh(balls: Ball[] = SCULPT, opts: BuildOptions = {}): 
   smooth(geometry, 3, 0.5);
   geometry.computeVertexNormals();
 
-  // parts: one per distinct (region, side), in first-seen order
-  const partIndex = new Map<string, number>();
-  const parts: PartRef[] = [];
-  const sums: number[][] = [];
-  const ballPart = new Uint16Array(balls.length);
-  balls.forEach((b, i) => {
-    const key = partKey(b);
-    let idx = partIndex.get(key);
-    if (idx === undefined) {
-      idx = parts.length;
-      partIndex.set(key, idx);
-      parts.push({ key, region: b.region, side: b.side, centre: [0, 0, 0] });
-      sums.push([0, 0, 0, 0]);
-    }
-    ballPart[i] = idx;
-    const s = sums[idx];
-    s[0] += b.pos[0];
-    s[1] += b.pos[1];
-    s[2] += b.pos[2];
-    s[3] += 1;
-  });
-  parts.forEach((p, i) => {
-    const s = sums[i];
-    p.centre = [s[0] / s[3], s[1] / s[3], s[2] / s[3]];
-  });
-
-  // each vertex goes to the ball whose surface it is closest to
-  const pos = geometry.getAttribute("position") as THREE.BufferAttribute;
-  const vertexCount = pos.count;
-  const vertexPart = new Uint16Array(vertexCount);
-  const buckets: number[][] = parts.map(() => []);
-  for (let v = 0; v < vertexCount; v += 1) {
-    const x = pos.getX(v);
-    const y = pos.getY(v);
-    const z = pos.getZ(v);
-    let best = 0;
-    let bestD = Infinity;
-    for (let i = 0; i < balls.length; i += 1) {
-      const b = balls[i];
-      const dx = x - b.pos[0];
-      const dy = y - b.pos[1];
-      const dz = z - b.pos[2];
-      const d = Math.sqrt(dx * dx + dy * dy + dz * dz) - b.r;
-      if (d < bestD) {
-        bestD = d;
-        best = i;
-      }
-    }
-    const p = ballPart[best];
-    vertexPart[v] = p;
-    buckets[p].push(v);
-  }
-  const partVerts = buckets.map((b) => Uint32Array.from(b));
+  const map = classifyRegions(geometry.getAttribute("position").array, geometry.getAttribute("position").count, balls);
+  const { vertexPart, parts, partVerts, vertexCount } = map;
 
   // colour attribute the figure paints into; starts white so a missing paint is loud
   geometry.setAttribute("color", new THREE.BufferAttribute(new Float32Array(vertexCount * 3).fill(1), 3));

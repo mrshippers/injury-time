@@ -5,7 +5,7 @@ import type { Position } from "../../src/lib/types";
 
 function row(n: number, position: Position, status: "fit" | "injured" = "fit", key: "steady" | "red" = "steady"): SquadRow {
   return {
-    player: { id: `p${n}`, club_id: "c", name: `P${n}`, position, squad_number: n, created_at: "" },
+    player: { id: `p${n}`, club_id: "c", name: `P${n}`, position, squad_number: n, user_id: null, body_params: null, external_stats: null, retired_on: null, created_at: "" },
     availability: status === "fit" ? null : { player_id: `p${n}`, club_id: "c", status, return_date: null, injury_id: null, noted_on: "" },
     weekLoad: 0,
     acwr: { kind: "insufficient_data" },

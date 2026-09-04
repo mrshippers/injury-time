@@ -15,19 +15,30 @@ import {
   type WeekOnWeekResult,
 } from "@/lib/load-engine";
 import { readinessFor, type Readiness } from "@/lib/readiness";
-import { emptyStats, sumMatchRows, type MatchRow, type SeasonStats } from "@/lib/stats";
+import { fromExternalStats, sumMatchRows, type MatchRow, type SeasonStats } from "@/lib/stats";
+import { cache } from "react";
+
+import { formLetters, ourStanding } from "@/lib/league/normalise";
 import { createClient } from "@/lib/supabase/server";
+import { getViewer } from "@/lib/viewer";
 import type {
   AvailabilityStatus,
   BodyRegion,
+  Clip,
   Club,
   CurrentAvailability,
   Fixture,
   Injury,
+  MatchCall,
+  Notification,
   Player,
+  ProgressPoint,
+  Result,
+  SavedLineup,
   SessionKind,
   Severity,
   Side,
+  Standing,
 } from "@/lib/types";
 
 /** ISO date (yyyy-mm-dd) for "today" in Europe/London. */
@@ -51,38 +62,11 @@ export function daysBetweenISO(a: string, b: string): number {
 }
 
 /**
- * The club this request operates on: the signed-in user's club if they
- * have a membership, otherwise the demo club (public read/write demo).
+ * The club this request operates on: the signed-in member's club, or for a
+ * guest the public club the `it.club` cookie names (Belstone by default).
+ * One resolution per request, however many readers ask.
  */
-export async function getActiveClub(): Promise<Club> {
-  const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (auth.user) {
-    const { data: membership } = await supabase
-      .from("club_members")
-      .select("club_id")
-      .eq("user_id", auth.user.id)
-      .limit(1)
-      .maybeSingle();
-    if (membership) {
-      const { data: club, error } = await supabase
-        .from("clubs")
-        .select("*")
-        .eq("id", membership.club_id)
-        .single();
-      if (error) throw error;
-      return club as Club;
-    }
-  }
-  const { data: demo, error } = await supabase
-    .from("clubs")
-    .select("*")
-    .eq("is_demo", true)
-    .limit(1)
-    .single();
-  if (error) throw error;
-  return demo as Club;
-}
+export const getActiveClub = cache(async (): Promise<Club> => (await getViewer()).club);
 
 /** Per-player load history over the trailing `days`, oldest first. */
 async function loadEntriesByPlayer(
@@ -204,7 +188,9 @@ async function squadRows(club: Club, asOf: string): Promise<SquadRow[]> {
         .from("players")
         .select("*")
         .eq("club_id", club.id)
-        .order("squad_number", { ascending: true }),
+        .is("retired_on", null)
+        .order("squad_number", { ascending: true, nullsFirst: false })
+        .order("name", { ascending: true }),
       supabase.from("current_availability").select("*").eq("club_id", club.id),
       loadEntriesByPlayer(club.id, 42),
       seasonStatsByPlayer(club.id),
@@ -226,7 +212,7 @@ async function squadRows(club: Club, asOf: string): Promise<SquadRow[]> {
       weekChange: weekOnWeekChange(entries, asOf),
       flag,
       readiness: readinessFor(ratio, flag),
-      stats: stats.get(p.id) ?? emptyStats(),
+      stats: stats.get(p.id) ?? fromExternalStats((p as Player).external_stats),
     };
   });
 }
@@ -399,7 +385,7 @@ export async function getPlayerProfile(
     weekChange: weekOnWeekChange(entries, asOf),
     flag,
     readiness: readinessFor(ratio, flag),
-    stats: stats.get(playerId) ?? emptyStats(),
+    stats: stats.get(playerId) ?? fromExternalStats((player as Player).external_stats),
   };
 }
 
@@ -415,7 +401,9 @@ export async function getRoster(): Promise<{
       .from("players")
       .select("*")
       .eq("club_id", club.id)
-      .order("squad_number", { ascending: true }),
+      .is("retired_on", null)
+      .order("squad_number", { ascending: true, nullsFirst: false })
+      .order("name", { ascending: true }),
     supabase.from("current_availability").select("*").eq("club_id", club.id),
   ]);
   if (error) throw error;
@@ -534,4 +522,88 @@ export async function setAvailability(input: {
     injury_id: injuryId,
   });
   if (error) throw error;
+}
+
+/* ── the season, the side, the squad talking back, the film ─────────── */
+
+export type Season = {
+  results: Result[];
+  /** the latest table snapshot, in position order */
+  standings: Standing[];
+  standingsAsOf: string | null;
+  /** our own row of that table */
+  us: Standing | null;
+  progress: ProgressPoint[];
+  /** last six results, oldest first */
+  form: ("W" | "D" | "L")[];
+  /** home crowds, oldest first */
+  attendance: { match_date: string; opponent: string; crowd: number }[];
+};
+
+export const getSeason = cache(async (clubId: string): Promise<Season> => {
+  const supabase = await createClient();
+  const [resultsRes, latestRes, progressRes] = await Promise.all([
+    supabase.from("results").select("*").eq("club_id", clubId).order("match_date", { ascending: true }),
+    supabase.from("league_standings").select("as_of").eq("club_id", clubId).order("as_of", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("league_progress").select("*").eq("club_id", clubId).order("match_no", { ascending: true }),
+  ]);
+  if (resultsRes.error) throw resultsRes.error;
+  if (progressRes.error) throw progressRes.error;
+  const standingsAsOf = latestRes.data?.as_of ?? null;
+  let standings: Standing[] = [];
+  if (standingsAsOf) {
+    const { data, error } = await supabase
+      .from("league_standings")
+      .select("*")
+      .eq("club_id", clubId)
+      .eq("as_of", standingsAsOf)
+      .order("position", { ascending: true });
+    if (error) throw error;
+    standings = (data ?? []) as Standing[];
+  }
+  const results = (resultsRes.data ?? []) as Result[];
+  return {
+    results,
+    standings,
+    standingsAsOf,
+    us: ourStanding(standings),
+    progress: (progressRes.data ?? []) as ProgressPoint[],
+    form: formLetters(results),
+    attendance: results
+      .filter((r) => r.venue === "H" && r.attendance !== null)
+      .map((r) => ({ match_date: r.match_date, opponent: r.opponent, crowd: r.attendance as number })),
+  };
+});
+
+export async function getSavedLineup(clubId: string, fixtureId: string): Promise<SavedLineup | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("lineups").select("*").eq("club_id", clubId).eq("fixture_id", fixtureId).maybeSingle();
+  if (error) throw error;
+  return (data as SavedLineup) ?? null;
+}
+
+export async function getMatchCalls(clubId: string, fixtureId: string): Promise<MatchCall[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("match_calls").select("*").eq("club_id", clubId).eq("fixture_id", fixtureId);
+  if (error) throw error;
+  return (data ?? []) as MatchCall[];
+}
+
+export async function getNotifications(clubId: string, limit = 20): Promise<Notification[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("club_id", clubId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as Notification[];
+}
+
+export async function getClips(clubId: string): Promise<Clip[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("clips").select("*").eq("club_id", clubId).order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Clip[];
 }

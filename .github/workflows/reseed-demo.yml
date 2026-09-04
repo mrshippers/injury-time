@@ -1,0 +1,41 @@
+# Keeps the fictional demo club fresh. The Kilburn Athletic seed is anchored
+# to the day it runs, so left alone the whole squad drifts to "undercooked"
+# within a day or two. This re-anchors it every morning and, when a Football
+# Web Pages key is present, pulls Belstone's real season as well.
+name: reseed demo
+
+on:
+  schedule:
+    - cron: "0 4 * * *" # 04:00 UTC, before anyone in the UK is up
+  workflow_dispatch:
+
+jobs:
+  reseed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ghkazaxuznltpxfzvxny
+      FWP_API_KEY: ${{ secrets.FWP_API_KEY }}
+      FWP_TEAM_ID: ${{ secrets.FWP_TEAM_ID }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: npm ci
+      - name: link
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF" -p ""
+      - name: reseed kilburn athletic (fictional, anchored to today)
+        run: |
+          npx tsx scripts/gen-seed-sql.ts > /tmp/kilburn.sql
+          supabase db query --linked -f /tmp/kilburn.sql
+      - name: refresh belstone season (snapshot unless a key is set)
+        continue-on-error: true
+        run: npx tsx scripts/refresh-season.ts

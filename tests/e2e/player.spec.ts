@@ -16,6 +16,12 @@ async function gotoPlayer(page: Page, name: string): Promise<void> {
 }
 
 test.describe("player profile", () => {
+  // the medical story lives on the fictional club; the guest's club is a cookie
+  test.beforeEach(async ({ context, baseURL }) => {
+    const url = new URL(baseURL ?? "http://localhost:3100");
+    await context.addCookies([{ name: "it.club", value: "kilburn-athletic", domain: url.hostname, path: "/" }]);
+  });
+
   test("a live injury is listed as current, on the right side, and the figure turns to show it", async ({ page }) => {
     await gotoPlayer(page, "Bobby Ashworth");
 
@@ -67,14 +73,46 @@ test.describe("player profile", () => {
     const card = page.getByRole("region", { name: /load this week/i });
     await expect(card).toContainText(/red zone/i);
     await expect(card).toContainText("big jump on his usual load");
-    // the week reads as sessions and a phrase; the ratio survives only in the title, never a fabricated 1.00
+    // plain words: sessions and a phrase; the numbers survive only in the title, never a fabricated 1.00
     await expect(card).toContainText(/\d sessions? this week · (well )?(over|under|about) his usual week/);
-    await expect(card.locator("[title]")).toHaveAttribute("title", /\d\.\d{2}x his usual week/);
+    await expect(card.getByTestId("load-line")).toHaveAttribute("title", /ratio \d\.\d{2}/);
     await expect(card).not.toContainText("\u2014");
+    // detailed words: the same card carries the ratio and the 28-day average, and the chart names both lines
+    await page.getByRole("button", { name: "detailed" }).click();
+    await expect(card).toContainText(/ratio \d\.\d{2}/);
+    await expect(card).toContainText(/28-day avg [\d,]+ AU/);
+    await expect(page.getByTestId("load-chart")).toHaveAttribute("data-mode", "detailed");
+    await expect(page.getByTestId("load-chart")).toContainText("28-DAY AVG");
+    await page.getByRole("button", { name: "plain" }).click();
+    await expect(page.getByTestId("load-chart")).toHaveAttribute("data-mode", "plain");
+    await expect(page.getByTestId("load-chart")).toContainText("HIS WEEK");
     // a season line off the match log
     const season = page.getByRole("region", { name: /this season/i });
     await expect(season).toContainText("apps");
     await expect(season.locator(".num").first()).toHaveText(/^\d+$/);
+  });
+
+  test("the chart writes one sentence at the point that matters, and the figure is the measured athlete", async ({ page }) => {
+    await gotoPlayer(page, "Bobby Ashworth");
+    // Bobby's hamstring went inside the window: that is the annotation
+    await expect(page.getByTestId("chart-annotation")).toContainText("the week his hamstring went");
+    await expect(page.getByTestId("chart-meaning")).not.toHaveText("");
+    // the figure is the parametric body, and a slider changes it without an error
+    const figure = page.getByTestId("body-figure");
+    await expect(figure).toHaveAttribute("data-surface", "parametric", { timeout: 30_000 });
+    await page.getByRole("button", { name: "measure" }).click();
+    const panel = page.getByTestId("measurements-panel");
+    await expect(panel).toBeVisible();
+    const height = panel.getByLabel("body height");
+    const before = await height.inputValue();
+    await height.focus();
+    await page.keyboard.press(Number(before) > 150 ? "ArrowLeft" : "ArrowRight");
+    await expect(height).not.toHaveValue(before);
+    await expect(panel).toContainText(/saved|saving/, { timeout: 15_000 });
+    await expect(figure).toContainText("his measurements");
+    // reset puts the default athlete back and clears the saved numbers
+    await panel.getByRole("button", { name: "reset" }).click();
+    await expect(figure).toContainText("default athlete");
   });
 
   test("no serious or critical accessibility violations", async ({ page }) => {

@@ -35,21 +35,33 @@ lines.push(`  pids uuid[] := '{}'; -- by squad index`);
 lines.push(`begin`);
 lines.push(`select id into cid from public.clubs where is_demo and name = ${q(DEMO_CLUB.name)};`);
 lines.push(`if cid is null then raise exception 'demo club missing'; end if;`);
-lines.push(`delete from public.fixtures where club_id = cid;`);
+// Everything that is a function of "today" is wiped and rebuilt. Players and
+// fixtures keep DETERMINISTIC ids so rows that point at them (match calls,
+// clip events, saved lineups) survive the nightly re-anchor.
 lines.push(`delete from public.session_loads where club_id = cid;`);
 lines.push(`delete from public.sessions where club_id = cid;`);
 lines.push(`delete from public.availability_events where club_id = cid;`);
 lines.push(`delete from public.injuries where club_id = cid;`);
-lines.push(`delete from public.players where club_id = cid;`);
+lines.push(`delete from public.results where club_id = cid;`);
+lines.push(`delete from public.league_progress where club_id = cid;`);
+lines.push(`delete from public.league_standings where club_id = cid;`);
+lines.push(`delete from public.match_calls where club_id = cid;`);
+lines.push(`delete from public.notifications where club_id = cid;`);
+lines.push(`update public.clubs set slug = coalesce(slug, 'kilburn-athletic'), division = coalesce(division, 'Premier Division'), season = coalesce(season, '2026-27'), ground = coalesce(ground, 'Kilburn Park, fictional') where id = cid;`);
 
-// players
+/** A stable uuid for a squad number: the same player has the same id on every run. */
+const playerId = (squadNumber: number) => `'0000000b-0000-4000-8000-${String(squadNumber).padStart(12, "0")}'::uuid`;
+const fixtureId = (i: number) => `'0000000f-0000-4000-8000-${String(i + 1).padStart(12, "0")}'::uuid`;
+
+// players: drop anyone not in the stable id set first (a one-time migration
+// off random ids, and a retire path), then upsert the squad by id
+lines.push(`delete from public.players where club_id = cid and id not in (${SQUAD.map((p) => playerId(p.squadNumber)).join(", ")});`);
 for (const p of SQUAD) {
   lines.push(
-    `insert into public.players (club_id, name, position, squad_number) values (cid, ${q(p.name)}, ${q(p.position)}, ${p.squadNumber}) returning id into pid; pids := pids || pid;`,
+    `insert into public.players (id, club_id, name, position, squad_number) values (${playerId(p.squadNumber)}, cid, ${q(p.name)}, ${q(p.position)}, ${p.squadNumber}) on conflict (id) do update set name = excluded.name, position = excluded.position, squad_number = excluded.squad_number, retired_on = null;`,
   );
 }
-const idx = (squadNumber: number) =>
-  `pids[${SQUAD.findIndex((p) => p.squadNumber === squadNumber) + 1}]`;
+const idx = (squadNumber: number) => playerId(squadNumber);
 
 // sessions + loads
 type Sess = { daysAgo: number; kind: "training" | "match"; opponent?: string };
@@ -132,6 +144,7 @@ function statsFor(
   return { goals, assists, yellow, red };
 }
 
+const goalsByDay = new Map<number, number>();
 for (const s of sessions) {
   lines.push(
     `insert into public.sessions (club_id, session_date, kind, opponent) values (cid, ${q(iso(s.daysAgo))}, ${q(s.kind)}, ${s.opponent ? q(s.opponent) : "null"}) returning id into sid;`,
@@ -141,6 +154,7 @@ for (const s of sessions) {
     const e = entryFor(p.squadNumber, s);
     if (e) {
       const st = statsFor(p.squadNumber, s, e);
+      if (s.kind === "match") goalsByDay.set(s.daysAgo, (goalsByDay.get(s.daysAgo) ?? 0) + st.goals);
       values.push(
         `(cid, sid, ${idx(p.squadNumber)}, ${e.rpe}, ${e.minutes}, ${st.goals}, ${st.assists}, ${st.yellow}, ${st.red})`,
       );
@@ -152,12 +166,52 @@ for (const s of sessions) {
     );
 }
 
-// fixtures still to play
-for (const f of UPCOMING) {
+// results: the score of every match we logged. Our goals are the ones on the
+// match log, so the season line and the scorers agree; theirs are drawn so a
+// ~2 ppg side comes out (the storyline is a promotion push).
+const played = [...FIXTURES].sort((a, b) => b.daysAgo - a.daysAgo);
+let pts = 0;
+let matchNo = 0;
+for (const f of played) {
+  const gf = goalsByDay.get(f.daysAgo) ?? 0;
+  const r = rand();
+  const ga = r < 0.55 ? Math.max(0, gf - pick(1, 2)) : r < 0.8 ? gf : gf + pick(1, 2);
+  const att = f.venue === "H" ? pick(70, 140) : pick(40, 110);
   lines.push(
-    `insert into public.fixtures (club_id, match_date, kickoff, opponent, venue, competition) values (cid, ${q(iso(-f.daysAhead))}, ${q(f.kickoff)}, ${q(f.opponent)}, ${q(f.venue)}, ${q(f.competition)});`,
+    `insert into public.results (club_id, match_date, competition, opponent, venue, goals_for, goals_against, attendance, scorers, source) values (cid, ${q(iso(f.daysAgo))}, ${q(f.competition)}, ${q(f.opponent)}, ${q(f.venue)}, ${gf}, ${ga}, ${att}, '{}', 'seed');`,
   );
+  if (f.competition.includes("Premier")) {
+    matchNo += 1;
+    pts += gf > ga ? 3 : gf === ga ? 1 : 0;
+    lines.push(`insert into public.league_progress (club_id, match_no, match_date, points) values (cid, ${matchNo}, ${q(iso(f.daysAgo))}, ${pts});`);
+  }
 }
+
+// fixtures still to play: stable ids, so calls and saved sides survive a re-seed
+UPCOMING.forEach((f, i) => {
+  lines.push(
+    `insert into public.fixtures (id, club_id, match_date, kickoff, opponent, venue, competition) values (${fixtureId(i)}, cid, ${q(iso(-f.daysAhead))}, ${q(f.kickoff)}, ${q(f.opponent)}, ${q(f.venue)}, ${q(f.competition)}) on conflict (id) do update set match_date = excluded.match_date, kickoff = excluded.kickoff, opponent = excluded.opponent, venue = excluded.venue, competition = excluded.competition;`,
+  );
+});
+lines.push(`delete from public.fixtures where club_id = cid and id not in (${UPCOMING.map((_, i) => fixtureId(i)).join(", ")});`);
+
+// the squad talking back: calls for the next fixture and two notices
+const CALLS: Record<number, { status: "in" | "out" | "unsure"; note?: string }> = {
+  5: { status: "out", note: "still feeling the hip" },
+  9: { status: "out" },
+  7: { status: "unsure" },
+  13: { status: "unsure", note: "working till 2, can make second half" },
+  18: { status: "unsure" },
+};
+SQUAD.slice(0, 17).forEach((p, i) => {
+  const c = CALLS[p.squadNumber] ?? { status: "in" as const };
+  lines.push(
+    `insert into public.match_calls (club_id, fixture_id, player_id, status, note, updated_at) values (cid, ${fixtureId(0)}, ${idx(p.squadNumber)}, ${q(c.status)}, ${c.note ? q(c.note) : "null"}, now() - interval '${37 * (i + 1)} minutes');`,
+  );
+});
+lines.push(
+  `insert into public.notifications (club_id, kind, title, body, fixture_id, audience, created_at) values (cid, 'match', 'meet 1.30 at the ground, kit is home white', 'Bring both shirts anyway. Bus for the away lot leaves the Cock at 1.', ${fixtureId(0)}, '{manager,coach,medical,player}', now() - interval '3 hours'), (cid, 'training', 'tuesday is 7.15, not 7', 'Pitch is booked from 7.15. Ten minutes of ball work before the session starts, be changed.', null, '{manager,coach,medical,player}', now() - interval '26 hours');`,
+);
 
 // injuries: current + season history for the body map
 type Inj = { squad: number; region: string; side: string; severity: string; occurredAgo: number; resolvedAgo: number | null; expectedAgo?: number };

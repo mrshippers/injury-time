@@ -1,19 +1,25 @@
 "use client";
 
 /**
- * The season injury map: a smooth figure you can turn, with one chip per
- * injured region under it. Hover a part or a chip and only that part lights.
- * Choose a chip and he turns to show you the side it is on.
+ * The season injury map: the athlete you can turn, one chip per injured
+ * region under it, and (for medical staff) his measurements beside it. Hover
+ * a part or a chip and only that part lights. Choose a chip and he turns to
+ * show you the side it is on. Drag a slider and he changes shape.
  */
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition, type CSSProperties, type PointerEvent } from "react";
 
-import type { Injury } from "@/lib/types";
+import { saveBodyParams } from "@/lib/body/actions";
+import { hasOwnParams } from "@/lib/body/params";
+import { wordFor } from "@/lib/health/language";
+import { useHealthLanguage } from "@/lib/health/store";
+import type { BodyParams, Injury } from "@/lib/types";
 
 import { useReducedMotion, useSceneTokens } from "@/components/three/tokens";
 import { BACK_REGIONS, PARTS, partKey } from "./body-geometry";
 import { marksFor, type Mark } from "./body-figure";
 import { REGION_LABEL, formatDate } from "./labels";
+import MeasurementsPanel from "./measurements-panel";
 
 const BodyFigure = dynamic(() => import("./body-figure"), {
   ssr: false,
@@ -28,15 +34,49 @@ function project(velocity: number, rate = 0.995): number {
 export type BodyMapProps = {
   injuries: Injury[];
   asOf: string;
+  playerId: string;
+  initialParams: BodyParams | null;
+  canEdit: boolean;
 };
 
-export default function BodyMap({ injuries, asOf }: BodyMapProps) {
+export default function BodyMap({ injuries, asOf, playerId, initialParams, canEdit }: BodyMapProps) {
   const tokens = useSceneTokens();
   const reduced = useReducedMotion();
+  const [mode] = useHealthLanguage();
   const [hovered, setHovered] = useState<string | null>(null);
   const [facing, setFacing] = useState<"front" | "back">("front");
   const yawTarget = useRef(0);
   const drag = useRef({ on: false, lastX: 0, lastT: 0, vel: 0, moved: 0 });
+
+  // measurements: local for the live figure, saved on release
+  const [params, setParams] = useState<BodyParams | null>(initialParams);
+  const [editing, setEditing] = useState(false);
+  const [saving, startSave] = useTransition();
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [surface, setSurface] = useState<"loading" | "parametric" | "sculpt">("loading");
+  const onReady = useCallback((parametric: boolean) => setSurface(parametric ? "parametric" : "sculpt"), []);
+  // saves go one at a time, in order: a reset must land after the slider
+  // release it follows, or the server keeps whichever request finished last
+  const queue = useRef<Promise<void>>(Promise.resolve());
+  const commit = useCallback(
+    (next: BodyParams | null) => {
+      startSave(async () => {
+        const run = queue.current.then(async () => {
+          const res = await saveBodyParams(playerId, next);
+          if (res.ok) {
+            setSavedAt(Date.now());
+            setSaveError(null);
+          } else {
+            setSaveError(res.error);
+          }
+        });
+        queue.current = run.catch(() => undefined);
+        await run;
+      });
+    },
+    [playerId],
+  );
 
   const marks = useMemo(() => marksFor(injuries, asOf), [injuries, asOf]);
   const live = marks.filter((m) => m.own.length > 0);
@@ -92,18 +132,21 @@ export default function BodyMap({ injuries, asOf }: BodyMapProps) {
     };
   }, []);
 
+  const own = hasOwnParams(params);
+
   return (
     <section aria-labelledby="body-map-heading">
-      <div className="flex items-baseline justify-between gap-4 border-b border-line pb-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-b border-line pb-2">
         <p className="annot" id="body-map-heading">{"// season injury map"}</p>
-        <Legend />
+        <Legend mode={mode} />
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,220px)]">
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,232px)]">
         <div
           className="relative aspect-[3/4] w-full max-h-[560px] touch-none select-none overflow-hidden border border-line bg-panel"
           data-testid="body-figure"
           data-facing={facing}
+          data-surface={surface}
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
@@ -123,6 +166,8 @@ export default function BodyMap({ injuries, asOf }: BodyMapProps) {
               hovered={hovered}
               onHover={setHovered}
               yawTarget={yawTarget}
+              params={params}
+              onReady={onReady}
             />
           ) : null}
           <div role="group" aria-label="turn the figure" className="absolute left-3 top-3 flex overflow-hidden rounded-[3px] border border-line">
@@ -141,8 +186,24 @@ export default function BodyMap({ injuries, asOf }: BodyMapProps) {
               </button>
             ))}
           </div>
+          {canEdit ? (
+            <button
+              type="button"
+              aria-pressed={editing}
+              onClick={() => setEditing((v) => !v)}
+              onPointerDown={(e) => e.stopPropagation()}
+              className={`pressable absolute right-3 top-3 h-7 rounded-[3px] border border-line px-3 text-[11px] font-semibold tracking-[0.1em] uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+                editing ? "bg-mint text-mint-ink" : "bg-panel-2 text-ink-dim hover:text-ink"
+              }`}
+            >
+              measure
+            </button>
+          ) : null}
           <p className="pointer-events-none absolute bottom-3 left-3 text-[10.5px] tracking-[0.12em] uppercase text-ink-dim">
             drag to turn
+          </p>
+          <p className="pointer-events-none absolute bottom-3 right-3 text-[10.5px] tracking-[0.12em] uppercase text-ink-faint">
+            {own ? "his measurements" : "default athlete"}
           </p>
         </div>
 
@@ -191,9 +252,29 @@ export default function BodyMap({ injuries, asOf }: BodyMapProps) {
           </div>
           <p className="text-[11.5px] leading-snug text-ink-dim">
             {current.length > 0
-              ? `${current.length} live injur${current.length === 1 ? "y" : "ies"}: shown in red, the rest tint by days out.`
-              : "No live injury. Past ones tint by days out."}
+              ? mode === "plain"
+                ? `${current.length} live injur${current.length === 1 ? "y" : "ies"}: shown in red, the rest tint by days out.`
+                : `${current.length} unresolved: drawn in red; resolved regions tint by cumulative days lost (under 14, under 42, 42 and over).`
+              : mode === "plain"
+                ? "No live injury. Past ones tint by days out."
+                : "No unresolved injury. Resolved regions tint by cumulative days lost."}
           </p>
+          {editing && canEdit ? (
+            <>
+              <MeasurementsPanel
+                params={params}
+                onChange={setParams}
+                onCommit={commit}
+                onReset={() => {
+                  setParams(null);
+                  commit(null);
+                }}
+                saving={saving}
+                savedAt={savedAt}
+              />
+              {saveError ? <p className="text-[11.5px] text-out">{saveError}</p> : null}
+            </>
+          ) : null}
           <p className="sr-only">
             {PARTS.filter((p) => p.region).length} body regions drawn; {live.length} carry an injury this season.
           </p>
@@ -203,17 +284,17 @@ export default function BodyMap({ injuries, asOf }: BodyMapProps) {
   );
 }
 
-function Legend() {
+function Legend({ mode }: { mode: "plain" | "detailed" }) {
   const swatches: { label: string; style: CSSProperties }[] = [
-    { label: "clear", style: { background: "var(--skin)", border: "1px solid var(--line-strong)" } },
-    { label: "past", style: { background: "var(--out)", opacity: 0.5 } },
-    { label: "current", style: { background: "var(--out)" } },
+    { label: wordFor(mode, "legendClear"), style: { background: "var(--skin)", border: "1px solid var(--line-strong)" } },
+    { label: wordFor(mode, "legendPast"), style: { background: "var(--out)", opacity: 0.5 } },
+    { label: wordFor(mode, "legendCurrent"), style: { background: "var(--out)" } },
   ];
   return (
-    <ul className="flex items-center gap-4">
+    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1">
       {swatches.map((s) => (
         <li key={s.label} className="flex items-center gap-1.5">
-          <span aria-hidden className="block h-2.5 w-2.5" style={s.style} />
+          <span aria-hidden className="block h-2.5 w-2.5 shrink-0" style={s.style} />
           <span className="text-[11px] tracking-wide text-ink-dim">{s.label}</span>
         </li>
       ))}
