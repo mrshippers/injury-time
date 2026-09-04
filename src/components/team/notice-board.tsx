@@ -59,7 +59,7 @@ export function NoticeBoard({ clubId, notices, canPost, role, fixture, now }: No
             type="button"
             aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
-            className="pressable rounded-[2px] border border-line-strong bg-pitch px-2.5 py-1 text-[11px] font-semibold tracking-[0.1em] uppercase text-ink hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+            className="pressable -my-1 h-10 rounded-[2px] border border-line-strong bg-pitch px-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:my-0 sm:h-auto sm:px-2.5 sm:py-1 sm:text-[11px]"
           >
             {open ? "close" : "post"}
           </button>
@@ -92,11 +92,11 @@ export function NoticeBoard({ clubId, notices, canPost, role, fixture, now }: No
           {visible.map((n) => (
             <li key={n.id} className="px-4 py-3 sm:px-5" data-testid="notice">
               <div className="flex items-baseline gap-3">
-                <span className="num shrink-0 text-[10.5px] tracking-[0.14em] uppercase text-gold">{KIND_META[n.kind].label}</span>
-                <p className="min-w-0 flex-1 text-[14px] font-semibold leading-snug text-ink">{n.title}</p>
-                <span className="num shrink-0 text-[11px] text-ink-faint">{timeAgo(n.created_at, clock)}</span>
+                <span className="num shrink-0 text-[12px] tracking-[0.14em] uppercase text-gold sm:text-[10.5px]">{KIND_META[n.kind].label}</span>
+                <p className="min-w-0 flex-1 text-[14.5px] font-semibold leading-snug text-ink sm:text-[14px]">{n.title}</p>
+                <span className="num shrink-0 text-[12px] text-ink-faint sm:text-[11px]">{timeAgo(n.created_at, clock)}</span>
               </div>
-              {n.body ? <p className="mt-1 max-w-[62ch] text-[12.5px] leading-snug text-ink-dim">{n.body}</p> : null}
+              {n.body ? <p className="mt-1 max-w-[62ch] text-[13px] leading-snug text-ink-dim sm:text-[12.5px]">{n.body}</p> : null}
             </li>
           ))}
         </ul>
@@ -151,7 +151,7 @@ function Composer({ fixture, onPosted }: { fixture: Fixture | null; onPosted: (n
         });
       }}
     >
-      <div className="flex flex-wrap gap-1" role="radiogroup" aria-label="kind">
+      <div className="flex flex-wrap gap-1.5 sm:gap-1" role="radiogroup" aria-label="kind">
         {NOTIFICATION_KINDS.map((k) => (
           <button
             key={k}
@@ -159,7 +159,7 @@ function Composer({ fixture, onPosted }: { fixture: Fixture | null; onPosted: (n
             role="radio"
             aria-checked={kind === k}
             onClick={() => setKind(k)}
-            className={`pressable rounded-[2px] border px-2.5 py-1 text-[10.5px] font-semibold tracking-[0.1em] uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+            className={`pressable h-11 rounded-[2px] border px-3 text-[12px] font-semibold uppercase tracking-[0.1em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:px-2.5 sm:py-1 sm:text-[10.5px] ${
               kind === k ? "border-transparent bg-mint text-mint-ink" : "border-line-strong bg-pitch text-ink-dim hover:text-ink"
             }`}
           >
@@ -175,7 +175,7 @@ function Composer({ fixture, onPosted }: { fixture: Fixture | null; onPosted: (n
         onChange={(e) => setTitle(e.target.value)}
         placeholder="the one line they need"
         aria-label="title"
-        className="w-full border border-line bg-pitch px-3 py-2 text-[14px] font-semibold text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none"
+        className="h-11 w-full border border-line bg-pitch px-3 text-[15px] font-semibold text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none sm:h-auto sm:py-2 sm:text-[14px]"
       />
       <textarea
         rows={2}
@@ -184,18 +184,18 @@ function Composer({ fixture, onPosted }: { fixture: Fixture | null; onPosted: (n
         onChange={(e) => setBody(e.target.value)}
         placeholder="anything else (optional)"
         aria-label="body"
-        className="w-full resize-y border border-line bg-pitch px-3 py-2 text-[13px] text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none"
+        className="min-h-11 w-full resize-y border border-line bg-pitch px-3 py-2.5 text-[14px] text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none sm:py-2 sm:text-[13px]"
       />
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <div className="flex flex-wrap items-center gap-1" role="group" aria-label="who sees it">
-          <span className="mr-1 text-[10.5px] tracking-[0.14em] uppercase text-ink-dim">to</span>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-1" role="group" aria-label="who sees it">
+          <span className="mr-1 text-[12px] tracking-[0.14em] uppercase text-ink-dim sm:text-[10.5px]">to</span>
           {CLUB_ROLES.map((r) => (
             <button
               key={r}
               type="button"
               aria-pressed={audience.includes(r)}
               onClick={() => toggleRole(r)}
-              className={`pressable rounded-[2px] border px-2 py-0.5 text-[10.5px] tracking-[0.08em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+              className={`pressable h-11 rounded-[2px] border px-3 text-[12px] tracking-[0.08em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:px-2 sm:py-0.5 sm:text-[10.5px] ${
                 audience.includes(r) ? "border-line-strong bg-panel text-ink" : "border-line bg-transparent text-ink-faint"
               }`}
             >
@@ -204,20 +204,27 @@ function Composer({ fixture, onPosted }: { fixture: Fixture | null; onPosted: (n
           ))}
         </div>
         {fixture ? (
-          <label className="flex items-center gap-2 text-[12px] text-ink-dim">
-            <input type="checkbox" checked={attach} onChange={(e) => setAttach(e.target.checked)} className="accent-[var(--mint)]" />
+          <button
+            type="button"
+            aria-pressed={attach}
+            onClick={() => setAttach((a) => !a)}
+            className={`pressable flex h-11 items-center gap-2 rounded-[2px] border px-3 text-[12.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:py-0.5 sm:text-[12px] ${
+              attach ? "border-line-strong bg-panel text-ink" : "border-line bg-transparent text-ink-faint"
+            }`}
+          >
+            <span aria-hidden className={`block h-2 w-2 ${attach ? "bg-mint" : "border border-line-strong"}`} />
             about {fixture.opponent} ({fixture.venue})
-          </label>
+          </button>
         ) : null}
         <button
           type="submit"
           disabled={pending || title.trim().length === 0}
-          className="pressable ml-auto rounded-[2px] bg-mint px-4 py-1.5 text-[11px] font-bold tracking-[0.12em] uppercase text-mint-ink disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+          className="pressable ml-auto h-11 rounded-[2px] bg-mint px-5 text-[12px] font-bold uppercase tracking-[0.12em] text-mint-ink disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink sm:h-auto sm:px-4 sm:py-1.5 sm:text-[11px]"
         >
           {pending ? "posting" : "post to squad"}
         </button>
       </div>
-      {error ? <p role="alert" className="text-[12px] text-out">{error}</p> : null}
+      {error ? <p role="alert" className="text-[12.5px] text-out">{error}</p> : null}
     </form>
   );
 }

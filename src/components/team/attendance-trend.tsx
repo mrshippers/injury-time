@@ -2,15 +2,19 @@
  * Two hairlines, one per played match: how many said "in" before kickoff and
  * how many came through the gate. Lupi grammar from the chart tokens: a mark
  * per record, the unit written at the end, a ledger grid, one gold annotation
- * on the best home crowd. Server-rendered SVG, no library.
+ * on the best home crowd. Server-rendered SVG, no library. Two drawings, CSS
+ * shows one: a wide frame, and a phone frame whose viewBox is the phone's
+ * own width so the type is real pixels and the annotation has a band above
+ * the plot.
  */
 import { CHART } from "@/lib/tokens/charts";
 import type { AttendancePoint } from "@/lib/team/data";
 import { shortDate } from "@/components/squad/format";
 
-const W = 640;
-const H = 220;
-const PAD = { l: 8, r: 96, t: 34, b: 30 };
+type Frame = { W: number; H: number; PAD: { l: number; r: number; t: number; b: number }; tick: number; reading: number; noteY: number };
+
+const WIDE: Frame = { W: 640, H: 220, PAD: { l: 8, r: 96, t: 34, b: 30 }, tick: CHART.tick.size, reading: CHART.reading.size, noteY: 22 };
+const PHONE: Frame = { W: 320, H: 232, PAD: { l: 6, r: 84, t: 44, b: 30 }, tick: 11.5, reading: 13, noteY: 18 };
 
 export function AttendanceTrend({ points, next }: { points: AttendancePoint[]; next: { opponent: string; venue: "H" | "A"; weekday: string } | null }) {
   const withCalls = points.filter((p) => p.calledIn !== null && p.calledIn > 0);
@@ -19,7 +23,7 @@ export function AttendanceTrend({ points, next }: { points: AttendancePoint[]; n
   if (withCalls.length === 0 && withCrowd.length === 0) {
     return (
       <Frame>
-        <p className="px-5 py-6 text-[13px] text-ink-dim">
+        <p className="px-4 py-6 text-[13.5px] text-ink-dim sm:px-5 sm:text-[13px]">
           {next
             ? `no calls yet, first one is ${next.opponent} ${next.venue === "H" ? "at home" : "away"} on ${next.weekday}`
             : "no calls yet, and no fixture in the diary to call for"}
@@ -28,6 +32,25 @@ export function AttendanceTrend({ points, next }: { points: AttendancePoint[]; n
     );
   }
 
+  return (
+    <Frame>
+      <figure className="px-3 pb-3 pt-2 sm:px-4">
+        <Drawing f={WIDE} points={points} className="hidden sm:block" />
+        <Drawing f={PHONE} points={points} className="sm:hidden" />
+        <figcaption className="annot mt-1 flex flex-wrap gap-x-4 gap-y-1 text-gold-dim">
+          <span>{"// each mark a match"}</span>
+          <span className="text-ink-dim">white = through the gate</span>
+          <span className="text-mint">mint = called in</span>
+        </figcaption>
+      </figure>
+    </Frame>
+  );
+}
+
+function Drawing({ f, points, className }: { f: Frame; points: AttendancePoint[]; className: string }) {
+  const { W, H, PAD } = f;
+  const withCalls = points.filter((p) => p.calledIn !== null && p.calledIn > 0);
+  const withCrowd = points.filter((p) => p.crowd !== null);
   const n = points.length;
   const innerW = W - PAD.l - PAD.r;
   const innerH = H - PAD.t - PAD.b;
@@ -44,57 +67,52 @@ export function AttendanceTrend({ points, next }: { points: AttendancePoint[]; n
   const lastCalls = [...points].reverse().find((p) => p.calledIn !== null);
   const best = withCrowd.filter((p) => p.venue === "H").sort((a, b) => b.crowd! - a.crowd!)[0];
   const bestIdx = best ? points.indexOf(best) : -1;
-
   const ticks = [0, 0.5, 1];
+  const mono = { fontFamily: CHART.tick.family } as const;
+  // the two end readings must not sit on each other
+  const crowdY = lastCrowd ? yCrowd(lastCrowd.crowd!) : 0;
+  let callsY = lastCalls && lastCalls.calledIn ? yCalls(lastCalls.calledIn) : 0;
+  if (lastCrowd && lastCalls && lastCalls.calledIn && Math.abs(callsY - crowdY) < 16) callsY = callsY >= crowdY ? crowdY + 16 : crowdY - 16;
 
   return (
-    <Frame>
-      <figure className="px-3 pb-3 pt-2 sm:px-4">
-        <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" role="img" aria-label="calls and crowd per match this season">
-          {ticks.map((t) => (
-            <line key={t} x1={PAD.l} x2={W - PAD.r + 6} y1={PAD.t + innerH - t * innerH} y2={PAD.t + innerH - t * innerH} stroke={CHART.grid} strokeWidth={1} />
-          ))}
-          {crowdPath ? <path d={crowdPath} fill="none" stroke={CHART.ladder[0]} strokeWidth={CHART.lead} strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="chart-draw" /> : null}
-          {callsPath ? <path d={callsPath} fill="none" stroke={CHART.accent} strokeWidth={CHART.hairline} strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="chart-draw" /> : null}
-          {points.map((p, i) => (
-            <g key={p.date + p.opponent}>
-              {p.crowd !== null ? <circle cx={x(i)} cy={yCrowd(p.crowd)} r={CHART.markRadius} fill={CHART.ladder[0]} className="chart-pop" style={{ animationDelay: `${i * CHART.motion.staggerDot}ms` }} /> : null}
-              {p.calledIn !== null && p.calledIn > 0 ? <circle cx={x(i)} cy={yCalls(p.calledIn)} r={CHART.markRadius} fill={CHART.accent} className="chart-pop" style={{ animationDelay: `${i * CHART.motion.staggerDot}ms` }} /> : null}
-            </g>
-          ))}
-          {points.map((p, i) =>
-            i === 0 || i === n - 1 || (n > 6 && i % Math.max(2, Math.round(n / 4)) === 0 && i < n - 2) ? (
-              <text key={`t${p.date}`} x={x(i)} y={H - 10} textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"} fontSize={CHART.tick.size} letterSpacing={CHART.tick.spacing} fill="var(--ink-faint)" style={{ fontFamily: CHART.tick.family, textTransform: "uppercase" }}>
-                {shortDate(p.date)}
-              </text>
-            ) : null,
-          )}
-          {lastCrowd ? (
-            <text x={W - PAD.r + 12} y={yCrowd(lastCrowd.crowd!) + 4} fontSize={CHART.reading.size} fontWeight={CHART.reading.weight} fill="var(--ink)" style={{ fontFamily: CHART.reading.family }}>
-              {lastCrowd.crowd} <tspan fontWeight={400} fill="var(--ink-dim)" fontSize={CHART.tick.size}>crowd</tspan>
-            </text>
-          ) : null}
-          {lastCalls && lastCalls.calledIn ? (
-            <text x={W - PAD.r + 12} y={yCalls(lastCalls.calledIn) + (lastCrowd && Math.abs(yCalls(lastCalls.calledIn) - yCrowd(lastCrowd.crowd!)) < 14 ? 16 : 4)} fontSize={CHART.reading.size} fontWeight={CHART.reading.weight} fill={CHART.accent} style={{ fontFamily: CHART.reading.family }}>
-              {lastCalls.calledIn} <tspan fontWeight={400} fill="var(--ink-dim)" fontSize={CHART.tick.size}>in</tspan>
-            </text>
-          ) : null}
-          {best && bestIdx >= 0 ? (
-            <g>
-              <line x1={x(bestIdx)} x2={x(bestIdx)} y1={yCrowd(best.crowd!) - 6} y2={PAD.t - 8} stroke={CHART.annotationDim} strokeWidth={1} strokeDasharray="2 3" />
-              <text x={x(bestIdx) + (bestIdx > n / 2 ? -6 : 6)} y={PAD.t - 12} textAnchor={bestIdx > n / 2 ? "end" : "start"} fontSize={CHART.tick.size} letterSpacing="0.08em" fill={CHART.annotation} style={{ fontFamily: CHART.tick.family }}>
-                best crowd · {best.crowd} v {best.opponent}
-              </text>
-            </g>
-          ) : null}
-        </svg>
-        <figcaption className="annot mt-1 flex flex-wrap gap-x-4 gap-y-1 text-gold-dim">
-          <span>{"// each mark a match"}</span>
-          <span className="text-ink-dim">white = through the gate</span>
-          <span className="text-mint">mint = called in</span>
-        </figcaption>
-      </figure>
-    </Frame>
+    <svg viewBox={`0 0 ${W} ${H}`} className={`block h-auto w-full ${className}`} role="img" aria-label="calls and crowd per match this season">
+      {ticks.map((t) => (
+        <line key={t} x1={PAD.l} x2={W - PAD.r + 6} y1={PAD.t + innerH - t * innerH} y2={PAD.t + innerH - t * innerH} stroke={CHART.grid} strokeWidth={1} />
+      ))}
+      {crowdPath ? <path d={crowdPath} fill="none" stroke={CHART.ladder[0]} strokeWidth={CHART.lead} strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="chart-draw" /> : null}
+      {callsPath ? <path d={callsPath} fill="none" stroke={CHART.accent} strokeWidth={CHART.hairline} strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="chart-draw" /> : null}
+      {points.map((p, i) => (
+        <g key={p.date + p.opponent}>
+          {p.crowd !== null ? <circle cx={x(i)} cy={yCrowd(p.crowd)} r={CHART.markRadius} fill={CHART.ladder[0]} className="chart-pop" style={{ animationDelay: `${i * CHART.motion.staggerDot}ms` }} /> : null}
+          {p.calledIn !== null && p.calledIn > 0 ? <circle cx={x(i)} cy={yCalls(p.calledIn)} r={CHART.markRadius} fill={CHART.accent} className="chart-pop" style={{ animationDelay: `${i * CHART.motion.staggerDot}ms` }} /> : null}
+        </g>
+      ))}
+      {points.map((p, i) =>
+        i === 0 || i === n - 1 || (n > 6 && i % Math.max(2, Math.round(n / 4)) === 0 && i < n - 2) ? (
+          <text key={`t${p.date}`} x={x(i)} y={H - 10} display={f === PHONE && n > 5 && i !== 0 && i !== n - 1 && i % 2 === 1 ? "none" : undefined} textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"} fontSize={f.tick} letterSpacing={CHART.tick.spacing} fill="var(--ink-faint)" style={{ ...mono, textTransform: "uppercase" }}>
+            {shortDate(p.date)}
+          </text>
+        ) : null,
+      )}
+      {lastCrowd ? (
+        <text x={W - PAD.r + 10} y={crowdY + 4} fontSize={f.reading} fontWeight={CHART.reading.weight} fill="var(--ink)" style={{ fontFamily: CHART.reading.family }}>
+          {lastCrowd.crowd} <tspan fontWeight={400} fill="var(--ink-dim)" fontSize={f.tick}>crowd</tspan>
+        </text>
+      ) : null}
+      {lastCalls && lastCalls.calledIn ? (
+        <text x={W - PAD.r + 10} y={callsY + 4} fontSize={f.reading} fontWeight={CHART.reading.weight} fill={CHART.accent} style={{ fontFamily: CHART.reading.family }}>
+          {lastCalls.calledIn} <tspan fontWeight={400} fill="var(--ink-dim)" fontSize={f.tick}>in</tspan>
+        </text>
+      ) : null}
+      {best && bestIdx >= 0 ? (
+        <g>
+          <line x1={x(bestIdx)} x2={x(bestIdx)} y1={yCrowd(best.crowd!) - 6} y2={f.noteY + 6} stroke={CHART.annotationDim} strokeWidth={1} strokeDasharray="2 3" />
+          <text x={x(bestIdx) + (bestIdx > n / 2 ? -6 : 6)} y={f.noteY} textAnchor={bestIdx > n / 2 ? "end" : "start"} fontSize={f.tick} letterSpacing="0.06em" fill={CHART.annotation} style={mono}>
+            best crowd · {best.crowd} v {best.opponent}
+          </text>
+        </g>
+      ) : null}
+    </svg>
   );
 }
 

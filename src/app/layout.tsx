@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import { SiteNav } from "@/components/nav/site-nav";
+import { PhoneTabBar, SiteNav } from "@/components/nav/site-nav";
 import { getViewer, listPublicClubs } from "@/lib/viewer";
 
 const manrope = Manrope({
@@ -19,6 +19,14 @@ export const metadata: Metadata = {
   title: "injury time.",
   description:
     "Squad availability and load for non-league. Your best eleven on the park more often.",
+  appleWebApp: { capable: true, title: "injury time", statusBarStyle: "black-translucent" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#070b09",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
@@ -32,6 +40,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-pitch text-ink">
         <SiteNav role={viewer.role} guest={viewer.guest} club={pick(viewer.club)} clubs={viewer.guest ? clubs.map(pick) : [pick(viewer.club)]} />
         {children}
+        <PhoneTabBar />
       </body>
     </html>
   );

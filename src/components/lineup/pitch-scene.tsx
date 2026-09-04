@@ -27,6 +27,8 @@ import { APRON_L, APRON_W, HALF_L, HALF_W, chalkGeometry, goalGeometry, netGeome
 export type DragSource = { kind: "list"; playerId: string } | { kind: "slot"; index: number };
 
 export type PitchSceneProps = {
+  /** phone: tall frame, number-only shirts, lighter render */
+  compact?: boolean;
   formation: Formation;
   xiIds: (string | null)[];
   byId: Map<string, SquadRow>;
@@ -155,14 +157,16 @@ function Floodlights({ t }: { t: SceneTokens }) {
 
 /* ── the camera ────────────────────────────────────────────────────────── */
 
-function Rig({ reduced, busy }: { reduced: boolean; busy: boolean }) {
+function Rig({ reduced, busy, compact }: { reduced: boolean; busy: boolean; compact: boolean }) {
   const controls = useRef<OrbitControlsImpl>(null);
   const { camera } = useThree();
   const dir = useRef(1);
   useEffect(() => {
-    camera.position.set(0, 96, -104);
+    // a phone frame is tall and narrow: come up and over so the whole side fits
+    if (compact) camera.position.set(0, 124, -62);
+    else camera.position.set(0, 96, -104);
     camera.lookAt(0, 0, -4);
-  }, [camera]);
+  }, [camera, compact]);
   // a slow sway between the azimuth limits: the map breathes, the user is never fighting it
   useFrame(() => {
     const c = controls.current;
@@ -184,10 +188,10 @@ function Rig({ reduced, busy }: { reduced: boolean; busy: boolean }) {
       enablePan={false}
       enableDamping
       dampingFactor={0.08}
-      minDistance={78}
+      minDistance={compact ? 96 : 78}
       maxDistance={160}
-      minPolarAngle={0.42}
-      maxPolarAngle={1.02}
+      minPolarAngle={compact ? 0.3 : 0.42}
+      maxPolarAngle={compact ? 0.72 : 1.02}
       minAzimuthAngle={-0.55}
       maxAzimuthAngle={0.55}
       rotateSpeed={0.5}
@@ -299,9 +303,10 @@ type TokenProps = {
   onHover: (i: number | null) => void;
   onSelect: (i: number) => void;
   onDragStart: (source: DragSource, e: PointerEvent) => void;
+  compact?: boolean;
 };
 
-function Token({ row, slotIndex, slot, t, selected, hovered, dragging, reduced, pointer, onHover, onSelect, onDragStart }: TokenProps) {
+function Token({ row, slotIndex, slot, t, selected, hovered, dragging, reduced, pointer, onHover, onSelect, onDragStart, compact = false }: TokenProps) {
   const group = useRef<THREE.Group>(null);
   const { camera, gl } = useThree();
   const probe = useMemo(() => ({ ray: new THREE.Raycaster(), plane: new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), ndc: new THREE.Vector2(), hit: new THREE.Vector3() }), []);
@@ -398,12 +403,14 @@ function Token({ row, slotIndex, slot, t, selected, hovered, dragging, reduced, 
         </Html>
         <Html center position={[0, 0.3, -4.4]} zIndexRange={[10, 0]} style={{ pointerEvents: "none", userSelect: "none" }}>
           <div className="flex flex-col items-center whitespace-nowrap">
-            <span
-              className="text-[11px] font-semibold leading-none tracking-[0.03em]"
-              style={{ color: selected ? t.mint : t.ink, textShadow: `0 1px 4px ${opaque(t.pitch)}, 0 0 10px ${opaque(t.pitch)}` }}
-            >
-              {surname}
-            </span>
+            {!compact || selected || hovered ? (
+              <span
+                className="text-[11px] font-semibold leading-none tracking-[0.03em]"
+                style={{ color: selected ? t.mint : t.ink, textShadow: `0 1px 4px ${opaque(t.pitch)}, 0 0 10px ${opaque(t.pitch)}` }}
+              >
+                {surname}
+              </span>
+            ) : null}
             {hovered && !dragging ? (
               <span
                 className="num mt-1 rounded-[2px] border px-1.5 py-[3px] text-[10px] font-semibold tracking-[0.08em]"
@@ -423,7 +430,7 @@ function Token({ row, slotIndex, slot, t, selected, hovered, dragging, reduced, 
 /* ── the scene ─────────────────────────────────────────────────────────── */
 
 export default function PitchScene(props: PitchSceneProps) {
-  const { formation, xiIds, byId, tokens: t, reduced, selected, hovered, drag, pointer, dragOver, onDragOver, onDragStart, onHover, onSelect, onClear } = props;
+  const { formation, xiIds, byId, tokens: t, reduced, selected, hovered, drag, pointer, dragOver, onDragOver, onDragStart, onHover, onSelect, onClear, compact = false } = props;
   const placed = useMemo(
     () =>
       xiIds
@@ -434,7 +441,7 @@ export default function PitchScene(props: PitchSceneProps) {
 
   return (
     <Canvas
-      dpr={[1, 1.75]}
+      dpr={compact ? [1, 1.5] : [1, 1.75]}
       shadows="soft"
       gl={{ antialias: true, alpha: true }}
       camera={{ fov: 36, near: 1, far: 500 }}
@@ -443,7 +450,7 @@ export default function PitchScene(props: PitchSceneProps) {
         if (!drag) onClear();
       }}
     >
-      <Rig reduced={reduced} busy={drag !== null} />
+      <Rig reduced={reduced} busy={drag !== null} compact={compact} />
       <Floodlights t={t} />
       <fog attach="fog" args={[opaque(t.pitch), 150, 260]} />
       <Turf t={t} />
@@ -461,6 +468,7 @@ export default function PitchScene(props: PitchSceneProps) {
           t={t}
           selected={selected === index}
           hovered={hovered === index}
+          compact={compact}
           dragging={drag?.kind === "slot" && drag.index === index}
           reduced={reduced}
           pointer={pointer}

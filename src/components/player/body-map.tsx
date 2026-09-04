@@ -20,6 +20,7 @@ import { BACK_REGIONS, PARTS, partKey } from "./body-geometry";
 import { marksFor, type Mark } from "./body-figure";
 import { REGION_LABEL, formatDate } from "./labels";
 import MeasurementsPanel from "./measurements-panel";
+import { useNarrow } from "./use-narrow";
 
 const BodyFigure = dynamic(() => import("./body-figure"), {
   ssr: false,
@@ -42,7 +43,32 @@ export type BodyMapProps = {
 export default function BodyMap({ injuries, asOf, playerId, initialParams, canEdit }: BodyMapProps) {
   const tokens = useSceneTokens();
   const reduced = useReducedMotion();
+  const narrow = useNarrow();
   const [mode] = useHealthLanguage();
+  // the canvas (and the 1.5 MB body behind it) mounts only once the figure
+  // has scrolled into view, and stays mounted after; a phone gets a lower
+  // pixel ratio so the clay stays smooth without cooking the battery
+  const stage = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = stage.current;
+    if (!el || inView) return;
+    if (typeof IntersectionObserver === "undefined") {
+      const t = setTimeout(() => setInView(true), 0);
+      return () => clearTimeout(t);
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "160px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [inView]);
   const [hovered, setHovered] = useState<string | null>(null);
   const [facing, setFacing] = useState<"front" | "back">("front");
   const yawTarget = useRef(0);
@@ -143,6 +169,7 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
 
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,232px)]">
         <div
+          ref={stage}
           className="relative aspect-[3/4] w-full max-h-[560px] touch-none select-none overflow-hidden border border-line bg-panel"
           data-testid="body-figure"
           data-facing={facing}
@@ -157,7 +184,7 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
             className="pointer-events-none absolute inset-0"
             style={{ background: "radial-gradient(58% 34% at 50% 90%, var(--turf-2) 0, transparent 72%)", opacity: 0.55 }}
           />
-          {tokens ? (
+          {tokens && inView ? (
             <BodyFigure
               injuries={injuries}
               asOf={asOf}
@@ -168,6 +195,7 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
               yawTarget={yawTarget}
               params={params}
               onReady={onReady}
+              dpr={narrow ? [1, 1.5] : [1, 2]}
             />
           ) : null}
           <div role="group" aria-label="turn the figure" className="absolute left-3 top-3 flex overflow-hidden rounded-[3px] border border-line">
@@ -178,7 +206,7 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
                 aria-pressed={facing === side}
                 onClick={() => turnTo(side)}
                 onPointerDown={(e) => e.stopPropagation()}
-                className={`pressable h-7 px-3 text-[11px] font-semibold tracking-[0.1em] uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+                className={`pressable h-10 px-4 text-[12px] font-semibold tracking-[0.1em] uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-7 sm:px-3 sm:text-[11px] ${
                   facing === side ? "bg-mint text-mint-ink" : "bg-panel-2 text-ink-dim hover:text-ink"
                 }`}
               >
@@ -192,24 +220,24 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
               aria-pressed={editing}
               onClick={() => setEditing((v) => !v)}
               onPointerDown={(e) => e.stopPropagation()}
-              className={`pressable absolute right-3 top-3 h-7 rounded-[3px] border border-line px-3 text-[11px] font-semibold tracking-[0.1em] uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+              className={`pressable absolute right-3 top-3 h-10 rounded-[3px] border border-line px-4 text-[12px] font-semibold tracking-[0.1em] uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-7 sm:px-3 sm:text-[11px] ${
                 editing ? "bg-mint text-mint-ink" : "bg-panel-2 text-ink-dim hover:text-ink"
               }`}
             >
               measure
             </button>
           ) : null}
-          <p className="pointer-events-none absolute bottom-3 left-3 text-[10.5px] tracking-[0.12em] uppercase text-ink-dim">
+          <p className="pointer-events-none absolute bottom-3 left-3 text-[11.5px] tracking-[0.12em] uppercase text-ink-dim sm:text-[10.5px]">
             drag to turn
           </p>
-          <p className="pointer-events-none absolute bottom-3 right-3 text-[10.5px] tracking-[0.12em] uppercase text-ink-faint">
+          <p className="pointer-events-none absolute bottom-3 right-3 text-[11.5px] tracking-[0.12em] uppercase text-ink-faint sm:text-[10.5px]">
             {own ? "his measurements" : "default athlete"}
           </p>
         </div>
 
         <div className="flex flex-col gap-4">
           <div>
-            <p className="text-[10.5px] tracking-[0.14em] uppercase text-ink-dim">injured this season</p>
+            <p className="text-[11.5px] tracking-[0.14em] uppercase text-ink-dim sm:text-[10.5px]">injured this season</p>
             {live.length === 0 ? (
               <p className="mt-2 text-[12.5px] text-ink-dim">Nothing marked. Clean so far.</p>
             ) : (
@@ -227,20 +255,20 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
                       onFocus={() => showMark(m)}
                       onBlur={() => setHovered(null)}
                       onClick={() => showMark(m)}
-                      className={`pressable flex w-full items-baseline gap-2 border-l-2 bg-panel px-2.5 py-1.5 text-left transition-colors duration-[190ms] hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+                      className={`pressable flex min-h-11 w-full flex-wrap items-baseline gap-x-2 gap-y-0.5 border-l-2 bg-panel px-3 py-2 text-left transition-colors duration-[190ms] hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:min-h-0 sm:px-2.5 sm:py-1.5 ${
                         hovered === m.key ? "bg-panel-2" : ""
                       }`}
                       style={{ borderColor: m.current ? "var(--out)" : "var(--line-strong)" }}
                     >
-                      <span className={`text-[12.5px] font-bold lowercase ${m.current ? "text-out" : "text-ink"}`}>
+                      <span className={`text-[13px] font-bold lowercase sm:text-[12.5px] ${m.current ? "text-out" : "text-ink"}`}>
                         {REGION_LABEL[m.part.region!]}
                       </span>
-                      <span className="text-[11px] text-ink-dim">
+                      <span className="text-[12px] text-ink-dim sm:text-[11px]">
                         {m.part.side !== "central" ? `${m.part.side} · ` : ""}
                         {m.current ? m.current.severity : `${m.days} days`}
                       </span>
                       {m.current ? (
-                        <span className="num ml-auto text-[11px] text-ink-dim">
+                        <span className="num ml-auto text-[12px] text-ink-dim sm:text-[11px]">
                           {m.current.expected_return ? `out → ${formatDate(m.current.expected_return)}` : "out → no date"}
                         </span>
                       ) : null}
@@ -250,7 +278,7 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
               </ul>
             )}
           </div>
-          <p className="text-[11.5px] leading-snug text-ink-dim">
+          <p className="text-[12.5px] leading-snug text-ink-dim sm:text-[11.5px]">
             {current.length > 0
               ? mode === "plain"
                 ? `${current.length} live injur${current.length === 1 ? "y" : "ies"}: shown in red, the rest tint by days out.`
@@ -295,7 +323,7 @@ function Legend({ mode }: { mode: "plain" | "detailed" }) {
       {swatches.map((s) => (
         <li key={s.label} className="flex items-center gap-1.5">
           <span aria-hidden className="block h-2.5 w-2.5 shrink-0" style={s.style} />
-          <span className="text-[11px] tracking-wide text-ink-dim">{s.label}</span>
+          <span className="text-[12px] tracking-wide text-ink-dim sm:text-[11px]">{s.label}</span>
         </li>
       ))}
     </ul>

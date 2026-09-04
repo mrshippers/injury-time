@@ -21,9 +21,9 @@ export default async function PlayerPage(props: PageProps<"/player/[id]">) {
 
   return (
     <HealthProvider defaultMode={defaultMode}>
-      <main className="mx-auto w-full max-w-[1280px] flex-1 px-6 py-10 sm:px-10 lg:px-16">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <Link href="/squad" className="pressable inline-flex items-center gap-2 text-sm text-ink-dim hover:text-ink">
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-7 sm:px-10 sm:py-10 lg:px-16">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <Link href="/squad" className="pressable inline-flex min-h-11 items-center gap-2 text-sm text-ink-dim hover:text-ink sm:min-h-0">
             <span aria-hidden>←</span> squad
           </Link>
           <LanguageToggle />

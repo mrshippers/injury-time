@@ -48,7 +48,7 @@ export function NextMatchVital({ next, daysUntil, fit, calls, squadSize }: { nex
             {calls.total === 0 ? (
               <>
                 nobody has called yet.{" "}
-                <Link href="/team" className="text-mint underline-offset-4 hover:underline">
+                <Link href="/team" className="text-mint underline-offset-4 hover:underline max-sm:inline-block max-sm:py-3 max-sm:-my-3">
                   ask the squad
                 </Link>
               </>

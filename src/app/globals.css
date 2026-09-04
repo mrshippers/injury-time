@@ -228,3 +228,44 @@ body {
     animation: none;
   }
 }
+
+/* ── phone floors ───────────────────────────────────────────────────────
+   Below 640px the board is read on a phone at arm's length on a touchline.
+   Nothing reads under 12px and nothing tappable is under 40px. These are
+   unlayered so they beat the utilities without !important. */
+@media (max-width: 639px) {
+  .text-\[9px\],
+  .text-\[9\.5px\],
+  .text-\[10px\],
+  .text-\[10\.5px\],
+  .text-\[11px\],
+  .text-\[11\.5px\],
+  .annot {
+    font-size: 12px;
+  }
+  button,
+  [role="button"],
+  select,
+  input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+  a.pressable {
+    min-height: 40px;
+  }
+  button,
+  [role="button"] {
+    min-width: 40px;
+  }
+  .glyph {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  /* the module bar sits at the bottom of the phone, so the page ends above it */
+  main {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}
+
+/* the floodlight and the ground reach into the safe areas */
+html {
+  background-color: var(--pitch);
+}

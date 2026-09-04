@@ -46,7 +46,7 @@ export function SessionHeader({
               type="button"
               aria-pressed={kind === k}
               onClick={() => onKindChange(k)}
-              className={`pressable h-9 px-4 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+              className={`pressable h-11 px-4 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-9 ${
                 kind === k ? "bg-mint text-mint-ink" : "bg-panel-2 text-ink-dim hover:text-ink"
               }`}
             >
@@ -59,7 +59,7 @@ export function SessionHeader({
           aria-label="session date"
           value={sessionDate}
           onChange={(e) => onDateChange(e.target.value)}
-          className="num h-9 rounded-[3px] border border-line bg-panel-2 px-3 text-sm text-ink [color-scheme:dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+          className="num h-11 rounded-[3px] border border-line bg-panel-2 px-3 text-sm text-ink [color-scheme:dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-9"
         />
         <input
           type="text"
@@ -71,24 +71,24 @@ export function SessionHeader({
           value={opponent}
           onChange={(e) => onOpponentChange(e.target.value)}
           maxLength={60}
-          className={`h-9 overflow-hidden rounded-[3px] border text-sm text-ink placeholder:text-ink-faint transition-[opacity,transform,max-width,padding] duration-200 ease-out motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+          className={`h-11 overflow-hidden rounded-[3px] border text-sm text-ink placeholder:text-ink-faint sm:h-9 transition-[opacity,transform,max-width,padding] duration-200 ease-out motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
             kind === "match"
               ? "pointer-events-auto max-w-[220px] translate-y-0 border-line bg-panel-2 px-3 opacity-100"
-              : "pointer-events-none max-w-0 -translate-y-1 border-transparent px-0 opacity-0"
+              : "pointer-events-none w-0 max-w-0 -translate-y-1 border-0 border-transparent px-0 opacity-0"
           }`}
         />
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
         <div className="flex flex-col gap-1">
-          <span className="text-[10.5px] tracking-[0.14em] uppercase text-ink-dim">everyone: effort</span>
+          <span className="text-[12px] tracking-[0.14em] uppercase text-ink-dim sm:text-[10.5px]">everyone: effort</span>
           <RpeChips value={def.rpe} onChange={(rpe) => onDefaultChange({ rpe })} ariaLabel="effort for everyone" />
         </div>
         <div className="flex flex-col gap-1">
-          <span className="text-[10.5px] tracking-[0.14em] uppercase text-ink-dim">everyone: minutes</span>
+          <span className="text-[12px] tracking-[0.14em] uppercase text-ink-dim sm:text-[10.5px]">everyone: minutes</span>
           <MinutesChips minutes={def.minutes} onChange={(minutes) => onDefaultChange({ minutes })} ariaLabel="minutes for everyone" />
         </div>
-        <p className="num self-end text-[11.5px] text-ink-dim" aria-live="polite">
+        <p className="num self-end text-[12.5px] text-ink-dim sm:text-[11.5px]" aria-live="polite">
           {def.rpe === null
             ? "pick an effort and every player takes it"
             : `${inheriting} of ${total} on the default · tap a name to change one`}

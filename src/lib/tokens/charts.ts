@@ -32,7 +32,7 @@ export const CHART = {
   warn: "var(--doubt)",
   bad: "var(--out)",
   /** type inside the drawing */
-  tick: { size: 10, spacing: "0.12em", family: "var(--font-plex-mono), monospace" },
+  tick: { size: 11, spacing: "0.12em", family: "var(--font-plex-mono), monospace" },
   reading: { size: 12, weight: 700, family: "var(--font-plex-mono), monospace" },
   label: { size: 11.5, family: "var(--font-manrope), system-ui, sans-serif" },
   /** motion: fast in, hard stop, no bounce */

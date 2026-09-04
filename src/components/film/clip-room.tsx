@@ -179,7 +179,7 @@ export function ClipRoom({
         <section aria-labelledby={`${id}-film`} className="border border-line bg-panel">
           <div className="flex items-baseline justify-between border-b border-line px-4 py-2">
             <p className="annot" id={`${id}-film`}>{"// the film"}</p>
-            <a href={clip.url} target="_blank" rel="noreferrer" className="num text-[11px] text-ink-dim underline-offset-4 hover:text-ink hover:underline">
+            <a href={clip.url} target="_blank" rel="noreferrer" className="num text-[11px] text-ink-dim underline-offset-4 hover:text-ink hover:underline max-sm:inline-block max-sm:py-3 max-sm:-my-3">
               open at source
             </a>
           </div>
@@ -398,6 +398,7 @@ function Timeline({
               className="cursor-pointer outline-none focus-visible:[&>circle]:stroke-[var(--mint)]"
               style={{ animationDelay: `${i * CHART.motion.staggerDot}ms` }}
             >
+              <rect x={x(e.t) - 42} y={base - 42} width={84} height={84} fill="transparent" />
               <circle cx={x(e.t)} cy={base} r={goal ? CHART.beadRadius + 1 : CHART.markRadius + 0.6} fill={fill} stroke="var(--panel)" strokeWidth={1.5} className="chart-pop" style={{ animationDelay: `${i * CHART.motion.staggerDot}ms` }} />
               {goal ? (
                 <text x={x(e.t)} y={base - 12} textAnchor="middle" fill={CHART.annotation} fontSize={CHART.tick.size} fontFamily={CHART.tick.family} letterSpacing={1.2}>

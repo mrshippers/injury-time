@@ -80,7 +80,7 @@ export function SessionForm({
   }
 
   return (
-    <div className="flex flex-1 flex-col pb-28">
+    <div className="flex flex-1 flex-col pb-36 sm:pb-28">
       <SessionHeader
         kind={kind}
         onKindChange={handleKindChange}

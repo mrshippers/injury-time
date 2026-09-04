@@ -26,7 +26,7 @@ export default async function TeamPage() {
               {next.venue === "H" ? `${next.opponent} at home` : `away at ${next.opponent}`}
               <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
             </h1>
-            <p className="mt-3 text-[13.5px] text-ink-dim">
+            <p className="mt-3 text-[14px] text-ink-dim sm:text-[13.5px]">
               <span className="num text-ink">{longDate(next.match_date)}</span>
               {next.kickoff ? <span className="num"> · {next.kickoff}</span> : null}
               {" · "}

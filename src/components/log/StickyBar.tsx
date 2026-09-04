@@ -30,7 +30,7 @@ export function StickyBar({
 }) {
   const disabled = loggedCount < 1 || isPending;
   return (
-    <div className="fixed inset-x-0 bottom-0 flex items-center justify-between gap-3 border-t border-line-strong bg-panel-2/90 px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:px-6">
+    <div className="fixed inset-x-0 z-20 flex items-center justify-between gap-3 border-t border-line-strong bg-panel-2/90 px-3 py-3 backdrop-blur max-sm:bottom-[calc(56px+env(safe-area-inset-bottom))] sm:bottom-0 sm:px-6 sm:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
       <p className="num text-sm text-ink-dim">
         <span className="font-semibold text-ink">{loggedCount}</span> of{" "}
         {totalCount} logged
@@ -45,7 +45,7 @@ export function StickyBar({
         type="button"
         onClick={onSave}
         disabled={disabled}
-        className="pressable h-10 rounded-[3px] bg-mint px-5 text-sm font-bold text-mint-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint disabled:pointer-events-none disabled:opacity-35"
+        className="pressable h-11 shrink-0 rounded-[3px] bg-mint px-5 text-sm font-bold text-mint-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint disabled:pointer-events-none disabled:opacity-35 sm:h-10"
       >
         {isPending ? "saving…" : "save session"}
       </button>

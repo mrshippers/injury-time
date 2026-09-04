@@ -8,6 +8,7 @@ export type AvailabilityEntry = {
   created_at: string;
 };
 
+/** Date, status, return: one line per event at any width, nothing wraps inside a cell. */
 export default function AvailabilityTimeline({
   events,
 }: {
@@ -31,22 +32,24 @@ export default function AvailabilityTimeline({
             return (
               <li
                 key={`${event.created_at}-${i}`}
-                className="flex items-baseline gap-3 py-2 border-b border-line last:border-b-0"
+                className="grid min-h-11 grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-x-3 border-b border-line py-2 last:border-b-0"
               >
-                <span className="num text-[12px] text-ink-dim w-[72px] shrink-0">
+                <span className="num whitespace-nowrap text-[12.5px] text-ink-dim sm:text-[12px]">
                   {formatDate(event.noted_on)}
                 </span>
                 <span
                   aria-hidden
-                  className="block w-2 h-2 shrink-0 translate-y-px"
+                  className="block h-2 w-2 shrink-0"
                   style={{ background: meta.varName }}
                 />
-                <span className={`text-sm ${meta.text}`}>{meta.label}</span>
+                <span className={`truncate text-[13.5px] sm:text-sm ${meta.text}`}>{meta.label}</span>
                 {event.return_date ? (
-                  <span className="num text-[12px] text-ink-dim ml-auto">
+                  <span className="num whitespace-nowrap text-[12.5px] text-ink-dim sm:text-[12px]">
                     back {formatDate(event.return_date)}
                   </span>
-                ) : null}
+                ) : (
+                  <span />
+                )}
               </li>
             );
           })}

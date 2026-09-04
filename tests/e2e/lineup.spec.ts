@@ -86,11 +86,13 @@ test.describe("the side", () => {
     const target = page.getByTestId("pitch").getByText(surname, { exact: true }).first();
     await expect(target).toBeVisible();
     const from = (await handle.boundingBox())!;
-    const to = (await target.boundingBox())!;
     await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
     await page.mouse.down();
     await page.mouse.move(from.x + 40, from.y + 10, { steps: 4 });
     await expect(page.getByTestId("pitch")).toHaveAttribute("data-drag", "list");
+    // the pitch sways until a drag starts; read the shirt's position once it has stopped
+    await page.waitForTimeout(250);
+    const to = (await target.boundingBox())!;
     await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2 + 8, { steps: 18 });
     await expect(page.getByText(new RegExp(`drop him at ${role}`))).toBeVisible();
     await page.mouse.up();

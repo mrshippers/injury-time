@@ -57,7 +57,7 @@ export function XiStrip({
                 <span className="num w-5 shrink-0 text-right text-[12px] text-ink-dim">{row?.player.squad_number ?? ""}</span>
                 <span className={`min-w-0 flex-1 truncate text-[13px] ${row ? "text-ink" : "text-out"}`}>
                   {row ? row.player.name : "empty"}
-                  {outOfPosition ? <span className="annot ml-2 !text-[9.5px]">{row!.player.position}</span> : null}
+                  {outOfPosition ? <span className="annot ml-2 text-[10px]">{row!.player.position}</span> : null}
                 </span>
                 {row ? (
                   <span className={`num shrink-0 text-[10px] font-semibold tracking-[0.08em] ${READINESS_TEXT[row.readiness.key]}`}>

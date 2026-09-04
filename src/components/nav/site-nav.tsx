@@ -47,8 +47,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
       <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center justify-between gap-2 px-3 sm:px-8">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <Link href="/" className="pressable display shrink-0 text-[17px] leading-none text-ink" aria-label="injury time, hub">
-            <span className="hidden sm:inline">injury time</span>
-            <span className="sm:hidden">it</span>
+            <span>injury time</span>
             <span aria-hidden className="ml-[0.08em] inline-block h-[0.16em] w-[0.16em] bg-mint align-baseline" />
           </Link>
           {canSwitch ? (
@@ -64,7 +63,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
                     router.refresh();
                   });
                 }}
-                className="num max-w-[6.5rem] truncate rounded-[2px] border border-line bg-panel px-1 py-[3px] text-[10.5px] tracking-[0.04em] text-ink-dim outline-none transition-colors duration-[190ms] hover:text-ink focus-visible:ring-2 focus-visible:ring-mint sm:max-w-none sm:px-1.5 sm:text-[11px] sm:tracking-[0.06em]"
+                className="num max-w-[11rem] truncate rounded-[2px] border border-line bg-panel px-2 py-[3px] text-[12px] tracking-[0.04em] text-ink-dim outline-none transition-colors duration-[190ms] hover:text-ink focus-visible:ring-2 focus-visible:ring-mint sm:max-w-none sm:min-h-0 sm:px-1.5 sm:text-[11px] sm:tracking-[0.06em]"
               >
                 {clubs.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -77,7 +76,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
             <span className="num hidden truncate text-[11px] tracking-[0.06em] text-ink-dim sm:inline">{club.name}</span>
           )}
         </div>
-        <ul className="flex shrink-0 items-center gap-0 sm:gap-2">
+        <ul className="hidden shrink-0 items-center gap-2 sm:flex">
           {MODULES.map((m) => {
             const active = m.match(pathname);
             return (
@@ -107,7 +106,50 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
             </span>
           </li>
         </ul>
+        <span className="annot shrink-0 text-gold-dim sm:hidden" aria-hidden>
+          {`// ${role}`}
+        </span>
       </div>
+    </nav>
+  );
+}
+
+/**
+ * On a phone the modules live at the bottom, under the thumb, like the tab
+ * bar of any app worth opening on a touchline. Same five words, same mint
+ * mark for "where am I", fixed above the safe area.
+ */
+export function PhoneTabBar() {
+  const pathname = usePathname() ?? "/";
+  if (pathname.startsWith("/login") || pathname.startsWith("/auth")) return null;
+  return (
+    <nav
+      aria-label="modules"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line-strong bg-panel sm:hidden"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)", boxShadow: "inset 0 1px 0 0 var(--sheen-edge)" }}
+    >
+      <ul className="grid h-14 grid-cols-5">
+        {MODULES.map((m) => {
+          const active = m.match(pathname);
+          return (
+            <li key={m.href} className="relative">
+              <Link
+                href={m.href}
+                aria-current={active ? "page" : undefined}
+                className={`pressable flex h-full min-h-[44px] items-center justify-center text-[13px] font-semibold tracking-[0.06em] outline-none transition-colors duration-[190ms] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
+                  active ? "text-ink" : "text-ink-dim"
+                }`}
+              >
+                {m.label}
+              </Link>
+              <span
+                aria-hidden
+                className={`absolute inset-x-3 top-0 h-[2px] bg-mint transition-opacity duration-[190ms] ${active ? "opacity-100 glow-mint" : "opacity-0"}`}
+              />
+            </li>
+          );
+        })}
+      </ul>
     </nav>
   );
 }

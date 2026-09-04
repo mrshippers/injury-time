@@ -7,7 +7,8 @@ const PRESETS = [45, 60, 75, 90];
 
 /**
  * Minutes chips: four presets and an always-visible -5 / +5 pair. No hidden
- * stepper to reveal; the odd 20-minute cameo is two taps, not four.
+ * stepper to reveal; the odd 20-minute cameo is two taps, not four. Thumb
+ * height on a phone, a small row on a desk.
  */
 export function MinutesChips({
   minutes,
@@ -21,14 +22,14 @@ export function MinutesChips({
   const roving = useRovingFocus(PRESETS.length + 2);
   const isPreset = PRESETS.includes(minutes);
   const chip = (selected: boolean) =>
-    `pressable num h-7 rounded-[3px] border px-2 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+    `pressable num h-11 min-w-11 rounded-[3px] border px-2.5 text-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-7 sm:min-w-0 sm:px-2 sm:text-xs ${
       selected
         ? "border-mint bg-mint text-mint-ink"
         : "border-line bg-panel-2 text-ink-dim hover:border-line-strong hover:text-ink"
     }`;
 
   return (
-    <div role="group" aria-label={ariaLabel} className="flex items-center gap-1">
+    <div role="group" aria-label={ariaLabel} className="flex flex-wrap items-center gap-1.5 sm:gap-1">
       {PRESETS.map((m, i) => (
         <button
           key={m}
@@ -54,12 +55,12 @@ export function MinutesChips({
         onFocus={roving.onFocus(PRESETS.length)}
         onKeyDown={roving.onKeyDown(PRESETS.length)}
         onClick={() => onChange(clampMinutes(minutes - 5))}
-        className={chip(false) + " w-7 px-0"}
+        className={chip(false) + " w-11 px-0 sm:w-7"}
       >
         −
       </button>
       {!isPreset ? (
-        <span className="num w-8 text-center text-xs text-mint" aria-live="polite">
+        <span className="num w-9 text-center text-[14px] text-mint sm:w-8 sm:text-xs" aria-live="polite">
           {minutes}
         </span>
       ) : null}
@@ -71,7 +72,7 @@ export function MinutesChips({
         onFocus={roving.onFocus(PRESETS.length + 1)}
         onKeyDown={roving.onKeyDown(PRESETS.length + 1)}
         onClick={() => onChange(clampMinutes(minutes + 5))}
-        className={chip(false) + " w-7 px-0"}
+        className={chip(false) + " w-11 px-0 sm:w-7"}
       >
         +
       </button>

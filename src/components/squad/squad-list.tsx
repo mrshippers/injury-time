@@ -57,6 +57,7 @@ export function SquadList({
   dragging,
   canManage,
   onSelect,
+  onToggleIn,
   onDragStart,
 }: {
   rows: SquadRow[];
@@ -65,6 +66,8 @@ export function SquadList({
   dragging: boolean;
   canManage: boolean;
   onSelect: (id: string) => void;
+  /** phone route: one tap puts him in the side or takes him out */
+  onToggleIn?: (id: string) => void;
   onDragStart: (playerId: string, e: PointerEvent) => void;
 }) {
   const [sort, setSort] = useState<{ key: SortKey; dir: Dir }>({ key: "number", dir: "asc" });
@@ -191,7 +194,7 @@ export function SquadList({
           <col className="hidden sm:table-column sm:w-[88px]" />
           <col className="hidden sm:table-column sm:w-7" />
           <col className="hidden sm:table-column sm:w-7" />
-          <col className="w-[66px] sm:w-[84px]" />
+          <col className="w-[104px] sm:w-[84px]" />
         </colgroup>
         <thead>
           <tr>
@@ -213,7 +216,7 @@ export function SquadList({
             const selected = selectedPlayer === player.id;
             const onPitch = inXI.has(player.id);
             return (
-              <SquadListRow key={player.id} row={row} selected={selected} onPitch={onPitch} maxLoad={maxLoad} dragging={dragging} canManage={canManage} editing={editing === player.id} onEdit={() => setEditing((e) => (e === player.id ? null : player.id))} onDone={() => setEditing(null)} onSelect={() => onSelect(player.id)} beginPress={beginPress} positionConfirmed={positionConfirmed(row)} />
+              <SquadListRow key={player.id} row={row} selected={selected} onPitch={onPitch} maxLoad={maxLoad} dragging={dragging} canManage={canManage} editing={editing === player.id} onEdit={() => setEditing((e) => (e === player.id ? null : player.id))} onDone={() => setEditing(null)} onSelect={() => onSelect(player.id)} onToggleIn={onToggleIn ? () => onToggleIn(player.id) : undefined} beginPress={beginPress} positionConfirmed={positionConfirmed(row)} />
             );
           })}
         </tbody>
@@ -271,6 +274,7 @@ function SquadListRow({
   onEdit,
   onDone,
   onSelect,
+  onToggleIn,
   beginPress,
   positionConfirmed,
 }: {
@@ -284,6 +288,7 @@ function SquadListRow({
   onEdit: () => void;
   onDone: () => void;
   onSelect: () => void;
+  onToggleIn?: () => void;
   beginPress: (e: React.PointerEvent, id: string, fromGrip: boolean) => void;
   positionConfirmed: boolean;
 }) {
@@ -297,7 +302,7 @@ function SquadListRow({
         data-on-pitch={onPitch ? "1" : undefined}
         aria-selected={selected}
         onPointerDown={(e) => beginPress(e, player.id, false)}
-        className={`h-[38px] border-b border-line transition-colors duration-[190ms] ease-[var(--ease-out-strong)] ${
+        className={`h-[38px] border-b border-line transition-colors sm:h-[38px] max-sm:h-[52px] duration-[190ms] ease-[var(--ease-out-strong)] ${
           selected ? "bg-panel-2" : "hover:bg-panel-2"
         } ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
       >
@@ -320,7 +325,11 @@ function SquadListRow({
         </td>
         <th scope="row" className={`${CELL} text-left font-normal`}>
           <span className="flex min-w-0 items-center gap-2">
-            <Link href={`/player/${player.id}`} onPointerDown={(e) => e.stopPropagation()} className="pressable truncate text-[13px] font-semibold text-ink hover:text-mint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint">
+            <Link
+              href={`/player/${player.id}`}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="pressable min-w-0 text-[13px] font-semibold leading-tight text-ink hover:text-mint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint max-sm:line-clamp-2 max-sm:min-h-0 sm:truncate"
+            >
               {player.name}
             </Link>
             {onPitch ? (
@@ -344,6 +353,19 @@ function SquadListRow({
         <td className={`${CELL} num hidden text-right text-[12px] sm:table-cell ${goals(row) > 0 ? "text-ink" : "text-ink-faint"}`}>{goals(row)}</td>
         <td className={`${CELL} text-right`}>
           <span className="inline-flex items-center gap-1" onPointerDown={(e) => e.stopPropagation()}>
+            {onToggleIn ? (
+              <button
+                type="button"
+                aria-pressed={onPitch}
+                aria-label={onPitch ? `take ${player.name} out of the side` : `put ${player.name} in the side`}
+                onClick={onToggleIn}
+                className={`pressable inline-flex h-10 w-10 items-center justify-center rounded-[2px] border text-[12px] font-bold tracking-[0.06em] transition-colors duration-[190ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:hidden ${
+                  onPitch ? "border-mint bg-mint text-mint-ink" : "border-line-strong bg-panel-2 text-ink-dim"
+                }`}
+              >
+                {onPitch ? "in" : "+"}
+              </button>
+            ) : null}
             {canManage ? (
               <button
                 type="button"

@@ -34,7 +34,7 @@ function Counter({
       type="button"
       aria-label={`${ariaLabel}: ${value}, tap to add`}
       onClick={() => onChange(value >= max ? 0 : value + 1)}
-      className={`pressable num flex h-7 min-w-[38px] items-center justify-center gap-1 rounded-[3px] border px-1.5 text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+      className={`pressable num flex h-11 min-w-[52px] items-center justify-center gap-1 rounded-[3px] border px-2 text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-7 sm:min-w-[38px] sm:px-1.5 sm:text-[11px] ${
         live ? `border-line-strong bg-panel-2 ${tone ?? "text-ink"}` : "border-line text-ink-dim hover:border-line-strong hover:text-ink"
       }`}
     >
@@ -74,10 +74,10 @@ export function PlayerRow({
         type="button"
         onClick={() => onChange({ expanded: true })}
         aria-label={`${player.name}, ${player.status}, tap to include in session`}
-        className="pressable flex w-full items-center gap-3 border-b border-line px-3 py-2.5 text-left hover:bg-panel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:px-6"
+        className="pressable flex min-h-[52px] w-full items-center gap-3 border-b border-line px-3 py-2.5 text-left hover:bg-panel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:min-h-0 sm:px-6"
       >
-        <span className="num w-5 shrink-0 text-right text-[12px] text-ink-dim">{player.squad_number ?? "–"}</span>
-        <span className="min-w-0 flex-1 truncate text-[13px] text-ink-dim">{player.name}</span>
+        <span className="num w-5 shrink-0 text-right text-[12.5px] text-ink-dim sm:text-[12px]">{player.squad_number ?? "–"}</span>
+        <span className="min-w-0 flex-1 truncate text-[13.5px] text-ink-dim sm:text-[13px]">{player.name}</span>
         <span className={`annot shrink-0 ${player.status === "injured" ? "text-out" : "text-susp"}`}>
           {player.status === "injured" ? "out" : "susp"}
         </span>
@@ -88,16 +88,16 @@ export function PlayerRow({
 
   return (
     <div data-testid="player-row" className={`border-b border-line ${row.absent ? "opacity-55" : ""}`}>
-      <div className="flex items-center gap-2 px-3 py-2 sm:gap-3 sm:px-6">
-        <span className="num w-5 shrink-0 text-right text-[12px] text-ink-dim">{player.squad_number ?? "–"}</span>
+      <div className="flex min-h-[52px] items-center gap-2 px-3 py-1.5 sm:min-h-0 sm:gap-3 sm:px-6 sm:py-2">
+        <span className="num w-5 shrink-0 text-right text-[12.5px] text-ink-dim sm:text-[12px]">{player.squad_number ?? "–"}</span>
         <button
           type="button"
           aria-expanded={row.open}
           aria-label={`${player.name}, ${row.absent ? "absent" : `effort ${eff.rpe ?? "not set"}, ${eff.minutes} minutes`}, tap to change`}
           onClick={() => onChange({ open: !row.open })}
-          className="pressable flex min-w-0 flex-1 items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+          className="pressable flex min-h-11 min-w-0 flex-1 items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:min-h-0"
         >
-          <span className={`min-w-0 truncate text-[13.5px] ${row.absent ? "text-ink-dim line-through" : "text-ink"}`}>
+          <span className={`min-w-0 truncate text-[14px] sm:text-[13.5px] ${row.absent ? "text-ink-dim line-through" : "text-ink"}`}>
             {player.name}
           </span>
           {player.status === "doubt" ? <span className="annot shrink-0 text-doubt">doubt</span> : null}
@@ -117,7 +117,7 @@ export function PlayerRow({
               </div>
             ) : null}
             <span
-              className={`num shrink-0 text-right text-[12.5px] tabular-nums ${inheritsRpe && inheritsMin ? "text-ink-dim" : "text-ink"}`}
+              className={`num shrink-0 text-right text-[13px] tabular-nums sm:text-[12.5px] ${inheritsRpe && inheritsMin ? "text-ink-dim" : "text-ink"}`}
               data-inherits={inheritsRpe && inheritsMin ? "1" : "0"}
             >
               <span className={inheritsRpe ? "" : "text-mint"}>{eff.rpe ?? "–"}</span>
@@ -134,18 +134,18 @@ export function PlayerRow({
           onClick={() => onChange({ absent: !row.absent, open: false })}
           aria-pressed={row.absent}
           aria-label={row.absent ? `mark ${player.name} present` : `mark ${player.name} absent`}
-          className="pressable num flex h-7 w-7 shrink-0 items-center justify-center rounded-[3px] border border-line text-[13px] text-ink-dim hover:border-line-strong hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+          className="pressable num flex h-11 w-11 shrink-0 items-center justify-center rounded-[3px] border border-line text-[15px] text-ink-dim hover:border-line-strong hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-7 sm:w-7 sm:text-[13px]"
         >
           {row.absent ? "↩" : "×"}
         </button>
       </div>
 
       {row.open && !row.absent ? (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line bg-panel px-3 py-2.5 pl-10 sm:px-6 sm:pl-14">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-line bg-panel px-3 py-3 sm:px-6 sm:py-2.5 sm:pl-14">
           <RpeChips value={eff.rpe} onChange={(rpe) => onChange({ rpe })} ariaLabel={`${player.name} effort`} />
           <MinutesChips minutes={eff.minutes} onChange={(minutes) => onChange({ minutes })} ariaLabel={`${player.name} minutes`} />
           {isMatch ? (
-            <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-1">
               <span className="sm:hidden">
                 <Counter label="G" value={row.goals} max={MAX_GOALS} onChange={(goals) => onChange({ goals })} tone="text-mint" ariaLabel={`${player.name} goals`} />
               </span>
@@ -160,7 +160,7 @@ export function PlayerRow({
             <button
               type="button"
               onClick={() => onChange({ rpe: null, minutes: null })}
-              className="pressable text-[11.5px] text-ink-dim underline-offset-4 hover:text-ink hover:underline"
+              className="pressable flex min-h-11 items-center text-[12.5px] text-ink-dim underline-offset-4 hover:text-ink hover:underline sm:min-h-0 sm:text-[11.5px]"
             >
               back to default
             </button>
@@ -169,7 +169,7 @@ export function PlayerRow({
             <button
               type="button"
               onClick={() => onChange({ expanded: false, open: false })}
-              className="pressable ml-auto text-[11.5px] text-ink-dim underline-offset-4 hover:text-ink hover:underline"
+              className="pressable ml-auto flex min-h-11 items-center text-[12.5px] text-ink-dim underline-offset-4 hover:text-ink hover:underline sm:min-h-0 sm:text-[11.5px]"
             >
               leave out
             </button>

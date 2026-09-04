@@ -311,9 +311,11 @@ export type BodyFigureProps = {
   yawTarget: React.MutableRefObject<number>;
   params: BodyParams | null;
   onReady?: (parametric: boolean) => void;
+  /** device pixel ratio range; a phone gets less */
+  dpr?: [number, number];
 };
 
-export default function BodyFigure({ injuries, asOf, tokens: t, reduced, hovered, onHover, yawTarget, params, onReady }: BodyFigureProps) {
+export default function BodyFigure({ injuries, asOf, tokens: t, reduced, hovered, onHover, yawTarget, params, onReady, dpr = [1, 2] }: BodyFigureProps) {
   const marks = useMemo(() => {
     const byKey = new Map<string, Mark>();
     for (const m of marksFor(injuries, asOf)) if (!byKey.has(m.key)) byKey.set(m.key, m);
@@ -325,7 +327,7 @@ export default function BodyFigure({ injuries, asOf, tokens: t, reduced, hovered
   }, [surface, onReady]);
 
   return (
-    <Canvas dpr={[1, 2]} gl={{ antialias: true, alpha: true }} style={{ background: "transparent" }} camera={{ fov: 30, near: 0.1, far: 50 }}>
+    <Canvas dpr={dpr} gl={{ antialias: true, alpha: true }} style={{ background: "transparent" }} camera={{ fov: 30, near: 0.1, far: 50 }}>
       {/* a small studio, no files: one soft key, a fill, a mint rim, a turf bounce off the floor */}
       <Environment resolution={256} frames={1}>
         <Lightformer form="rect" intensity={3.2} position={[2.4, 3.4, 3.2]} scale={[3, 3, 1]} target={[0, 1, 0]} color={opaque(t.ink)} />

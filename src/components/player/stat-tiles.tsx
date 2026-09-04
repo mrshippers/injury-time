@@ -28,8 +28,8 @@ export function sessionsThisWeek(loads: readonly LoadEntry[], asOf: string): num
 
 function Cell({ label, value, dim }: { label: string; value: string; dim?: boolean }) {
   return (
-    <div className="px-4 py-3">
-      <p className="text-[10px] tracking-[0.14em] uppercase text-ink-dim">{label}</p>
+    <div className="min-h-11 px-3 py-3 sm:px-4">
+      <p className="text-[11.5px] tracking-[0.14em] uppercase text-ink-dim sm:text-[10px]">{label}</p>
       <p className={`num mt-1 text-[22px] leading-none ${dim ? "text-cold" : "text-ink"}`}>{value}</p>
     </div>
   );
@@ -73,7 +73,7 @@ export default function StatTiles({
           {readiness.word}
         </p>
         <p className="mt-2 max-w-[40ch] text-[13px] leading-snug text-ink">{readinessGloss(mode, readiness)}</p>
-        <p className={`mt-3 text-[12px] text-ink-dim ${mode === "detailed" ? "num" : ""}`} title={loadDetail(facts)} data-testid="load-line">
+        <p className={`mt-3 text-[12.5px] text-ink-dim sm:text-[12px] ${mode === "detailed" ? "num" : ""}`} title={loadDetail(facts)} data-testid="load-line">
           {loadLine(mode, facts)}
         </p>
       </section>

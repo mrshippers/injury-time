@@ -77,6 +77,18 @@ function subscribeMotion(cb: () => void) {
   return () => mq.removeEventListener("change", cb);
 }
 
+const PHONE = "(max-width: 639px)";
+function subscribePhone(cb: () => void) {
+  const mq = window.matchMedia(PHONE);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+
+/** Below the `sm` breakpoint: the touchline phone, one thumb, no hover. */
+export function useIsPhone(): boolean {
+  return useSyncExternalStore(subscribePhone, () => window.matchMedia(PHONE).matches, () => false);
+}
+
 export function useReducedMotion(): boolean {
   return useSyncExternalStore(subscribeMotion, () => window.matchMedia(MQ).matches, () => false);
 }
