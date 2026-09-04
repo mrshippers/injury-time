@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+/** Every context starts on the fictional club; nothing a test writes may land on Belstone. */
+const KILBURN = {
+  cookies: [{ name: "it.club", value: "kilburn-athletic", domain: "localhost", path: "/", expires: -1, httpOnly: false, secure: false, sameSite: "Lax" as const }],
+  origins: [],
+};
+
 /**
  * The team page on two phones at once. A call made on one lands on the other
  * without a reload; a notice posted on one lands at the top of the other.
@@ -7,8 +13,8 @@ import { expect, test } from "@playwright/test";
  */
 test.describe("the team page", () => {
   test("a call made in one browser appears in another without a reload", async ({ browser }) => {
-    const a = await browser.newContext();
-    const b = await browser.newContext();
+    const a = await browser.newContext({ storageState: KILBURN });
+    const b = await browser.newContext({ storageState: KILBURN });
     const pageA = await a.newPage();
     const pageB = await b.newPage();
     await pageA.goto("/team");
@@ -47,8 +53,8 @@ test.describe("the team page", () => {
   });
 
   test("a notice posted in one browser lands at the top of another", async ({ browser }) => {
-    const a = await browser.newContext();
-    const b = await browser.newContext();
+    const a = await browser.newContext({ storageState: KILBURN });
+    const b = await browser.newContext({ storageState: KILBURN });
     const pageA = await a.newPage();
     const pageB = await b.newPage();
     await pageA.goto("/team");
