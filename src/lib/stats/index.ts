@@ -11,6 +11,9 @@
  * interface without any page changing: the pages only ever see `SeasonStats`.
  */
 
+/** Where a season line came from: the club's own match log, the league feed, or nowhere yet. */
+export type StatsSource = "log" | "feed" | "none";
+
 export type SeasonStats = {
   /** Match sessions with any minutes logged. */
   apps: number;
@@ -21,6 +24,7 @@ export type SeasonStats = {
   assists: number;
   yellow: number;
   red: number;
+  source?: StatsSource;
 };
 
 export type MatchRow = {
@@ -32,7 +36,17 @@ export type MatchRow = {
 };
 
 export function emptyStats(): SeasonStats {
-  return { apps: 0, starts: 0, minutes: 0, goals: 0, assists: 0, yellow: 0, red: 0 };
+  return { apps: 0, starts: 0, minutes: 0, goals: 0, assists: 0, yellow: 0, red: 0, source: "none" };
+}
+
+/**
+ * The league feed knows games and goals for a player and nothing else. When
+ * the club's own log is empty this is the honest season line: apps and goals
+ * from the feed, everything else 0, and `source: "feed"` so a page can say so.
+ */
+export function fromExternalStats(ext: { apps?: number; goals?: number } | null | undefined): SeasonStats {
+  if (!ext || (!ext.apps && !ext.goals)) return emptyStats();
+  return { apps: ext.apps ?? 0, starts: 0, minutes: 0, goals: ext.goals ?? 0, assists: 0, yellow: 0, red: 0, source: "feed" };
 }
 
 /** Pure fold of match rows into a season line. Training rows must not be passed. */
@@ -48,6 +62,7 @@ export function sumMatchRows(rows: readonly MatchRow[]): SeasonStats {
     s.yellow += r.yellow;
     s.red += r.red;
   }
+  s.source = s.apps > 0 ? "log" : "none";
   return s;
 }
 

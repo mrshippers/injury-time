@@ -45,7 +45,7 @@ export type Severity = (typeof SEVERITIES)[number]
 export const SESSION_KINDS = ['training', 'match'] as const
 export type SessionKind = (typeof SESSION_KINDS)[number]
 
-export const CLUB_ROLES = ['manager', 'physio'] as const
+export const CLUB_ROLES = ['manager', 'coach', 'medical', 'player'] as const
 export type ClubRole = (typeof CLUB_ROLES)[number]
 
 /** ISO date, `YYYY-MM-DD`. Postgres `date`, no time, no zone. */
@@ -53,12 +53,50 @@ export type DateString = string
 /** ISO 8601 timestamp with offset. Postgres `timestamptz`. */
 export type TimestampString = string
 
+export type ClubSettings = {
+  health_language?: 'plain' | 'detailed'
+}
+
 export type Club = {
   id: string
   name: string
   league: string
   is_demo: boolean
+  slug: string | null
+  ground: string | null
+  division: string | null
+  season: string | null
+  founded: number | null
+  fwp_team_id: number | null
+  colours: { home?: string; away?: string; accent?: string }
+  settings: ClubSettings
   created_at: TimestampString
+}
+
+/** Measurements in cm. Any field may be missing; the figure falls back to the default athlete. */
+export type BodyParams = {
+  height?: number
+  chest?: number
+  neck?: number
+  shoulders?: number
+  waist?: number
+  hips?: number
+  arm_length?: number
+  upper_arm?: number
+  wrist?: number
+  thigh?: number
+  lower_leg?: number
+  calf?: number
+}
+
+/** Season numbers that came from the league feed rather than the match log. */
+export type ExternalStats = {
+  apps?: number
+  goals?: number
+  as_of?: DateString
+  source?: string
+  /** false when the feed gave us the player but not where they play */
+  position_confirmed?: boolean
 }
 
 export type ClubMember = {
@@ -74,6 +112,10 @@ export type Player = {
   name: string
   position: Position
   squad_number: number | null
+  user_id: string | null
+  body_params: BodyParams | null
+  external_stats: ExternalStats | null
+  retired_on: DateString | null
   created_at: TimestampString
 }
 
@@ -176,7 +218,7 @@ export type Database = {
     Tables: {
       clubs: {
         Row: Club
-        Insert: Insertable<Club, 'is_demo'>
+        Insert: Insertable<Club, 'is_demo' | 'slug' | 'ground' | 'division' | 'season' | 'founded' | 'fwp_team_id' | 'colours' | 'settings'>
         Update: Partial<Club>
         Relationships: []
       }
@@ -188,7 +230,7 @@ export type Database = {
       }
       players: {
         Row: Player
-        Insert: Insertable<Player, 'squad_number'>
+        Insert: Insertable<Player, 'squad_number' | 'user_id' | 'body_params' | 'external_stats' | 'retired_on'>
         Update: Partial<Player>
         Relationships: []
       }
@@ -227,6 +269,48 @@ export type Database = {
         Update: Partial<Fixture>
         Relationships: []
       }
+      results: {
+        Row: Result
+        Insert: Insertable<Result, 'ht_for' | 'ht_against' | 'attendance' | 'scorers' | 'source'>
+        Update: Partial<Result>
+        Relationships: []
+      }
+      league_standings: {
+        Row: Standing
+        Insert: Omit<Standing, 'id' | 'home' | 'away' | 'is_us'> & Partial<Pick<Standing, 'id' | 'home' | 'away' | 'is_us'>>
+        Update: Partial<Standing>
+        Relationships: []
+      }
+      league_progress: {
+        Row: ProgressPoint
+        Insert: Omit<ProgressPoint, 'id' | 'position'> & Partial<Pick<ProgressPoint, 'id' | 'position'>>
+        Update: Partial<ProgressPoint>
+        Relationships: []
+      }
+      match_calls: {
+        Row: MatchCall
+        Insert: Omit<MatchCall, 'id' | 'note' | 'updated_at'> & Partial<Pick<MatchCall, 'id' | 'note' | 'updated_at'>>
+        Update: Partial<MatchCall>
+        Relationships: []
+      }
+      notifications: {
+        Row: Notification
+        Insert: Insertable<Notification, 'body' | 'fixture_id' | 'audience' | 'created_by'>
+        Update: Partial<Notification>
+        Relationships: []
+      }
+      clips: {
+        Row: Clip
+        Insert: Insertable<Clip, 'match_date' | 'fixture_id' | 'opponent' | 'events' | 'analysis' | 'status' | 'created_by'>
+        Update: Partial<Clip>
+        Relationships: []
+      }
+      lineups: {
+        Row: SavedLineup
+        Insert: Omit<SavedLineup, 'id' | 'bench' | 'updated_at'> & Partial<Pick<SavedLineup, 'id' | 'bench' | 'updated_at'>>
+        Update: Partial<SavedLineup>
+        Relationships: []
+      }
     }
     Views: {
       current_availability: {
@@ -236,4 +320,138 @@ export type Database = {
     }
     Functions: Record<never, never>
   }
+}
+
+/* ── the season, from the league feed ─────────────────────────────────── */
+
+export type Result = {
+  id: string
+  club_id: string
+  match_date: DateString
+  competition: string
+  opponent: string
+  venue: Venue
+  goals_for: number
+  goals_against: number
+  ht_for: number | null
+  ht_against: number | null
+  attendance: number | null
+  scorers: string[]
+  source: string
+  created_at: TimestampString
+}
+
+export type StandingSplit = { p?: number; w?: number; d?: number; l?: number }
+
+export type Standing = {
+  id: string
+  club_id: string
+  as_of: DateString
+  position: number
+  team: string
+  played: number
+  won: number
+  drawn: number
+  lost: number
+  gf: number
+  ga: number
+  gd: number
+  points: number
+  home: StandingSplit
+  away: StandingSplit
+  is_us: boolean
+}
+
+export type ProgressPoint = {
+  id: string
+  club_id: string
+  match_no: number
+  match_date: DateString
+  points: number
+  position: number | null
+}
+
+/* ── the squad talking back ───────────────────────────────────────────── */
+
+export const CALL_STATUSES = ['in', 'out', 'unsure'] as const
+export type CallStatus = (typeof CALL_STATUSES)[number]
+
+export type MatchCall = {
+  id: string
+  club_id: string
+  fixture_id: string
+  player_id: string
+  status: CallStatus
+  note: string | null
+  updated_at: TimestampString
+}
+
+export const NOTIFICATION_KINDS = ['call', 'training', 'match', 'notice', 'medical'] as const
+export type NotificationKind = (typeof NOTIFICATION_KINDS)[number]
+
+export type Notification = {
+  id: string
+  club_id: string
+  kind: NotificationKind
+  title: string
+  body: string | null
+  fixture_id: string | null
+  audience: ClubRole[]
+  created_by: string | null
+  created_at: TimestampString
+}
+
+/* ── film ─────────────────────────────────────────────────────────────── */
+
+export const CLIP_SOURCES = ['veo', 'youtube', 'upload', 'other'] as const
+export type ClipSource = (typeof CLIP_SOURCES)[number]
+
+export const CLIP_EVENT_KINDS = ['goal', 'chance', 'shot', 'save', 'turnover', 'press', 'set_piece', 'injury', 'sub', 'note'] as const
+export type ClipEventKind = (typeof CLIP_EVENT_KINDS)[number]
+
+export type ClipEvent = {
+  /** seconds into the clip */
+  t: number
+  kind: ClipEventKind
+  player_id?: string
+  note?: string
+}
+
+export type ClipAnalysis = {
+  summary: string
+  /** what to do on the day: warm-up focus, shape, set pieces */
+  gameday: string[]
+  /** what Tuesday looks like because of this film */
+  training: string[]
+  players: { player_id: string; note: string }[]
+  generated_at: TimestampString
+  model: string
+}
+
+export type Clip = {
+  id: string
+  club_id: string
+  source: ClipSource
+  url: string
+  title: string
+  match_date: DateString | null
+  fixture_id: string | null
+  opponent: string | null
+  events: ClipEvent[]
+  analysis: ClipAnalysis | null
+  status: 'new' | 'tagged' | 'analysed'
+  created_by: string | null
+  created_at: TimestampString
+}
+
+/* ── a saved side ─────────────────────────────────────────────────────── */
+
+export type SavedLineup = {
+  id: string
+  club_id: string
+  fixture_id: string
+  formation: string
+  xi: (string | null)[]
+  bench: string[]
+  updated_at: TimestampString
 }

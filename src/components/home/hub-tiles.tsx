@@ -19,34 +19,24 @@ const TONE: Record<NonNullable<Tile["tone"]>, string> = {
 };
 
 /**
- * FM's module buttons, with the module's live state on the button. A tile
- * that only says "squad" is a menu; a tile that says "17 of 22 available"
- * is a decision.
+ * The modules, one quiet row. A tile that only says "squad" is a menu; a
+ * tile that says "17 of 22 available" is a decision. They sit under the
+ * vitals as the way in, never as the point.
  */
 export function HubTiles({ tiles }: { tiles: Tile[] }) {
   return (
-    <ul className="grid grid-cols-1 gap-px bg-line sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="grid grid-cols-2 gap-px bg-line sm:grid-cols-3 lg:grid-cols-6">
       {tiles.map((t) => (
         <li key={t.href + t.label} className="bg-panel">
           <Link
             href={t.href}
-            className="pressable group flex h-full flex-col justify-between gap-6 px-5 py-4 outline-none transition-colors duration-[190ms] hover:bg-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-mint"
+            className="pressable group flex h-full flex-col justify-between gap-4 px-4 py-3 outline-none transition-colors duration-[190ms] hover:bg-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-mint"
           >
-            <div className="flex items-center justify-between">
-              <span className="annot">{`// ${t.label}`}</span>
-              <span
-                aria-hidden
-                className="text-ink-faint transition-transform duration-[190ms] ease-[var(--ease-out-strong)] group-hover:translate-x-1 group-hover:text-mint"
-              >
-                →
-              </span>
-            </div>
-            <div>
-              <p className={`display text-[26px] leading-none ${TONE[t.tone ?? "neutral"]}`}>
-                {t.headline}
-              </p>
-              <p className="mt-2 text-[12.5px] leading-snug text-ink-dim">{t.detail}</p>
-            </div>
+            <span className="annot">{`// ${t.label}`}</span>
+            <span>
+              <span className={`display block text-[19px] leading-none ${TONE[t.tone ?? "neutral"]}`}>{t.headline}</span>
+              <span className="mt-1.5 block text-[11.5px] leading-snug text-ink-dim">{t.detail}</span>
+            </span>
           </Link>
         </li>
       ))}

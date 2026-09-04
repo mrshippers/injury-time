@@ -1,0 +1,149 @@
+{
+ "source": "OpnTec/bodyapps-viz basis.js (LGPL-3.0)",
+ "vertexCount": 14444,
+ "triangleCount": 28796,
+ "baseHeight": 1.6,
+ "topVertex": 2118,
+ "offsets": {
+  "positions": 0,
+  "normals": 173328,
+  "indices": 346656,
+  "morphs": 519432,
+  "morphBytes": 86664
+ },
+ "morphs": [
+  {
+   "key": "height",
+   "name": "height",
+   "label": "body height",
+   "unit": "cm",
+   "scale": 0.000008110614801124214,
+   "default": 160,
+   "low": 120,
+   "high": 190,
+   "topDelta": 0.26576051115989685
+  },
+  {
+   "key": "chest",
+   "name": "chest",
+   "label": "chest",
+   "unit": "cm",
+   "scale": 0.0000012416278386070055,
+   "default": 96.67,
+   "low": 83.76,
+   "high": 130.56,
+   "topDelta": 0
+  },
+  {
+   "key": "neck",
+   "name": "neck",
+   "label": "neck girth",
+   "unit": "cm",
+   "scale": 2.5961191347276703e-7,
+   "default": 37,
+   "low": 32,
+   "high": 40,
+   "topDelta": 0
+  },
+  {
+   "key": "shoulders",
+   "name": "shoulders",
+   "label": "shoulders",
+   "unit": "in",
+   "scale": 7.026452875512952e-7,
+   "default": 13.07,
+   "low": 11.3,
+   "high": 16,
+   "topDelta": 0
+  },
+  {
+   "key": "waist",
+   "name": "waist",
+   "label": "waist",
+   "unit": "cm",
+   "scale": 7.929450835418217e-7,
+   "default": 76.66,
+   "low": 64,
+   "high": 100,
+   "topDelta": 0
+  },
+  {
+   "key": "hips",
+   "name": "hips",
+   "label": "hips",
+   "unit": "cm",
+   "scale": 9.848321500216928e-7,
+   "default": 112,
+   "low": 96,
+   "high": 124,
+   "topDelta": 0
+  },
+  {
+   "key": "arm_length",
+   "name": "arm_length",
+   "label": "arm length",
+   "unit": "in",
+   "scale": 0.0000015068778455919317,
+   "default": 26,
+   "low": 21,
+   "high": 32,
+   "topDelta": 0.0013777160784229636
+  },
+  {
+   "key": "upper_arm",
+   "name": "armgirth",
+   "label": "upper arm",
+   "unit": "cm",
+   "scale": 4.289268528236311e-7,
+   "default": 15,
+   "low": 12,
+   "high": 20,
+   "topDelta": 0
+  },
+  {
+   "key": "wrist",
+   "name": "wrist_girth",
+   "label": "wrist",
+   "unit": "cm",
+   "scale": 2.4268070172454156e-7,
+   "default": 16,
+   "low": 12,
+   "high": 20,
+   "topDelta": 0
+  },
+  {
+   "key": "thigh",
+   "name": "thigh_girth",
+   "label": "thigh",
+   "unit": "cm",
+   "scale": 5.982361484372466e-7,
+   "default": 42,
+   "low": 30,
+   "high": 63,
+   "topDelta": 0
+  },
+  {
+   "key": "lower_leg",
+   "name": "lowerleg_length",
+   "label": "lower leg",
+   "unit": "cm",
+   "scale": 0.0000023170363277444502,
+   "default": 38,
+   "low": 29,
+   "high": 46,
+   "topDelta": 0.07590383291244507
+  },
+  {
+   "key": "calf",
+   "name": "calf_girth",
+   "label": "calf",
+   "unit": "cm",
+   "scale": 5.36155038693758e-7,
+   "default": 55,
+   "low": 49,
+   "high": 61,
+   "topDelta": 0
+  }
+ ],
+ "windingFlipped": false
+}

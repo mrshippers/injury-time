@@ -1,7 +1,12 @@
 import { daysBetweenISO, getDashboard, getSquadBoard } from "@/lib/data";
+import { getHomeSeason } from "@/lib/home/data";
+import { ordinal, seasonContext } from "@/lib/home/season-context";
+import { getViewer } from "@/lib/viewer";
 import { AvailabilityStrip } from "@/components/home/availability-strip";
-import { BackSoonPanel, NextMatchPanel, WatchListPanel } from "@/components/home/hub-panels";
 import { HubTiles, type Tile } from "@/components/home/hub-tiles";
+import { SeasonLine } from "@/components/home/season-line";
+import { FormVital, NextMatchVital, ScorersVital, WatchVital } from "@/components/home/vitals";
+import { StatReading } from "@/components/charts";
 import { longDate, shortDate } from "@/components/squad/format";
 
 export const dynamic = "force-dynamic";
@@ -9,122 +14,128 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "the hub - injury time." };
 
 /**
- * The hub. FM's squad overview for a club with no analyst: every module is a
- * tile that already carries its answer, and the three things a gaffer asks
- * on the way to training (who's next, who's a risk, who's back) sit above.
+ * The manager's homepage. Three layers and no more: the season (one number,
+ * one line), the vitals a gaffer checks on the way to training, and the
+ * modules as a quiet row underneath. Everything on it is a reading off real
+ * data or an honest sentence saying there is none yet.
  */
 export default async function Home() {
+  const viewer = await getViewer();
   const [dash, board] = await Promise.all([getDashboard(), getSquadBoard()]);
-  const { club, asOf, counts, fixtures, lastSession, topScorers, topAssists, fitByPosition } = dash;
+  const { club, asOf, counts, lastSession } = dash;
+  const season = await getHomeSeason(viewer.club.id, asOf);
+  const ctx = seasonContext({ results: season.results, standings: season.standings, progress: season.progress, fixtures: season.fixtures, asOf });
 
+  const fixtures = season.fixtures.length > 0 ? season.fixtures : dash.fixtures;
   const next = fixtures[0] ?? null;
   const daysUntil = next ? daysBetweenISO(asOf, next.match_date) : null;
   const unavailable = counts.injured + counts.suspended;
-
-  // A side needs a keeper, three at the back, three in the middle, one up top
-  // before it is a side at all. Anything short of that is the headline.
-  const short: string[] = [];
-  if (fitByPosition.GK < 1) short.push("a keeper");
-  if (fitByPosition.DF < 3) short.push("defenders");
-  if (fitByPosition.MF < 3) short.push("midfielders");
-  if (fitByPosition.FW < 1) short.push("a striker");
-  const canFieldXI = counts.fit >= 11 && short.length === 0;
-
+  const hasLoad = board.rows.some((r) => r.readiness.key !== "unknown");
   const sinceLast = lastSession ? daysBetweenISO(lastSession.date, asOf) : null;
-  const scorer = topScorers[0];
-  const creator = topAssists[0];
+  const clubName = viewer.club.name || club.name;
+  const division = [viewer.club.league, viewer.club.division].filter(Boolean).join(" ");
 
   const tiles: Tile[] = [
-    {
-      href: "/squad",
-      label: "squad room",
-      headline: `${counts.fit} of ${dash.squadSize} available`,
-      detail: `${counts.doubt} doubt · ${counts.injured} out · ${counts.suspended} suspended`,
-      tone: counts.fit >= 14 ? "ok" : counts.fit >= 11 ? "warn" : "bad",
-    },
-    {
-      href: "/lineup",
-      label: "lineup",
-      headline: canFieldXI ? "XI ready" : counts.fit < 11 ? `${counts.fit} fit, need 11` : `short of ${short.join(", ")}`,
-      detail: next
-        ? `${next.opponent} (${next.venue}) · ${shortDate(next.match_date)} · pick on the 3D pitch`
-        : "no fixture in the diary yet",
-      tone: canFieldXI ? "ok" : "warn",
-    },
+    { href: "/squad", label: "squad", headline: `${counts.fit} of ${dash.squadSize}`, detail: "available, pick the side", tone: counts.fit >= 14 ? "ok" : counts.fit >= 11 ? "warn" : "bad" },
+    { href: "/team", label: "team", headline: season.calls.total === 0 ? "no calls" : `${season.calls.in} in`, detail: next ? `for ${next.opponent}` : "next match", tone: season.calls.total === 0 ? "neutral" : "ok" },
     {
       href: "/log",
-      label: "log a session",
-      headline:
-        sinceLast === null ? "nothing logged" : sinceLast === 0 ? "logged today" : sinceLast === 1 ? "last: yesterday" : `last: ${sinceLast} days ago`,
-      detail: lastSession
-        ? `${lastSession.kind === "match" ? `match v ${lastSession.opponent?.split(" (")[0] ?? "?"}` : "training"} · ${lastSession.logged} players`
-        : "one tap per player, two on a bad night",
+      label: "log",
+      headline: sinceLast === null ? "nothing yet" : sinceLast === 0 ? "today" : sinceLast === 1 ? "yesterday" : `${sinceLast} days ago`,
+      detail: lastSession ? `${lastSession.kind === "match" ? "match" : "training"} · ${lastSession.logged} players` : "one tap per player",
       tone: sinceLast !== null && sinceLast > 4 ? "warn" : "neutral",
     },
-    {
-      href: "/squad",
-      label: "treatment room",
-      headline: unavailable === 0 ? "nobody out" : `${unavailable} out`,
-      detail:
-        dash.backSoon.length > 0
-          ? `${dash.backSoon[0].player.name} back ${shortDate(dash.backSoon[0].availability!.return_date!)}`
-          : counts.doubt > 0
-            ? `${counts.doubt} carrying a doubt into the week`
-            : "no return dates this week",
-      tone: unavailable >= 3 ? "bad" : unavailable > 0 ? "warn" : "ok",
-    },
-    {
-      href: "/lineup",
-      label: "fixtures",
-      headline: next ? `${next.opponent} (${next.venue})` : "diary empty",
-      detail: next
-        ? `${longDate(next.match_date)}${next.kickoff ? ` · ${next.kickoff}` : ""} · ${fixtures.length} in the diary`
-        : "add the next match to plan around it",
-    },
-    {
-      href: "/squad",
-      label: "season stats",
-      headline: scorer ? `${scorer.player.name.split(" ").at(-1)} ${scorer.stats.goals}` : "no goals yet",
-      detail: scorer
-        ? `top scorer · ${creator ? `${creator.player.name.split(" ").at(-1)} ${creator.stats.assists} assists` : "no assists logged"}`
-        : "goals and assists come off the match log",
-    },
+    { href: "/squad", label: "treatment", headline: unavailable === 0 ? "nobody out" : `${unavailable} out`, detail: dash.backSoon[0] ? `${dash.backSoon[0].player.name.split(" ").at(-1)} back ${shortDate(dash.backSoon[0].availability!.return_date!)}` : counts.doubt > 0 ? `${counts.doubt} carrying a doubt` : "no return dates this week", tone: unavailable >= 3 ? "bad" : unavailable > 0 ? "warn" : "ok" },
+    { href: "/film", label: "film", headline: "the film room", detail: "clip in, tuesday out" },
+    { href: "/team", label: "fixtures", headline: `${fixtures.length} in the diary`, detail: fixtures[1] ? `then ${fixtures[1].opponent} (${fixtures[1].venue}) ${shortDate(fixtures[1].match_date)}` : "add the next match", tone: "neutral" },
   ];
 
   return (
     <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 py-7 sm:px-8 sm:py-9">
-      <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="annot">{"// the hub"}</p>
-          <h1 className="display mt-2 text-4xl sm:text-5xl">
-            {club.name}
-            <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
-          </h1>
-          <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-dim">
-            <span>{club.league}</span>
-            <span aria-hidden className="text-line-strong">/</span>
-            <span className="num">
-              as of <time dateTime={asOf}>{longDate(asOf)}</time>
-            </span>
-          </p>
-        </div>
-        <div className="w-full lg:w-[440px]">
-          <AvailabilityStrip rows={board.rows} counts={counts} />
-        </div>
+      <header className="flex flex-col gap-2">
+        <p className="annot">{"// the hub"}</p>
+        <h1 className="display text-4xl sm:text-5xl">
+          {clubName}
+          <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+        </h1>
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-dim">
+          <span>{division || club.league}</span>
+          <span aria-hidden className="text-line-strong">/</span>
+          <span className="num">
+            as of <time dateTime={asOf}>{longDate(asOf)}</time>
+          </span>
+          {viewer.guest ? (
+            <>
+              <span aria-hidden className="text-line-strong">/</span>
+              <span>looking as a guest manager</span>
+            </>
+          ) : null}
+        </p>
       </header>
 
-      <div className="mt-7 grid grid-cols-1 gap-3 md:grid-cols-3">
-        <NextMatchPanel fixtures={fixtures} daysUntil={daysUntil} fitCount={counts.fit} />
-        <WatchListPanel rows={dash.watchList} />
-        <BackSoonPanel rows={dash.backSoon} outCount={unavailable} />
+      {/* primary: the season, one number and one line */}
+      <section aria-labelledby="season-heading" className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-end">
+        <div>
+          <p className="annot" id="season-heading">{"// the season"}</p>
+          {ctx.hasSeason ? (
+            <StatReading
+              value={String(ctx.points)}
+              unit="pts"
+              label={ctx.position ? `${ordinal(ctx.position)} of ${ctx.teams} · ${ctx.played} played` : `${ctx.played} played · no table on the feed yet`}
+              size="xl"
+              glow
+              className="mt-2"
+            />
+          ) : (
+            <StatReading value={String(counts.fit)} unit={`of ${dash.squadSize}`} label="available for the next match" size="xl" glow className="mt-2" tone={counts.fit >= 11 ? "ink" : "bad"} />
+          )}
+          <ul className="mt-4 flex max-w-[40ch] flex-col gap-1.5">
+            {ctx.sentences.map((s) => (
+              <li key={s} className="text-[14px] leading-snug text-ink">
+                {s}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="min-w-0">
+          {ctx.hasSeason ? (
+            <SeasonLine ctx={ctx} results={season.results} fixtures={season.fixtures} asOf={asOf} />
+          ) : (
+            <AvailabilityStrip rows={board.rows} counts={counts} />
+          )}
+          <p className="annot mt-2 text-gold-dim">
+            {ctx.hasSeason
+              ? `points after each league game · pace lines from the origin · christmas where the diary puts it${season.standingsAsOf ? ` · table ${shortDate(season.standingsAsOf)}` : ""}`
+              : "one block per player, in squad-number order"}
+          </p>
+        </div>
+      </section>
+
+      {/* secondary: the vitals */}
+      <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2 xl:grid-cols-[1.1fr_1fr_1fr_1.2fr]">
+        <NextMatchVital next={next} daysUntil={daysUntil} fit={counts.fit} calls={season.calls} squadSize={dash.squadSize} />
+        <FormVital ctx={ctx} results={season.results} />
+        <ScorersVital feed={season.feedScorers} logged={dash.topScorers} feedAsOf={season.feedAsOf} />
+        <WatchVital rows={dash.watchList} hasLoad={hasLoad} backSoon={dash.backSoon} />
       </div>
 
-      <div className="mt-7">
+      {ctx.hasSeason ? (
+        <div className="mt-10">
+          <p className="annot mb-3">{"// the squad today"}</p>
+          <AvailabilityStrip rows={board.rows} counts={counts} />
+        </div>
+      ) : null}
+
+      {/* the modules, one quiet row */}
+      <div className="mt-12">
         <HubTiles tiles={tiles} />
       </div>
 
+      {/* tertiary */}
       <p className="annot mt-6 text-gold-dim">
-        steady · pushing it · undercooked · red zone: this week against his usual&ensp;·&ensp;red zone is the week a hamstring goes
+        {ctx.hasSeason ? "league feed: footballwebpages.co.uk" : "readiness words: steady · pushing it · undercooked · red zone, this week against his usual"}
+        {season.standingsAsOf ? ` · updated ${shortDate(season.standingsAsOf)}` : ""}
+        &ensp;·&ensp;red zone is the week a hamstring goes
       </p>
     </main>
   );

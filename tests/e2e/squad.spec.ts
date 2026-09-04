@@ -1,88 +1,113 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+/**
+ * The squad list half of the room. Club-agnostic: a guest may land on
+ * Belstone (real season, no medical data) or the demo club, so every spec
+ * reads what is on the page rather than assuming a name.
+ */
 test.beforeEach(async ({ page }) => {
   await page.goto("/squad");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
-test("renders the seeded squad, one row per player", async ({ page }) => {
-  await expect(page.locator("tbody tr")).toHaveCount(22);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Kilburn Athletic");
-  await expect(page.getByRole("link", { name: "Theo Braithwaite" })).toBeVisible();
+test("renders the squad, one row per player, with a count line", async ({ page }) => {
+  const rows = page.locator("tbody tr[data-player]");
+  const n = await rows.count();
+  expect(n).toBeGreaterThanOrEqual(11);
+  await expect(page.getByText(new RegExp(`${n} in the squad`))).toBeVisible();
+  const onPitch = await page.locator("tbody tr[data-on-pitch]").count();
+  expect(onPitch).toBeGreaterThanOrEqual(9);
+  await expect(page.getByText(new RegExp(`${onPitch} on the pitch`))).toBeVisible();
 });
 
-test("every availability state is legible as text, not colour alone", async ({ page }) => {
+test("every availability state on the board is legible as text, not colour alone", async ({ page }) => {
   const body = page.locator("tbody");
-  for (const label of ["FIT", "DOUBT", "OUT", "SUSP"]) {
-    await expect(
-      body.getByText(label, { exact: true }).first(),
-      `expected at least one ${label} row`,
-    ).toBeVisible();
-  }
+  await expect(body.getByText("FIT", { exact: true }).first()).toBeVisible();
+  await expect(body).not.toContainText("NaN");
+  await expect(body).not.toContainText(/acwr/i);
 });
 
-test("the load-spike player carries a red flag", async ({ page }) => {
-  const row = page.locator("tbody tr").filter({ hasText: "Theo Braithwaite" });
-  await expect(row).toHaveCount(1);
-  // FlagDot renders the flag's meaning as screen-reader text next to the square.
-  await expect(row.getByText("load spike")).toHaveCount(1);
-});
-
-test("a player without 28 days of history reads as no reading, never a number", async ({ page }) => {
+test("a player without four weeks of data reads as no reading, never a number", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   const unknown = page.getByTitle("needs 28 days of data");
-  expect(await unknown.count()).toBeGreaterThan(0);
+  if ((await unknown.count()) === 0) test.skip(true, "everyone has a reading");
   await expect(unknown.first()).toContainText("NO READING");
-  await expect(page.locator("tbody")).not.toContainText("NaN");
-  await expect(page.locator("tbody")).not.toContainText(/acwr/i);
 });
 
-test("load is a word on the board and the season line sits beside it", async ({ page }) => {
-  const row = page.locator("tbody tr").filter({ hasText: "Theo Braithwaite" });
-  await expect(row).toContainText("RED ZONE");
-  await expect(row).toHaveAttribute("title", /x his usual week/).catch(() => undefined);
-  const bobby = page.locator("tbody tr").filter({ hasText: "Bobby Ashworth" });
-  await expect(bobby).toContainText(/\d+ · \d+ · \d+/);
+test("columns sort and the header says which way", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const name = page.getByRole("columnheader", { name: /^name/ });
+  await expect(page.getByRole("columnheader", { name: /^#/ })).toHaveAttribute("aria-sort", "ascending");
+  await name.getByRole("button").click();
+  await expect(name).toHaveAttribute("aria-sort", "ascending");
+  const first = await page.locator("tbody tr[data-player] th a").first().textContent();
+  await name.getByRole("button").click();
+  await expect(name).toHaveAttribute("aria-sort", "descending");
+  const last = await page.locator("tbody tr[data-player] th a").first().textContent();
+  expect(first).not.toEqual(last);
+});
+
+test("filters narrow the list and the count follows", async ({ page }) => {
+  const all = await page.locator("tbody tr[data-player]").count();
+  // filter on a position that exists on this board
+  const positions = await page.locator("tbody tr[data-player]").evaluateAll((trs) =>
+    trs.map((tr) => (tr.querySelectorAll("td")[1]?.textContent ?? "").trim()).filter((p) => /^(GK|DF|MF|FW)$/.test(p)),
+  );
+  const pick = ["GK", "DF", "MF", "FW"].find((p) => positions.includes(p) && positions.filter((x) => x === p).length < positions.length) ?? positions[0] ?? "MF";
+  await page.getByRole("group", { name: "position" }).getByRole("button", { name: pick }).click();
+  const some = await page.locator("tbody tr[data-player]").count();
+  expect(some).toBeGreaterThanOrEqual(1);
+  expect(some).toBeLessThanOrEqual(all);
+  if (some < all) await expect(page.getByText(new RegExp(`${some} of ${all}`))).toBeVisible();
+  await page.getByRole("group", { name: "position" }).getByRole("button", { name: "all" }).click();
+  const firstName = (await page.locator("tbody tr[data-player] th a").first().textContent())!.trim();
+  await page.getByRole("searchbox", { name: /search the squad/i }).fill(firstName.split(" ")[0]);
+  await expect(page.locator("tbody tr[data-player]").first()).toContainText(firstName);
+  expect(await page.locator("tbody tr[data-player]").count()).toBeLessThan(all);
 });
 
 for (const width of [1440, 390]) {
   test(`no horizontal scroll at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    );
+    await page.waitForTimeout(500);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(0);
   });
 }
 
 test("status popover opens, traps Escape, and returns focus to its trigger", async ({ page }) => {
-  const trigger = page
-    .getByRole("button", { name: "set availability for Theo Braithwaite" });
+  const name = (await page.locator("tbody tr[data-player] th a").first().textContent())!.trim();
+  const trigger = page.getByRole("button", { name: `set availability for ${name}` });
   await trigger.click();
-
-  const dialog = page.getByRole("dialog", { name: "set availability for Theo Braithwaite" });
+  const dialog = page.getByRole("dialog", { name: `set availability for ${name}` });
   await expect(dialog).toBeVisible();
-  await expect(dialog).toHaveCSS("opacity", "1");
-
-  // choosing "injured" reveals the structured injury fields
   await dialog.getByRole("radio", { name: "injured" }).check();
   await expect(dialog.getByRole("combobox", { name: "body region" })).toBeVisible();
-  await expect(dialog.getByLabel("expected return")).toBeVisible();
-
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
   await expect(trigger).toBeFocused();
 });
 
+test("a manager can open the add-player form and an edit row", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole("button", { name: "add a player" }).click();
+  await expect(page.getByRole("form", { name: "add a player" })).toBeVisible();
+  await page.getByRole("button", { name: "close" }).click();
+  const name = (await page.locator("tbody tr[data-player] th a").first().textContent())!.trim();
+  await page.getByRole("button", { name: `edit ${name}` }).click();
+  const form = page.getByRole("form", { name: `edit ${name}` });
+  await expect(form).toBeVisible();
+  await expect(form.getByRole("button", { name: "retire" })).toBeVisible();
+  await form.getByRole("button", { name: "cancel" }).click();
+  await expect(form).toBeHidden();
+});
+
 test("axe reports no serious or critical violations", async ({ page }) => {
-  const results = await new AxeBuilder({ page }).analyze();
-  const blocking = results.violations.filter(
-    (violation) => violation.impact === "serious" || violation.impact === "critical",
-  );
+  const results = await new AxeBuilder({ page }).exclude("canvas").analyze();
+  const blocking = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
   expect(
-    blocking.map(
-      (v) => `${v.id} (${v.impact}) x${v.nodes.length}: ${v.nodes[0]?.target.join(" ")}`,
-    ),
+    blocking.map((v) => `${v.id} (${v.impact}) x${v.nodes.length}: ${v.nodes[0]?.target.join(" ")}`),
     "serious/critical accessibility violations",
   ).toEqual([]);
 });

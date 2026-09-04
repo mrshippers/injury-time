@@ -1,0 +1,1044 @@
+{
+ "club": {
+  "name": "Belstone",
+  "slug": "belstone",
+  "founded": 1983,
+  "ground": "The Medburn Ground, Watling Street, Radlett, WD6 3AB",
+  "league": "Combined Counties League",
+  "division": "Division One",
+  "step": 6,
+  "season": "2026-27",
+  "source": "footballwebpages.co.uk + belstonefc.com, scraped 4 Sep 2026",
+  "officials": [
+   {
+    "name": "Aaron Lincoln",
+    "role": "manager"
+   },
+   {
+    "name": "David Shevel",
+    "role": "medical",
+    "title": "Coach/Physio"
+   },
+   {
+    "name": "Lee Maddison",
+    "role": "coach"
+   },
+   {
+    "name": "Terry Ellis",
+    "role": "coach",
+    "title": "GK Coach"
+   }
+  ],
+  "score_note": "goals_for is always Belstone; Football Web Pages prints the club first whatever the venue"
+ },
+ "fixtures": [
+  {
+   "date": "2026-07-25",
+   "venue": "H",
+   "opponent": "Spartans Youth",
+   "competition": "Combined Counties Div 1",
+   "goals_for": 4,
+   "goals_against": 0,
+   "ht_for": 1,
+   "ht_against": 0,
+   "attendance": 56,
+   "scorers": [
+    "Joaquim",
+    "Ocran",
+    "Camara",
+    "Gavin"
+   ]
+  },
+  {
+   "date": "2026-07-28",
+   "venue": "H",
+   "opponent": "Edgware & Kingsbury",
+   "competition": "Combined Counties Div 1",
+   "goals_for": 6,
+   "goals_against": 0,
+   "ht_for": 1,
+   "ht_against": 0,
+   "attendance": 61,
+   "scorers": [
+    "Ocran",
+    "Mcnally (2, 1 pen)",
+    "Gavin (2)",
+    "Joaquim"
+   ]
+  },
+  {
+   "date": "2026-08-01",
+   "venue": "A",
+   "opponent": "Molesey",
+   "competition": "Combined Counties Div 1",
+   "goals_for": 0,
+   "goals_against": 1,
+   "ht_for": 0,
+   "ht_against": 1,
+   "attendance": 82,
+   "scorers": []
+  },
+  {
+   "date": "2026-08-04",
+   "venue": "A",
+   "opponent": "Holmer Green",
+   "competition": "Combined Counties Div 1",
+   "goals_for": 3,
+   "goals_against": 1,
+   "ht_for": 0,
+   "ht_against": 0,
+   "attendance": 85,
+   "scorers": [
+    "Gavin",
+    "Mcnally",
+    "Kimber"
+   ]
+  },
+  {
+   "date": "2026-08-08",
+   "venue": "H",
+   "opponent": "FC Deportivo Galicia",
+   "competition": "Combined Counties Div 1",
+   "goals_for": 2,
+   "goals_against": 0,
+   "ht_for": 1,
+   "ht_against": 0,
+   "attendance": 53,
+   "scorers": [
+    "Kimber",
+    "Gilmas"
+   ]
+  },
+  {
+   "date": "2026-08-14",
+   "venue": "A",
+   "opponent": "Enfield",
+   "competition": "FA Vase 1Q",
+   "goals_for": 2,
+   "goals_against": 0,
+   "attendance": null,
+   "scorers": []
+  },
+  {
+   "date": "2026-08-18",
+   "venue": "A",
+   "opponent": "London Samurai Rovers",
+   "competition": "Combined Counties Div 1",
+   "goals_for": 2,
+   "goals_against": 5,
+   "ht_for": 0,
+   "ht_against": 1,
+   "attendance": 31,
+   "scorers": [
+    "Tomkins",
+    "Camara"
+   ]
+  },
+  {
+   "date": "2026-08-22",
+   "venue": "A",
+   "opponent": "Brook House",
+   "competition": "Combined Counties Div 1",
+   "goals_for": 0,
+   "goals_against": 1,
+   "ht_for": 0,
+   "ht_against": 1,
+   "attendance": 81,
+   "scorers": []
+  },
+  {
+   "date": "2026-08-29",
+   "venue": "H",
+   "opponent": "Spelthorne Sports",
+   "competition": "Combined Counties Div 1",
+   "goals_for": 3,
+   "goals_against": 1,
+   "ht_for": 2,
+   "ht_against": 0,
+   "attendance": 67,
+   "scorers": [
+    "Tomkins (2, 1 pen)",
+    "Mcnally"
+   ]
+  },
+  {
+   "date": "2026-09-02",
+   "venue": "A",
+   "opponent": "Eagles Land Benfica",
+   "competition": "Combined Counties Div 1",
+   "goals_for": 1,
+   "goals_against": 0,
+   "ht_for": 1,
+   "ht_against": 0,
+   "attendance": 30,
+   "scorers": [
+    "Ndukuba"
+   ]
+  },
+  {
+   "date": "2026-09-05",
+   "venue": "H",
+   "opponent": "Westside",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-09-08",
+   "venue": "A",
+   "opponent": "Wembley",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "7.45pm"
+  },
+  {
+   "date": "2026-09-12",
+   "venue": "H",
+   "opponent": "Wivenhoe Town",
+   "competition": "FA Vase 2Q",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-09-15",
+   "venue": "H",
+   "opponent": "Oxhey Jets",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "7.45pm"
+  },
+  {
+   "date": "2026-09-19",
+   "venue": "A",
+   "opponent": "Bovingdon",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-09-22",
+   "venue": "H",
+   "opponent": "Maidenhead Town",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "7.45pm"
+  },
+  {
+   "date": "2026-09-26",
+   "venue": "H",
+   "opponent": "St Margaretsbury",
+   "competition": "Herts Cup 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-10-03",
+   "venue": "A",
+   "opponent": "Woodley United",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-10-06",
+   "venue": "H",
+   "opponent": "Bovingdon",
+   "competition": "CCL Div One Challenge Cup 1",
+   "kickoff": "7.45pm"
+  },
+  {
+   "date": "2026-10-10",
+   "venue": "A",
+   "opponent": "Langley",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-10-17",
+   "venue": "A",
+   "opponent": "Staines & Lammas (Middlesex)",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-10-24",
+   "venue": "H",
+   "opponent": "Berks County",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-10-31",
+   "venue": "H",
+   "opponent": "PFC Victoria London",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-11-07",
+   "venue": "H",
+   "opponent": "Molesey",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-11-14",
+   "venue": "A",
+   "opponent": "Colliers Wood United",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-11-21",
+   "venue": "H",
+   "opponent": "Woodley United",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-11-24",
+   "venue": "H",
+   "opponent": "Shepherd's Bush",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "7.45pm"
+  },
+  {
+   "date": "2026-11-28",
+   "venue": "A",
+   "opponent": "FC Deportivo Galicia",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-12-05",
+   "venue": "A",
+   "opponent": "Oxhey Jets",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-12-12",
+   "venue": "H",
+   "opponent": "Brook House",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-12-19",
+   "venue": "A",
+   "opponent": "Edgware & Kingsbury",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2026-12-28",
+   "venue": "H",
+   "opponent": "Eagles Land Benfica",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "11.30am"
+  },
+  {
+   "date": "2027-01-05",
+   "venue": "A",
+   "opponent": "Shepherd's Bush",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "7.45pm"
+  },
+  {
+   "date": "2027-01-16",
+   "venue": "H",
+   "opponent": "Wembley",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2027-01-22",
+   "venue": "A",
+   "opponent": "PFC Victoria London",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "7.45pm"
+  },
+  {
+   "date": "2027-01-30",
+   "venue": "H",
+   "opponent": "Staines & Lammas (Middlesex)",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2027-02-06",
+   "venue": "H",
+   "opponent": "London Samurai Rovers",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2027-02-13",
+   "venue": "A",
+   "opponent": "Spelthorne Sports",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2027-02-20",
+   "venue": "H",
+   "opponent": "Bovingdon",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2027-03-06",
+   "venue": "H",
+   "opponent": "Holmer Green",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2027-03-10",
+   "venue": "A",
+   "opponent": "Maidenhead Town",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "7.45pm"
+  },
+  {
+   "date": "2027-03-20",
+   "venue": "A",
+   "opponent": "Westside",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2027-03-23",
+   "venue": "H",
+   "opponent": "Langley",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "7.45pm"
+  },
+  {
+   "date": "2027-03-29",
+   "venue": "A",
+   "opponent": "Berks County",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "1pm"
+  },
+  {
+   "date": "2027-04-03",
+   "venue": "A",
+   "opponent": "Spartans Youth",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  },
+  {
+   "date": "2027-04-10",
+   "venue": "H",
+   "opponent": "Colliers Wood United",
+   "competition": "Combined Counties Div 1",
+   "kickoff": "3pm"
+  }
+ ],
+ "table": [
+  {
+   "position": 1,
+   "team": "Wembley",
+   "home": {
+    "p": 4,
+    "w": 3,
+    "d": 1,
+    "l": 0
+   },
+   "away": {
+    "p": 5,
+    "w": 3,
+    "d": 1,
+    "l": 1
+   },
+   "played": 9,
+   "won": 6,
+   "drawn": 2,
+   "lost": 1,
+   "gf": 25,
+   "ga": 10,
+   "gd": 15,
+   "points": 20
+  },
+  {
+   "position": 2,
+   "team": "Bovingdon",
+   "home": {
+    "p": 5,
+    "w": 2,
+    "d": 2,
+    "l": 1
+   },
+   "away": {
+    "p": 5,
+    "w": 4,
+    "d": 0,
+    "l": 1
+   },
+   "played": 10,
+   "won": 6,
+   "drawn": 2,
+   "lost": 2,
+   "gf": 21,
+   "ga": 11,
+   "gd": 10,
+   "points": 20
+  },
+  {
+   "position": 3,
+   "team": "Westside",
+   "home": {
+    "p": 4,
+    "w": 3,
+    "d": 1,
+    "l": 0
+   },
+   "away": {
+    "p": 5,
+    "w": 3,
+    "d": 0,
+    "l": 2
+   },
+   "played": 9,
+   "won": 6,
+   "drawn": 1,
+   "lost": 2,
+   "gf": 28,
+   "ga": 11,
+   "gd": 17,
+   "points": 19
+  },
+  {
+   "position": 4,
+   "team": "Langley",
+   "home": {
+    "p": 5,
+    "w": 4,
+    "d": 0,
+    "l": 1
+   },
+   "away": {
+    "p": 4,
+    "w": 2,
+    "d": 1,
+    "l": 1
+   },
+   "played": 9,
+   "won": 6,
+   "drawn": 1,
+   "lost": 2,
+   "gf": 24,
+   "ga": 13,
+   "gd": 11,
+   "points": 19
+  },
+  {
+   "position": 5,
+   "team": "London Samurai Rovers",
+   "home": {
+    "p": 4,
+    "w": 3,
+    "d": 0,
+    "l": 1
+   },
+   "away": {
+    "p": 5,
+    "w": 3,
+    "d": 1,
+    "l": 1
+   },
+   "played": 9,
+   "won": 6,
+   "drawn": 1,
+   "lost": 2,
+   "gf": 23,
+   "ga": 15,
+   "gd": 8,
+   "points": 19
+  },
+  {
+   "position": 6,
+   "team": "Belstone",
+   "home": {
+    "p": 4,
+    "w": 4,
+    "d": 0,
+    "l": 0
+   },
+   "away": {
+    "p": 5,
+    "w": 2,
+    "d": 0,
+    "l": 3
+   },
+   "played": 9,
+   "won": 6,
+   "drawn": 0,
+   "lost": 3,
+   "gf": 21,
+   "ga": 9,
+   "gd": 12,
+   "points": 18
+  },
+  {
+   "position": 7,
+   "team": "Brook House",
+   "home": {
+    "p": 5,
+    "w": 4,
+    "d": 1,
+    "l": 0
+   },
+   "away": {
+    "p": 4,
+    "w": 1,
+    "d": 2,
+    "l": 1
+   },
+   "played": 9,
+   "won": 5,
+   "drawn": 3,
+   "lost": 1,
+   "gf": 18,
+   "ga": 12,
+   "gd": 6,
+   "points": 18
+  },
+  {
+   "position": 8,
+   "team": "PFC Victoria London",
+   "home": {
+    "p": 5,
+    "w": 3,
+    "d": 1,
+    "l": 1
+   },
+   "away": {
+    "p": 4,
+    "w": 2,
+    "d": 1,
+    "l": 1
+   },
+   "played": 9,
+   "won": 5,
+   "drawn": 2,
+   "lost": 2,
+   "gf": 24,
+   "ga": 12,
+   "gd": 12,
+   "points": 17
+  },
+  {
+   "position": 9,
+   "team": "Holmer Green",
+   "home": {
+    "p": 6,
+    "w": 4,
+    "d": 1,
+    "l": 1
+   },
+   "away": {
+    "p": 3,
+    "w": 1,
+    "d": 1,
+    "l": 1
+   },
+   "played": 9,
+   "won": 5,
+   "drawn": 2,
+   "lost": 2,
+   "gf": 15,
+   "ga": 10,
+   "gd": 5,
+   "points": 17
+  },
+  {
+   "position": 10,
+   "team": "Colliers Wood United",
+   "home": {
+    "p": 6,
+    "w": 5,
+    "d": 0,
+    "l": 1
+   },
+   "away": {
+    "p": 2,
+    "w": 0,
+    "d": 1,
+    "l": 1
+   },
+   "played": 8,
+   "won": 5,
+   "drawn": 1,
+   "lost": 2,
+   "gf": 22,
+   "ga": 11,
+   "gd": 11,
+   "points": 16
+  },
+  {
+   "position": 11,
+   "team": "Maidenhead Town",
+   "home": {
+    "p": 5,
+    "w": 2,
+    "d": 2,
+    "l": 1
+   },
+   "away": {
+    "p": 4,
+    "w": 2,
+    "d": 0,
+    "l": 2
+   },
+   "played": 9,
+   "won": 4,
+   "drawn": 2,
+   "lost": 3,
+   "gf": 19,
+   "ga": 22,
+   "gd": -3,
+   "points": 14
+  },
+  {
+   "position": 12,
+   "team": "Molesey",
+   "home": {
+    "p": 7,
+    "w": 4,
+    "d": 1,
+    "l": 2
+   },
+   "away": {
+    "p": 3,
+    "w": 0,
+    "d": 0,
+    "l": 3
+   },
+   "played": 10,
+   "won": 4,
+   "drawn": 1,
+   "lost": 5,
+   "gf": 20,
+   "ga": 23,
+   "gd": -3,
+   "points": 13
+  },
+  {
+   "position": 13,
+   "team": "Berks County",
+   "home": {
+    "p": 3,
+    "w": 2,
+    "d": 0,
+    "l": 1
+   },
+   "away": {
+    "p": 6,
+    "w": 1,
+    "d": 3,
+    "l": 2
+   },
+   "played": 9,
+   "won": 3,
+   "drawn": 3,
+   "lost": 3,
+   "gf": 16,
+   "ga": 14,
+   "gd": 2,
+   "points": 12
+  },
+  {
+   "position": 14,
+   "team": "Spelthorne Sports",
+   "home": {
+    "p": 5,
+    "w": 2,
+    "d": 3,
+    "l": 0
+   },
+   "away": {
+    "p": 4,
+    "w": 0,
+    "d": 0,
+    "l": 4
+   },
+   "played": 9,
+   "won": 2,
+   "drawn": 3,
+   "lost": 4,
+   "gf": 9,
+   "ga": 13,
+   "gd": -4,
+   "points": 9
+  },
+  {
+   "position": 15,
+   "team": "Staines & Lammas (Middlesex)",
+   "home": {
+    "p": 5,
+    "w": 0,
+    "d": 3,
+    "l": 2
+   },
+   "away": {
+    "p": 4,
+    "w": 1,
+    "d": 2,
+    "l": 1
+   },
+   "played": 9,
+   "won": 1,
+   "drawn": 5,
+   "lost": 3,
+   "gf": 14,
+   "ga": 16,
+   "gd": -2,
+   "points": 8
+  },
+  {
+   "position": 16,
+   "team": "Eagles Land Benfica",
+   "home": {
+    "p": 2,
+    "w": 0,
+    "d": 1,
+    "l": 1
+   },
+   "away": {
+    "p": 5,
+    "w": 2,
+    "d": 0,
+    "l": 3
+   },
+   "played": 7,
+   "won": 2,
+   "drawn": 1,
+   "lost": 4,
+   "gf": 9,
+   "ga": 18,
+   "gd": -9,
+   "points": 7
+  },
+  {
+   "position": 17,
+   "team": "FC Deportivo Galicia",
+   "home": {
+    "p": 4,
+    "w": 1,
+    "d": 0,
+    "l": 3
+   },
+   "away": {
+    "p": 6,
+    "w": 0,
+    "d": 3,
+    "l": 3
+   },
+   "played": 10,
+   "won": 1,
+   "drawn": 3,
+   "lost": 6,
+   "gf": 11,
+   "ga": 21,
+   "gd": -10,
+   "points": 6
+  },
+  {
+   "position": 18,
+   "team": "Shepherd's Bush",
+   "home": {
+    "p": 5,
+    "w": 2,
+    "d": 0,
+    "l": 3
+   },
+   "away": {
+    "p": 4,
+    "w": 0,
+    "d": 0,
+    "l": 4
+   },
+   "played": 9,
+   "won": 2,
+   "drawn": 0,
+   "lost": 7,
+   "gf": 18,
+   "ga": 34,
+   "gd": -16,
+   "points": 6
+  },
+  {
+   "position": 19,
+   "team": "Edgware & Kingsbury",
+   "home": {
+    "p": 3,
+    "w": 1,
+    "d": 0,
+    "l": 2
+   },
+   "away": {
+    "p": 6,
+    "w": 1,
+    "d": 0,
+    "l": 5
+   },
+   "played": 9,
+   "won": 2,
+   "drawn": 0,
+   "lost": 7,
+   "gf": 10,
+   "ga": 32,
+   "gd": -22,
+   "points": 6
+  },
+  {
+   "position": 20,
+   "team": "Oxhey Jets",
+   "home": {
+    "p": 6,
+    "w": 1,
+    "d": 1,
+    "l": 4
+   },
+   "away": {
+    "p": 3,
+    "w": 0,
+    "d": 1,
+    "l": 2
+   },
+   "played": 9,
+   "won": 1,
+   "drawn": 2,
+   "lost": 6,
+   "gf": 8,
+   "ga": 19,
+   "gd": -11,
+   "points": 5
+  },
+  {
+   "position": 21,
+   "team": "Woodley United",
+   "home": {
+    "p": 2,
+    "w": 0,
+    "d": 1,
+    "l": 1
+   },
+   "away": {
+    "p": 7,
+    "w": 1,
+    "d": 1,
+    "l": 5
+   },
+   "played": 9,
+   "won": 1,
+   "drawn": 2,
+   "lost": 6,
+   "gf": 8,
+   "ga": 24,
+   "gd": -16,
+   "points": 5
+  },
+  {
+   "position": 22,
+   "team": "Spartans Youth",
+   "home": {
+    "p": 4,
+    "w": 1,
+    "d": 0,
+    "l": 3
+   },
+   "away": {
+    "p": 5,
+    "w": 0,
+    "d": 1,
+    "l": 4
+   },
+   "played": 9,
+   "won": 1,
+   "drawn": 1,
+   "lost": 7,
+   "gf": 12,
+   "ga": 25,
+   "gd": -13,
+   "points": 4
+  }
+ ],
+ "table_as_of": "2026-09-02",
+ "appearances": [
+  {
+   "name": "Daniel Flynn",
+   "appearances": 9
+  },
+  {
+   "name": "Oliver Gilmas",
+   "appearances": 9
+  },
+  {
+   "name": "Jordan Mcnally",
+   "appearances": 9
+  },
+  {
+   "name": "Aram Sarkissian",
+   "appearances": 9
+  },
+  {
+   "name": "Aarush Yogarajan",
+   "appearances": 9
+  },
+  {
+   "name": "Joshua Gavin",
+   "appearances": 8
+  },
+  {
+   "name": "Mitchel Swain",
+   "appearances": 8
+  },
+  {
+   "name": "Ibrahim Camara",
+   "appearances": 7
+  },
+  {
+   "name": "Jan Desai",
+   "appearances": 7
+  },
+  {
+   "name": "James Kimber",
+   "appearances": 7
+  },
+  {
+   "name": "Kayden Mandangu-Makangu",
+   "appearances": 7
+  },
+  {
+   "name": "Jack Kimber",
+   "appearances": 6
+  },
+  {
+   "name": "Craige Tomkins",
+   "appearances": 6
+  },
+  {
+   "name": "Eyituayo Akinbulumo",
+   "appearances": 4
+  },
+  {
+   "name": "Amar Bowen",
+   "appearances": 4
+  },
+  {
+   "name": "Youssef Enajar",
+   "appearances": 4
+  },
+  {
+   "name": "Wilberforce Ocran",
+   "appearances": 4
+  },
+  {
+   "name": "Roddick Agyeman-Duah",
+   "appearances": 2
+  },
+  {
+   "name": "Bertrand Akowuam",
+   "appearances": 2
+  },
+  {
+   "name": "Hodje Joaquim",
+   "appearances": 2
+  }
+ ]
+}
