@@ -1,0 +1,118 @@
+{
+  "name": "availability-chaser",
+  "bucket": "Software",
+  "autonomous": true,
+  "model": {
+    "primary": "sonnet",
+    "fallback": "haiku",
+    "handoff": "haiku"
+  },
+  "harness": {
+    "role": "Chase players who have not answered the match call before the deadline, and record what they say.",
+    "context_sources": [
+      "supabase://ghkazaxuznltpxfzvxny/match_calls",
+      "supabase://ghkazaxuznltpxfzvxny/fixtures",
+      "supabase://ghkazaxuznltpxfzvxny/players"
+    ],
+    "constraints": [
+      "uk english, no em dashes, no emoji",
+      "NEVER fabricate availability, injuries or RPE for Belstone FC - public data only",
+      "one chase per player per fixture, never a second nudge"
+    ],
+    "done_when": "every player with no match_call for the next fixture has been chased once, or the deadline has passed",
+    "verify_command": "python scripts/verify_stack.py agent.config.json --config --strict"
+  },
+  "tools": {
+    "allow": [
+      "agentmail",
+      "supabase"
+    ]
+  },
+  "comms": {
+    "agentmail": {
+      "inbox": "injurytime@agentmail.to",
+      "send": true,
+      "receive": true,
+      "reply_all": false,
+      "reply_allow": [
+        "*@kilburnathletic.example"
+      ]
+    },
+    "inbound_auth": {
+      "checks": "spf_dkim_dmarc",
+      "on_fail": "tag_unauthenticated"
+    }
+  },
+  "memory": {
+    "store": "files",
+    "tier": [
+      "session",
+      "long_term"
+    ],
+    "lessons_ledger": "./LESSONS.md",
+    "learning_beats": [
+      "retrieve",
+      "record"
+    ]
+  },
+  "gate": {
+    "confidence_threshold": 0.75,
+    "max_gate_failures": 3
+  },
+  "loop": {
+    "time_cap_seconds": 900,
+    "heartbeat_seconds": 300,
+    "warm_handover_to": "agentmail://jamal@strydeos.com",
+    "circuit_breaker": {
+      "max_consecutive_tool_failures": 3,
+      "on_trip": "report_degraded"
+    }
+  },
+  "predeploy": {
+    "task_completion": true,
+    "verification_quality": true
+  },
+  "environment": "production",
+  "scope": [
+    "supabase://ghkazaxuznltpxfzvxny/match_calls",
+    "supabase://ghkazaxuznltpxfzvxny/fixtures",
+    "supabase://ghkazaxuznltpxfzvxny/players (kilburn-athletic only; belstone is public data, never chased)"
+  ],
+  "injection_screening": {
+    "enabled": true,
+    "channels": [
+      "agentmail:inbound",
+      "supabase:match_calls.note"
+    ],
+    "note": "a player reply is free text from outside; it sets availability, so it is an instruction path"
+  },
+  "permissions": {
+    "enforced_at": "api_key",
+    "capabilities": {
+      "message_read": true,
+      "draft_create": true,
+      "message_send": true,
+      "db_write": "match_calls.status only",
+      "mint_child_key": false
+    },
+    "note": "the chase itself is the only send; it cannot write a player record or a fixture"
+  },
+  "human_approval": {
+    "step": "none for the chase; any Belstone write is refused by the key, not by the prompt",
+    "channel": "agentmail://jamal@strydeos.com"
+  },
+  "tenancy": {
+    "multi_tenant": true,
+    "isolation": "club_slug",
+    "note": "two clubs share this agent. Belstone is real and public-data-only, Kilburn is fictional. the boundary is the club slug and it is enforced on the key, not in the constraints"
+  },
+  "audit": {
+    "store": "supabase://ghkazaxuznltpxfzvxny/agent_actions",
+    "retain_inbound": true,
+    "retention_days": 365,
+    "note": "keep the player's reply that set the availability, not just the status change"
+  },
+  "actions": {
+    "idempotency_key": "chase:{fixture_id}:{player_id}"
+  }
+}
