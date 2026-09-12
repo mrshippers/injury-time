@@ -8,7 +8,7 @@
     "handoff": "haiku"
   },
   "harness": {
-    "role": "Chase players who have not answered the match call before the deadline, and record what they say.",
+    "role": "Find players with no call for the next fixture and post one notice naming them.",
     "context_sources": [
       "supabase://ghkazaxuznltpxfzvxny/match_calls",
       "supabase://ghkazaxuznltpxfzvxny/fixtures",
@@ -16,32 +16,21 @@
     ],
     "constraints": [
       "uk english, no em dashes, no emoji",
-      "NEVER fabricate availability, injuries or RPE for Belstone FC - public data only",
-      "one chase per player per fixture, never a second nudge"
+      "NEVER chase Belstone - real club, public data only, availability we do not have",
+      "never write a call on a player's behalf; absence of a call is the finding",
+      "one notice per fixture, never a second"
     ],
-    "done_when": "every player with no match_call for the next fixture has been chased once, or the deadline has passed",
-    "verify_command": "python scripts/verify_stack.py agent.config.json --config --strict"
+    "done_when": "one notifications row of kind 'call' exists for the next fixture, or every player has called in",
+    "verify_command": "npx vitest run tests/unit/availability-chaser.test.ts"
   },
   "tools": {
     "allow": [
-      "agentmail",
       "supabase"
     ]
   },
   "comms": {
-    "agentmail": {
-      "inbox": "injurytime@agentmail.to",
-      "send": true,
-      "receive": true,
-      "reply_all": false,
-      "reply_allow": [
-        "*@kilburnathletic.example"
-      ]
-    },
-    "inbound_auth": {
-      "checks": "spf_dkim_dmarc",
-      "on_fail": "tag_unauthenticated"
-    }
+    "actuation": "notifications table, kind=call, read in the app by manager and coach",
+    "note": "no outbound email. players have no email column and inventing an address is worse than not sending."
   },
   "memory": {
     "store": "files",
@@ -61,8 +50,8 @@
   },
   "loop": {
     "time_cap_seconds": 900,
-    "heartbeat_seconds": 300,
-    "warm_handover_to": "agentmail://jamal@strydeos.com",
+    "heartbeat_seconds": 86400,
+    "warm_handover_to": "notifications://kilburn-athletic",
     "circuit_breaker": {
       "max_consecutive_tool_failures": 3,
       "on_trip": "report_degraded"
@@ -78,28 +67,15 @@
     "supabase://ghkazaxuznltpxfzvxny/fixtures",
     "supabase://ghkazaxuznltpxfzvxny/players (kilburn-athletic only; belstone is public data, never chased)"
   ],
-  "injection_screening": {
-    "enabled": true,
-    "channels": [
-      "agentmail:inbound",
-      "supabase:match_calls.note"
-    ],
-    "note": "a player reply is free text from outside; it sets availability, so it is an instruction path"
-  },
   "permissions": {
-    "enforced_at": "api_key",
+    "enforced_at": "infrastructure",
     "capabilities": {
-      "message_read": true,
-      "draft_create": true,
-      "message_send": true,
-      "db_write": "match_calls.status only",
+      "db_read": "clubs, fixtures, players, match_calls",
+      "db_write": "notifications insert only",
+      "message_send": false,
       "mint_child_key": false
     },
-    "note": "the chase itself is the only send; it cannot write a player record or a fixture"
-  },
-  "human_approval": {
-    "step": "none for the chase; any Belstone write is refused by the key, not by the prompt",
-    "channel": "agentmail://jamal@strydeos.com"
+    "note": "the route refuses without CRON_SECRET, and RLS refuses a write outside the club. neither depends on the model"
   },
   "tenancy": {
     "multi_tenant": true,
@@ -107,12 +83,19 @@
     "note": "two clubs share this agent. Belstone is real and public-data-only, Kilburn is fictional. the boundary is the club slug and it is enforced on the key, not in the constraints"
   },
   "audit": {
-    "store": "supabase://ghkazaxuznltpxfzvxny/agent_actions",
+    "store": "supabase://ghkazaxuznltpxfzvxny/notifications",
     "retain_inbound": true,
     "retention_days": 365,
-    "note": "keep the player's reply that set the availability, not just the status change"
+    "note": "the notice body IS the retained input - the names that were silent at run time, kept beside the action they caused"
   },
   "actions": {
     "idempotency_key": "chase:{fixture_id}:{player_id}"
+  },
+  "runtime": {
+    "kind": "vercel_cron",
+    "path": "/api/cron/availability-chaser",
+    "schedule": "0 9 * * *",
+    "source": "src/app/api/cron/availability-chaser/route.ts",
+    "tests": "tests/unit/availability-chaser.test.ts"
   }
 }

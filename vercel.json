@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/cron/availability-chaser", "schedule": "0 9 * * *" }
+  ]
+}
