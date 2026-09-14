@@ -1,0 +1,106 @@
+{
+  "name": "season-refresh",
+  "bucket": "Software",
+  "autonomous": true,
+  "model": {
+    "primary": "sonnet",
+    "fallback": "haiku",
+    "handoff": "haiku"
+  },
+  "harness": {
+    "role": "Pull Belstone's public league feed nightly and file what drifted, so the demo club never goes stale.",
+    "context_sources": [
+      "supabase://ghkazaxuznltpxfzvxny/clubs",
+      "supabase://ghkazaxuznltpxfzvxny/results",
+      "supabase://ghkazaxuznltpxfzvxny/fixtures",
+      "supabase://ghkazaxuznltpxfzvxny/league_standings",
+      "scripts/belstone-2026-27.json (floor snapshot when the FWP feed is unavailable)"
+    ],
+    "constraints": [
+      "belstone only - this agent never touches Kilburn or any other club",
+      "writes only what the league publishes: results, fixtures, standings, progress, and season-numbers on players",
+      "never invents injuries, availability or training data for these real people",
+      "one notice per run, only when something actually drifted"
+    ],
+    "done_when": "a notifications row of kind 'notice' exists for today naming what drifted, or the run reports nothing-to-do because the feed had nothing new",
+    "verify_command": "npx vitest run tests/unit/season-refresh.test.ts"
+  },
+  "tools": {
+    "allow": [
+      "supabase"
+    ]
+  },
+  "comms": {
+    "actuation": "notifications table, kind=notice, read in the app by manager and coach",
+    "note": "no outbound email - same boundary as availability-chaser, Belstone has no contact channel and none should be invented"
+  },
+  "memory": {
+    "store": "files",
+    "tier": [
+      "session",
+      "long_term"
+    ],
+    "lessons_ledger": "./LESSONS.md",
+    "learning_beats": [
+      "retrieve",
+      "record"
+    ]
+  },
+  "gate": {
+    "confidence_threshold": 0.75,
+    "max_gate_failures": 3
+  },
+  "loop": {
+    "time_cap_seconds": 300,
+    "heartbeat_seconds": 86400,
+    "warm_handover_to": "notifications://belstone",
+    "circuit_breaker": {
+      "max_consecutive_tool_failures": 3,
+      "on_trip": "report_degraded"
+    }
+  },
+  "predeploy": {
+    "task_completion": true,
+    "verification_quality": true
+  },
+  "environment": "production",
+  "scope": [
+    "supabase://ghkazaxuznltpxfzvxny/clubs (slug=belstone only)",
+    "supabase://ghkazaxuznltpxfzvxny/results",
+    "supabase://ghkazaxuznltpxfzvxny/fixtures",
+    "supabase://ghkazaxuznltpxfzvxny/league_standings",
+    "supabase://ghkazaxuznltpxfzvxny/league_progress",
+    "supabase://ghkazaxuznltpxfzvxny/players (external_stats column only)"
+  ],
+  "permissions": {
+    "enforced_at": "infrastructure",
+    "capabilities": {
+      "db_read": "clubs, results, fixtures, league_standings, league_progress, players",
+      "db_write": "results, fixtures, league_standings, league_progress, players.external_stats, notifications insert",
+      "message_send": false,
+      "mint_child_key": false
+    },
+    "note": "the route refuses without CRON_SECRET, and RLS scopes every write to the club row it read. neither depends on the model"
+  },
+  "tenancy": {
+    "multi_tenant": false,
+    "isolation": "club_slug",
+    "note": "hardcoded to slug=belstone; this agent does not iterate clubs the way availability-chaser does"
+  },
+  "audit": {
+    "store": "supabase://ghkazaxuznltpxfzvxny/notifications",
+    "retain_inbound": true,
+    "retention_days": 365,
+    "note": "the notice body is the diff itself: fixtures added, results refreshed, players updated, names the feed could not match"
+  },
+  "actions": {
+    "idempotency_key": "season-refresh:belstone:{run_date}"
+  },
+  "runtime": {
+    "kind": "vercel_cron",
+    "path": "/api/cron/season-refresh",
+    "schedule": "0 6 * * *",
+    "source": "src/app/api/cron/season-refresh/route.ts",
+    "tests": "tests/unit/season-refresh.test.ts"
+  }
+}
