@@ -149,6 +149,41 @@ body {
 .glyph[data-tone="bad"] { color: var(--out); border-color: color-mix(in oklab, var(--out) 45%, transparent); }
 .glyph[data-tone="live"] { color: var(--mint); border-color: color-mix(in oklab, var(--mint) 45%, transparent); box-shadow: var(--glow-mint); }
 
+/* status marks: the SHAPE carries the state and the hue only reinforces it,
+   so a block reads in greyscale and to a red-green colourblind eye, where
+   fit green and out red are the same mud. solid = available / ok,
+   half = doubt / watch, hollow struck through = out / red zone,
+   hatched = suspended, hollow = no reading yet. */
+.mark {
+  display: block;
+  border: 1.5px solid transparent;
+}
+.mark-fit {
+  background: var(--fit);
+  opacity: 0.8;
+}
+.mark-doubt {
+  border-color: var(--doubt);
+  background: linear-gradient(to top, var(--doubt) 50%, transparent 50%);
+}
+.mark-out {
+  border-color: var(--out);
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 1px),
+    var(--out) calc(50% - 1px),
+    var(--out) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+}
+.mark-susp {
+  border-color: var(--susp);
+  background: repeating-linear-gradient(135deg, var(--susp) 0 2px, transparent 2px 5px);
+}
+.mark-cold {
+  border-color: var(--cold);
+}
+
 /* charts: the lieflat grammar's motion. A line draws in fast and stops hard;
    a mark pops in on a short stagger; nothing bounces. */
 .chart-draw {
