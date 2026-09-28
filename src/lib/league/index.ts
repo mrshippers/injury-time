@@ -12,7 +12,7 @@ import { fwpConfigFromEnv, loadFromFwp } from "./fwp";
 import { fromSnapshot, matchPlayer, type SeasonData, type Snapshot } from "./normalise";
 
 export type { SeasonData, SeasonFixture, SeasonProgress, SeasonResult, SeasonStanding } from "./normalise";
-export { formLetters, goalsByScorer, isLeague, matchPlayer, normaliseKickoff, ourStanding, parseScorer, progressFrom } from "./normalise";
+export { divisionLine, formLetters, goalsByScorer, isLeague, matchPlayer, normaliseKickoff, ourStanding, parseScorer, progressFrom } from "./normalise";
 
 export type SeasonSource = "fwp" | "snapshot";
 

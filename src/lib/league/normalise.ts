@@ -112,6 +112,27 @@ export function goalsByScorer(results: readonly { scorers: string[] }[]): { name
   return [...tally.entries()].map(([name, goals]) => ({ name, goals })).sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
 }
 
+/**
+ * League and division as one line. Feeds often repeat a word across the two
+ * ("Spartan South Midlands Premier" + "Premier Division"), so the words the
+ * league ends on and the division starts with are said once.
+ */
+export function divisionLine(league: string | null | undefined, division: string | null | undefined): string {
+  const l = (league ?? "").trim();
+  const d = (division ?? "").trim();
+  if (!l || !d) return l || d;
+  if (d.toLowerCase().includes(l.toLowerCase())) return d;
+  if (l.toLowerCase().includes(d.toLowerCase())) return l;
+  const lw = l.split(/\s+/);
+  const dw = d.split(/\s+/);
+  for (let k = Math.min(lw.length, dw.length); k > 0; k--) {
+    if (lw.slice(-k).join(" ").toLowerCase() === dw.slice(0, k).join(" ").toLowerCase()) {
+      return [...lw, ...dw.slice(k)].join(" ");
+    }
+  }
+  return `${l} ${d}`;
+}
+
 /** A league game is anything that is not a cup, vase, trophy or shield. */
 export function isLeague(competition: string): boolean {
   return !/\b(cup|vase|trophy|shield|plate|charity)\b/i.test(competition);

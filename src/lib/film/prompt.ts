@@ -3,6 +3,7 @@
  * squad, returns the system prompt and the message. Kept apart from the API
  * call so a test can read exactly what goes over the wire.
  */
+import { divisionLine } from "@/lib/league/normalise";
 import type { ClipEvent, Player } from "@/lib/types";
 
 export type AnalysisContext = {
@@ -43,7 +44,7 @@ export function buildAnalysisMessage(ctx: AnalysisContext): string {
   const byId = new Map(ctx.players.map((p) => [p.id, p]));
   const lines: string[] = [];
 
-  lines.push(`Club: ${ctx.club.name}, ${ctx.club.league}${ctx.club.division ? ` ${ctx.club.division}` : ""}.`);
+  lines.push(`Club: ${ctx.club.name}, ${divisionLine(ctx.club.league, ctx.club.division)}.`);
   if (ctx.result) {
     const where = ctx.result.venue === "H" ? "at home" : "away";
     lines.push(

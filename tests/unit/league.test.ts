@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import snapshot from "../../scripts/belstone-2026-27.json";
 import { mapFixturesResults } from "../../src/lib/league/fwp";
 import {
+  divisionLine,
   formLetters,
   fromSnapshot,
   goalsByScorer,
@@ -110,5 +111,22 @@ describe("the api mapper", () => {
     expect(fixtures).toEqual([{ match_date: "2026-09-05", kickoff: "15:00", opponent: "Westside", venue: "H", competition: "Combined Counties Div 1" }]);
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({ opponent: "Spelthorne Sports", venue: "H", goals_for: 3, goals_against: 1, attendance: 67, source: "fwp" });
+  });
+});
+
+describe("division line", () => {
+  it("drops the word the league name and division share", () => {
+    expect(divisionLine("Spartan South Midlands Premier", "Premier Division")).toBe("Spartan South Midlands Premier Division");
+  });
+  it("joins plainly when nothing overlaps", () => {
+    expect(divisionLine("Combined Counties League", "Division One")).toBe("Combined Counties League Division One");
+  });
+  it("keeps whichever already contains the other", () => {
+    expect(divisionLine("Isthmian League", "Isthmian League Premier Division")).toBe("Isthmian League Premier Division");
+    expect(divisionLine("Hellenic League Division One", "division one")).toBe("Hellenic League Division One");
+  });
+  it("copes with a missing half", () => {
+    expect(divisionLine("Hellenic League", null)).toBe("Hellenic League");
+    expect(divisionLine("", "Division One")).toBe("Division One");
   });
 });

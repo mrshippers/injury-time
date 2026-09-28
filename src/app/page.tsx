@@ -1,5 +1,6 @@
 import { daysBetweenISO, getDashboard, getSquadBoard } from "@/lib/data";
 import { getHomeSeason } from "@/lib/home/data";
+import { divisionLine } from "@/lib/league";
 import { ordinal, seasonContext } from "@/lib/home/season-context";
 import { getViewer } from "@/lib/viewer";
 import { AvailabilityStrip } from "@/components/home/availability-strip";
@@ -33,7 +34,7 @@ export default async function Home() {
   const hasLoad = board.rows.some((r) => r.readiness.key !== "unknown");
   const sinceLast = lastSession ? daysBetweenISO(lastSession.date, asOf) : null;
   const clubName = viewer.club.name || club.name;
-  const division = [viewer.club.league, viewer.club.division].filter(Boolean).join(" ");
+  const division = divisionLine(viewer.club.league, viewer.club.division);
 
   const tiles: Tile[] = [
     { href: "/squad", label: "squad", headline: `${counts.fit} of ${dash.squadSize}`, detail: "available, pick the side", tone: counts.fit >= 14 ? "ok" : counts.fit >= 11 ? "warn" : "bad" },
