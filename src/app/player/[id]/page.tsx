@@ -9,6 +9,9 @@ import InjuryTable from "@/components/player/injury-table";
 import LanguageToggle, { HealthProvider } from "@/components/player/language-toggle";
 import LoadSparkline from "@/components/player/load-sparkline";
 import PlayerHeader from "@/components/player/player-header";
+import RtpPanel from "@/components/player/rtp-panel";
+import { createClient } from "@/lib/supabase/server";
+import type { RtpStep } from "@/lib/types";
 import StatTiles from "@/components/player/stat-tiles";
 
 export default async function PlayerPage(props: PageProps<"/player/[id]">) {
@@ -18,6 +21,12 @@ export default async function PlayerPage(props: PageProps<"/player/[id]">) {
 
   const defaultMode = profile.club.settings?.health_language ?? "plain";
   const canEditBody = viewer.guest || viewer.can("edit_body");
+  const current = profile.injuries.find((i) => i.resolved_on === null) ?? null;
+  let rtpSteps: RtpStep[] = [];
+  if (current) {
+    const { data } = await (await createClient()).from("rtp_steps").select("*").eq("injury_id", current.id);
+    rtpSteps = (data ?? []) as RtpStep[];
+  }
 
   return (
     <HealthProvider defaultMode={defaultMode}>
@@ -67,6 +76,7 @@ export default async function PlayerPage(props: PageProps<"/player/[id]">) {
           />
 
           <div className="flex flex-col gap-12">
+            {current ? <RtpPanel injury={current} steps={rtpSteps} asOf={profile.asOf} canEdit={viewer.can("edit_injuries")} /> : null}
             <InjuryTable injuries={profile.injuries} asOf={profile.asOf} />
             <AvailabilityTimeline events={profile.availabilityHistory} />
           </div>
