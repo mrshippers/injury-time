@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { AttendanceTrend } from "@/components/team/attendance-trend";
 import { CallBoard } from "@/components/team/call-board";
 import { NoticeBoard } from "@/components/team/notice-board";
@@ -33,6 +35,12 @@ export default async function TeamPage() {
               {next.competition}
               {daysUntil !== null ? <span className="num text-gold"> · {daysAwayWord(daysUntil)}</span> : null}
             </p>
+            <Link
+              href="/matchday"
+              className="pressable mt-4 inline-flex h-10 items-center rounded-[2px] border border-line-strong bg-pitch px-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-panel-2"
+            >
+              matchday screen
+            </Link>
           </>
         ) : (
           <>
