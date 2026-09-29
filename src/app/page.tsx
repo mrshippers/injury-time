@@ -7,6 +7,8 @@ import { divisionLine } from "@/lib/league";
 import { ordinal, seasonContext } from "@/lib/home/season-context";
 import { getViewer } from "@/lib/viewer";
 import { AvailabilityStrip } from "@/components/home/availability-strip";
+import { CongestionPanel } from "@/components/home/congestion-panel";
+import { findCongestion } from "@/lib/home/congestion";
 import { HubTiles, type Tile } from "@/components/home/hub-tiles";
 import { SeasonLine } from "@/components/home/season-line";
 import { FormVital, NextMatchVital, ScorersVital, WatchVital } from "@/components/home/vitals";
@@ -38,6 +40,17 @@ export default async function Home() {
   const sinceLast = lastSession ? daysBetweenISO(lastSession.date, asOf) : null;
   const clubName = viewer.club.name || club.name;
   const division = divisionLine(viewer.club.league, viewer.club.division);
+  const congestion = findCongestion(
+    fixtures,
+    board.rows.map((r) => ({
+      id: r.player.id,
+      name: r.player.name,
+      readiness: r.readiness.key,
+      word: r.readiness.word,
+      available: (r.availability?.status ?? "fit") === "fit" || r.availability?.status === "doubt",
+    })),
+    asOf,
+  );
 
   const tiles: Tile[] = [
     { href: "/squad", label: "squad", headline: `${counts.fit} of ${dash.squadSize}`, detail: "available, pick the side", tone: counts.fit >= 14 ? "ok" : counts.fit >= 11 ? "warn" : "bad" },
@@ -114,6 +127,12 @@ export default async function Home() {
           </p>
         </div>
       </section>
+
+      {congestion ? (
+        <div className="mt-10">
+          <CongestionPanel c={congestion} />
+        </div>
+      ) : null}
 
       {/* secondary: the vitals */}
       <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2 xl:grid-cols-[1.1fr_1fr_1fr_1.2fr]">
