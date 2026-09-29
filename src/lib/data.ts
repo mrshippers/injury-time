@@ -69,7 +69,7 @@ export function daysBetweenISO(a: string, b: string): number {
 export const getActiveClub = cache(async (): Promise<Club> => (await getViewer()).club);
 
 /** Per-player load history over the trailing `days`, oldest first. */
-async function loadEntriesByPlayer(
+export async function loadEntriesByPlayer(
   clubId: string,
   days: number,
 ): Promise<Map<string, LoadEntry[]>> {

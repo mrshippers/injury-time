@@ -304,3 +304,34 @@ body {
 html {
   background-color: var(--pitch);
 }
+
+/* ── print: the season review goes to the committee on paper ─────────────
+   Ink on white, no floodlight, no nav. Tokens are swapped, not overridden
+   per element, so every utility follows. */
+@media print {
+  :root {
+    --pitch: #ffffff;
+    --pitch-pool: #ffffff;
+    --flood: transparent;
+    --panel: #ffffff;
+    --panel-2: #f3f3f3;
+    --line: #d4d4d4;
+    --line-strong: #999999;
+    --ink: #111111;
+    --ink-dim: #444444;
+    --ink-faint: #777777;
+    --gold: #6b5310;
+    --gold-dim: #6b5310;
+  }
+  body {
+    background: #ffffff;
+    background-image: none;
+  }
+  header nav,
+  nav[aria-label="modules"] {
+    display: none !important;
+  }
+  main {
+    padding-bottom: 0;
+  }
+}

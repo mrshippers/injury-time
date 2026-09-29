@@ -58,6 +58,9 @@ export default async function ClubPage() {
           <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
         </h1>
         <p className="mt-3 max-w-[60ch] text-[14px] leading-relaxed text-ink-dim">{source.long}</p>
+        <a href="/review" className="mt-4 inline-block text-[13px] text-ink underline decoration-gold-dim underline-offset-4 hover:text-gold">
+          the season review, for the committee
+        </a>
       </header>
 
       <section aria-labelledby="feed-h" className="mt-10 border-t border-line pt-6">
