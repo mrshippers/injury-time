@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { AttendanceTrend } from "@/components/team/attendance-trend";
 import { CallBoard } from "@/components/team/call-board";
+import { CheckinsPanel } from "@/components/team/checkins-panel";
 import { NoticeBoard } from "@/components/team/notice-board";
+import { createClient } from "@/lib/supabase/server";
+import type { PlayerCheckin } from "@/lib/types";
 import { longDate } from "@/components/squad/format";
 import { getTeamPage } from "@/lib/team/data";
 import { daysAwayWord, weekdayWord } from "@/lib/team/format";
@@ -16,7 +19,14 @@ export const metadata = { title: "the team - injury time." };
  * in, what did the gaffer say. Everything on it moves in real time.
  */
 export default async function TeamPage() {
-  const { viewer, next, daysUntil, players, calls, notices, attendance, now } = await getTeamPage();
+  const { viewer, next, daysUntil, players, calls, notices, attendance, now, asOf } = await getTeamPage();
+  // RLS returns rows only to staff of a real club; a guest or a player gets none
+  const staff = !viewer.guest && viewer.can("view_squad_health");
+  let checkins: PlayerCheckin[] = [];
+  if (staff) {
+    const { data } = await (await createClient()).from("player_checkins").select("*").eq("club_id", viewer.club.id).eq("checkin_on", asOf);
+    checkins = (data ?? []) as PlayerCheckin[];
+  }
 
   return (
     <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 py-7 sm:px-8 sm:py-9">
@@ -68,6 +78,14 @@ export default async function TeamPage() {
               calls={calls}
               role={viewer.role}
               ownPlayerId={viewer.role === "player" ? viewer.playerId : null}
+            />
+          ) : null}
+          {staff || viewer.club.is_demo ? (
+            <CheckinsPanel
+              players={players.map((p) => ({ id: p.id, name: p.name, number: p.squad_number }))}
+              today={checkins}
+              isDemo={viewer.club.is_demo}
+              canSend={staff && !viewer.club.is_demo}
             />
           ) : null}
         </div>

@@ -36,7 +36,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
   const pathname = usePathname() ?? "/";
   const router = useRouter();
   const [pending, start] = useTransition();
-  if (pathname.startsWith("/login") || pathname.startsWith("/auth")) return null;
+  if (pathname.startsWith("/login") || pathname.startsWith("/auth") || pathname.startsWith("/checkin")) return null;
 
   const canSwitch = guest && clubs.length > 1;
 
@@ -122,7 +122,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
  */
 export function PhoneTabBar() {
   const pathname = usePathname() ?? "/";
-  if (pathname.startsWith("/login") || pathname.startsWith("/auth")) return null;
+  if (pathname.startsWith("/login") || pathname.startsWith("/auth") || pathname.startsWith("/checkin")) return null;
   return (
     <nav
       aria-label="modules"

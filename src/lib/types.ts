@@ -323,6 +323,12 @@ export type Database = {
         Update: Partial<ClubFeedKey>
         Relationships: []
       }
+      player_checkin_links: {
+        Row: PlayerCheckinLink
+        Insert: { player_id: string; token?: string; consent_at?: TimestampString | null; created_at?: TimestampString }
+        Update: Partial<PlayerCheckinLink>
+        Relationships: []
+      }
       rtp_steps: {
         Row: RtpStep
         Insert: Insertable<RtpStep, 'done_on'>
@@ -531,4 +537,12 @@ export type ClubFeedKey = {
   last_sync_at: TimestampString | null
   last_sync_note: string | null
   updated_at: TimestampString
+}
+
+/** A player's private check-in credential. Service role only: RLS has no policies on it. */
+export type PlayerCheckinLink = {
+  player_id: string
+  token: string
+  consent_at: TimestampString | null
+  created_at: TimestampString
 }
