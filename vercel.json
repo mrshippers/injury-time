@@ -1,6 +1,16 @@
 {
   "crons": [
-    { "path": "/api/cron/availability-chaser", "schedule": "0 9 * * *" },
-    { "path": "/api/cron/season-refresh", "schedule": "0 6 * * *" }
+    {
+      "path": "/api/cron/availability-chaser",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/season-refresh",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/club-feeds",
+      "schedule": "15 6 * * *"
+    }
   ]
 }

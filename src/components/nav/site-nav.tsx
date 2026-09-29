@@ -20,6 +20,7 @@ const MODULES: { href: string; label: string; match: (p: string) => boolean }[] 
   { href: "/team", label: "team", match: (p) => p.startsWith("/team") },
   { href: "/film", label: "film", match: (p) => p.startsWith("/film") },
   { href: "/log", label: "log", match: (p) => p.startsWith("/log") },
+  { href: "/club", label: "club", match: (p) => p.startsWith("/club") },
 ];
 
 export type NavClub = { id: string; name: string; slug: string | null };
@@ -116,7 +117,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
 
 /**
  * On a phone the modules live at the bottom, under the thumb, like the tab
- * bar of any app worth opening on a touchline. Same five words, same mint
+ * bar of any app worth opening on a touchline. Same six words, same mint
  * mark for "where am I", fixed above the safe area.
  */
 export function PhoneTabBar() {
@@ -128,7 +129,7 @@ export function PhoneTabBar() {
       className="fixed inset-x-0 bottom-0 z-30 border-t border-line-strong bg-panel sm:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)", boxShadow: "inset 0 1px 0 0 var(--sheen-edge)" }}
     >
-      <ul className="grid h-14 grid-cols-5">
+      <ul className="grid h-14 grid-cols-6">
         {MODULES.map((m) => {
           const active = m.match(pathname);
           return (

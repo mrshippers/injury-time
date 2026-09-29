@@ -70,8 +70,14 @@ export type Club = {
   fwp_team_id: number | null
   colours: { home?: string; away?: string; accent?: string }
   settings: ClubSettings
+  /** where the season on screen came from; the hub names it, never "live" for a snapshot */
+  season_source: SeasonSourceKind
+  season_synced_at: TimestampString | null
   created_at: TimestampString
 }
+
+/** feed: the club's own league-feed key; snapshot: a dated copy; manual: entered by the club */
+export type SeasonSourceKind = 'feed' | 'snapshot' | 'manual'
 
 /** Measurements in cm. Any field may be missing; the figure falls back to the default athlete. */
 export type BodyParams = {
@@ -218,7 +224,7 @@ export type Database = {
     Tables: {
       clubs: {
         Row: Club
-        Insert: Insertable<Club, 'is_demo' | 'slug' | 'ground' | 'division' | 'season' | 'founded' | 'fwp_team_id' | 'colours' | 'settings'>
+        Insert: Insertable<Club, 'is_demo' | 'slug' | 'ground' | 'division' | 'season' | 'founded' | 'fwp_team_id' | 'colours' | 'settings' | 'season_source' | 'season_synced_at'>
         Update: Partial<Club>
         Relationships: []
       }
@@ -311,6 +317,24 @@ export type Database = {
         Update: Partial<SavedLineup>
         Relationships: []
       }
+      club_feed_keys: {
+        Row: ClubFeedKey
+        Insert: Omit<ClubFeedKey, 'provider' | 'last_sync_at' | 'last_sync_note' | 'updated_at'> & Partial<Pick<ClubFeedKey, 'provider' | 'last_sync_at' | 'last_sync_note' | 'updated_at'>>
+        Update: Partial<ClubFeedKey>
+        Relationships: []
+      }
+      rtp_steps: {
+        Row: RtpStep
+        Insert: Insertable<RtpStep, 'done_on'>
+        Update: Partial<RtpStep>
+        Relationships: []
+      }
+      player_checkins: {
+        Row: PlayerCheckin
+        Insert: Insertable<PlayerCheckin, 'checkin_on' | 'last_rpe'>
+        Update: Partial<PlayerCheckin>
+        Relationships: []
+      }
     }
     Views: {
       current_availability: {
@@ -318,7 +342,20 @@ export type Database = {
         Relationships: []
       }
     }
-    Functions: Record<never, never>
+    Functions: {
+      checkin_status: {
+        Args: { token: string }
+        Returns: { first_name: string; club_name: string; consented: boolean; today_done: boolean }[]
+      }
+      submit_checkin: {
+        Args: { token: string; consent: boolean; soreness: number; last_rpe: number | null; available: CheckinAvailable }
+        Returns: 'ok' | 'unknown_link' | 'consent_required'
+      }
+      withdraw_checkins: {
+        Args: { token: string }
+        Returns: 'withdrawn' | 'unknown_link'
+      }
+    }
   }
 }
 
@@ -453,5 +490,45 @@ export type SavedLineup = {
   formation: string
   xi: (string | null)[]
   bench: string[]
+  updated_at: TimestampString
+}
+
+/* ── return to play: the physio's ladder, dated ────────────────────────── */
+
+export const RTP_STAGES = ['rest', 'walking', 'jogging', 'running', 'sprinting', 'ball_work', 'full_training', 'match_fit'] as const
+export type RtpStage = (typeof RTP_STAGES)[number]
+
+export type RtpStep = {
+  id: string
+  club_id: string
+  injury_id: string
+  stage: RtpStage
+  target_date: DateString
+  done_on: DateString | null
+  created_at: TimestampString
+}
+
+/* ── player check-ins (by private link, consent first) ─────────────────── */
+
+export type CheckinAvailable = 'yes' | 'no' | 'unsure'
+
+export type PlayerCheckin = {
+  id: string
+  club_id: string
+  player_id: string
+  checkin_on: DateString
+  soreness: number
+  last_rpe: number | null
+  available: CheckinAvailable
+  created_at: TimestampString
+}
+
+/** A club's own league-feed key. Service role only: RLS has no policies on it. */
+export type ClubFeedKey = {
+  club_id: string
+  provider: 'fwp'
+  api_key: string
+  last_sync_at: TimestampString | null
+  last_sync_note: string | null
   updated_at: TimestampString
 }

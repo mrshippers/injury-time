@@ -1,5 +1,8 @@
 import { daysBetweenISO, getDashboard, getSquadBoard } from "@/lib/data";
 import { getHomeSeason } from "@/lib/home/data";
+import Link from "next/link";
+
+import { sourceLine } from "@/lib/club/source";
 import { divisionLine } from "@/lib/league";
 import { ordinal, seasonContext } from "@/lib/home/season-context";
 import { getViewer } from "@/lib/viewer";
@@ -134,8 +137,7 @@ export default async function Home() {
 
       {/* tertiary */}
       <p className="annot mt-6 text-gold-dim">
-        {ctx.hasSeason ? "league feed: footballwebpages.co.uk" : "readiness words: steady · pushing it · undercooked · red zone, this week against his usual"}
-        {season.standingsAsOf ? ` · updated ${shortDate(season.standingsAsOf)}` : ""}
+        <Link href="/club" className="underline decoration-gold-dim underline-offset-4 hover:text-gold">{sourceLine(viewer.club).short}</Link>
         &ensp;·&ensp;red zone is the week a hamstring goes
       </p>
     </main>
