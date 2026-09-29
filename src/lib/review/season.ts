@@ -82,3 +82,10 @@ export function seasonReview(
     judged: before.filter((b) => b.flag !== "cold").length,
   };
 }
+
+/** "2026-27" is 1 Jul 2026 to 30 Jun 2027; no season set means the last 365 days. */
+export function seasonWindow(season: string | null, asOf: string): { from: string; to: string } {
+  const m = season?.match(/^(\d{4})-(\d{2})$/);
+  if (m) return { from: `${m[1]}-07-01`, to: `${Number(m[1]) + 1}-06-30` };
+  return { from: new Date(Date.parse(asOf) - 365 * DAY).toISOString().slice(0, 10), to: asOf };
+}

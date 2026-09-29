@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { LoadEntry } from "../../src/lib/load-engine";
-import { seasonReview, type ReviewInjury } from "../../src/lib/review/season";
+import { seasonReview, seasonWindow, type ReviewInjury } from "../../src/lib/review/season";
 
 const res = (d: string, gf: number, ga: number, competition = "League") => ({ match_date: d, competition, goals_for: gf, goals_against: ga });
 const inj = (id: string, player_id: string, occurred_on: string, resolved_on: string | null = null): ReviewInjury => ({ id, player_id, body_region: "hamstring", severity: "minor", occurred_on, resolved_on });
@@ -30,5 +30,14 @@ describe("season review", () => {
     expect(r.before.find((b) => b.playerId === "unlogged")!.flag).toBe("cold");
     expect(r.before.find((b) => b.playerId === "spiked")!.flag).toBe("red");
     expect(r).toMatchObject({ redCalled: 1, judged: 1 });
+  });
+});
+
+describe("the season window", () => {
+  it("reads 2026-27 as July to June", () => {
+    expect(seasonWindow("2026-27", "2026-09-29")).toEqual({ from: "2026-07-01", to: "2027-06-30" });
+  });
+  it("falls back to the last year when no season is set", () => {
+    expect(seasonWindow(null, "2026-09-29")).toEqual({ from: "2025-09-29", to: "2026-09-29" });
   });
 });

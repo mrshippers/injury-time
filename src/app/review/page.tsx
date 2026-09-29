@@ -4,7 +4,7 @@ import { longDate } from "@/components/squad/format";
 import { sourceLine } from "@/lib/club/source";
 import { loadEntriesByPlayer, todayISO } from "@/lib/data";
 import type { LoadFlag } from "@/lib/load-engine";
-import { seasonReview } from "@/lib/review/season";
+import { seasonReview, seasonWindow } from "@/lib/review/season";
 import { createClient } from "@/lib/supabase/server";
 import type { Injury } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
@@ -29,9 +29,10 @@ export default async function ReviewPage() {
   const club = viewer.club;
   const asOf = todayISO();
   const supabase = await createClient();
+  const win = seasonWindow(club.season, asOf);
   const [{ data: results }, { data: injuries }, { data: players }, loads] = await Promise.all([
-    supabase.from("results").select("match_date, competition, goals_for, goals_against").eq("club_id", club.id),
-    supabase.from("injuries").select("*").eq("club_id", club.id),
+    supabase.from("results").select("match_date, competition, goals_for, goals_against").eq("club_id", club.id).gte("match_date", win.from).lte("match_date", win.to),
+    supabase.from("injuries").select("*").eq("club_id", club.id).gte("occurred_on", win.from).lte("occurred_on", win.to),
     supabase.from("players").select("id, name").eq("club_id", club.id),
     loadEntriesByPlayer(club.id, 365),
   ]);
@@ -48,7 +49,9 @@ export default async function ReviewPage() {
             {club.name}
             <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
           </h1>
-          <p className="num mt-2 text-[12px] text-ink-dim">as of {longDate(asOf)} · {sourceLine(club).short}</p>
+          <p className="num mt-2 text-[12px] text-ink-dim">
+            {longDate(win.from)} to {longDate(asOf < win.to ? asOf : win.to)} · {sourceLine(club).short}
+          </p>
         </div>
         <PrintButton />
       </div>

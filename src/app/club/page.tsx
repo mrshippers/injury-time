@@ -107,7 +107,7 @@ export default async function ClubPage() {
                 <span className="num text-ink">
                   {r.goals_for}-{r.goals_against}
                 </span>
-                <span className="num w-16 text-right text-[11px] uppercase tracking-[0.1em] text-ink-faint">{r.source === "manual" ? "entered" : "feed"}</span>
+                <span className="num w-16 text-right text-[11px] uppercase tracking-[0.1em] text-ink-faint">{({ manual: "entered", fwp: "feed", snapshot: "copy", seed: "demo" } as Record<string, string>)[r.source] ?? r.source}</span>
               </li>
             ))}
           </ul>
