@@ -9,8 +9,10 @@ import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
 
-export default async function ClipPage(props: { params: Promise<{ id: string }> }) {
+export default async function ClipPage(props: { params: Promise<{ id: string }>; searchParams: Promise<{ t?: string }> }) {
   const { id } = await props.params;
+  const t = Number((await props.searchParams).t);
+  const startAt = Number.isFinite(t) && t > 0 ? Math.floor(t) : 0;
   const viewer = await getViewer();
   const clip = await getClip(viewer.club.id, id);
   if (!clip) notFound();
@@ -44,6 +46,7 @@ export default async function ClipPage(props: { params: Promise<{ id: string }> 
           players={squad.map((p) => ({ id: p.id, name: p.name, position: p.position, squad_number: p.squad_number }))}
           canEdit={viewer.can("manage_film")}
           analysisAvailable={analysisConfigured()}
+          startAt={startAt}
         />
       </div>
     </main>

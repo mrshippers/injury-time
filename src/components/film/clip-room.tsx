@@ -49,7 +49,7 @@ declare global {
   }
 }
 
-function useYouTube(iframe: React.RefObject<HTMLIFrameElement | null>, enabled: boolean) {
+function useYouTube(iframe: React.RefObject<HTMLIFrameElement | null>, enabled: boolean, startAt = 0) {
   const player = useRef<YTPlayer | null>(null);
   const [ready, setReady] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -65,6 +65,8 @@ function useYouTube(iframe: React.RefObject<HTMLIFrameElement | null>, enabled: 
             setReady(true);
             const d = player.current?.getDuration() ?? 0;
             if (d > 0) setDuration(d);
+            // opened from a moment on a player's page: land on it, let them press play
+            if (startAt > 0) player.current?.seekTo(startAt, true);
           },
         },
       });
@@ -86,7 +88,7 @@ function useYouTube(iframe: React.RefObject<HTMLIFrameElement | null>, enabled: 
     return () => {
       cancelled = true;
     };
-  }, [enabled, iframe]);
+  }, [enabled, iframe, startAt]);
   return { player, ready, duration };
 }
 
@@ -99,6 +101,7 @@ export function ClipRoom({
   players,
   canEdit,
   analysisAvailable,
+  startAt = 0,
 }: {
   clip: Clip;
   embedUrl: string | null;
@@ -106,10 +109,11 @@ export function ClipRoom({
   players: SquadPlayer[];
   canEdit: boolean;
   analysisAvailable: boolean;
+  startAt?: number;
 }) {
   const id = useId();
   const iframe = useRef<HTMLIFrameElement | null>(null);
-  const { player, ready, duration } = useYouTube(iframe, Boolean(embedUrl && videoId));
+  const { player, ready, duration } = useYouTube(iframe, Boolean(embedUrl && videoId), startAt);
 
   const [events, setEvents] = useState<ClipEvent[]>(clip.events);
   const [analysis, setAnalysis] = useState<ClipAnalysis | null>(clip.analysis);

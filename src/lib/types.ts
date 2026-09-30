@@ -221,6 +221,29 @@ type Insertable<T, Optional extends keyof T = never> = Omit<T, Generated | Optio
  * Schema shape for the typed supabase-js client. Hand-written on purpose: it
  * stays readable, and it is the same file reviewers read for the domain unions.
  */
+/** positions a player picks for themselves; finer than the squad's GK/DF/MF/FW */
+export const HUB_POSITIONS = ['GK', 'RB', 'CB', 'LB', 'RWB', 'LWB', 'DM', 'CM', 'AM', 'RW', 'LW', 'ST'] as const
+export type HubPosition = (typeof HUB_POSITIONS)[number]
+export const FEET = ['left', 'right', 'both'] as const
+export type Foot = (typeof FEET)[number]
+
+/** the player's own page, in their words (0011). football only, never the body */
+export type HubProfile = {
+  player_id: string
+  club_id: string
+  nickname: string | null
+  shirt_name: string | null
+  preferred_foot: Foot | null
+  best_position: HubPosition | null
+  walkout_song: string | null
+  boots: string | null
+  hero: string | null
+  previous_clubs: string[]
+  bio: string | null
+  pinned: { clip_id: string; t: number } | null
+  updated_at: TimestampString
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -335,6 +358,12 @@ export type Database = {
         Row: RtpStep
         Insert: Insertable<RtpStep, 'done_on'>
         Update: Partial<RtpStep>
+        Relationships: []
+      }
+      player_profiles: {
+        Row: HubProfile
+        Insert: Insertable<HubProfile, 'nickname' | 'shirt_name' | 'preferred_foot' | 'best_position' | 'walkout_song' | 'boots' | 'hero' | 'previous_clubs' | 'bio' | 'pinned' | 'updated_at'>
+        Update: Partial<HubProfile>
         Relationships: []
       }
       player_checkins: {
