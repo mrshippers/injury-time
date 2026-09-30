@@ -244,6 +244,17 @@ export type HubProfile = {
   updated_at: TimestampString
 }
 
+/** one device a signed-in member turned notifications on for (0013) */
+export type PushSubscriptionRow = {
+  id: string
+  user_id: string
+  club_id: string
+  endpoint: string
+  p256dh: string
+  auth: string
+  created_at: TimestampString
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -358,6 +369,12 @@ export type Database = {
         Row: RtpStep
         Insert: Insertable<RtpStep, 'done_on'>
         Update: Partial<RtpStep>
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: PushSubscriptionRow
+        Insert: Insertable<PushSubscriptionRow>
+        Update: Partial<PushSubscriptionRow>
         Relationships: []
       }
       player_profiles: {

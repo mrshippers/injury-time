@@ -1,6 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
-
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase/env'
+import { pushToUsers } from '@/lib/push/send'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
  * Availability chaser.
@@ -31,6 +30,7 @@ type Summary = {
   fixture?: string
   chased: string[]
   already_notified?: boolean
+  pushed?: number
 }
 
 function unauthorised() {
@@ -44,13 +44,16 @@ export async function GET(request: Request) {
   const offered = request.headers.get('authorization')
   if (!secret || offered !== `Bearer ${secret}`) return unauthorised()
 
-  const db = createClient(SUPABASE_URL(), SUPABASE_ANON_KEY())
+  // service role since real clubs are private to anon; the club filter below is the scope
+  const db = createAdminClient()
   let failures = 0
   const degrade = (reason: string): Degraded => ({ status: 'degraded', reason, failures })
 
-  // only clubs open to try: a real club shown from public data (Belstone) has no
-  // calls to chase and is read-only since 0010. keyed on the column, not a name
-  const clubs = await db.from('clubs').select('id, name').eq('demo_writable', true)
+  // real clubs (their own squads, their own calls) and clubs open to try. never a
+  // real club shown from public data (Belstone: is_demo and not demo_writable),
+  // which has no calls to chase. keyed on the columns, not a name
+  const all = await db.from('clubs').select('id, name, is_demo, demo_writable')
+  const clubs = { error: all.error, data: (all.data ?? []).filter((c) => c.demo_writable === true || c.is_demo === false) }
   if (clubs.error) return Response.json(degrade(`clubs: ${clubs.error.message}`), { status: 503 })
   if (!clubs.data?.length) {
     return Response.json({ status: 'nothing-to-do', club: '-', chased: [] } satisfies Summary)
@@ -81,7 +84,7 @@ export async function GET(request: Request) {
     }
 
     const [players, calls] = await Promise.all([
-      db.from('players').select('id, name').eq('club_id', club.id),
+      db.from('players').select('id, name, user_id').eq('club_id', club.id),
       db.from('match_calls').select('player_id').eq('fixture_id', fixture.data.id),
     ])
     if (players.error || calls.error) {
@@ -142,11 +145,21 @@ export async function GET(request: Request) {
       continue
     }
 
+    // the players themselves, on their phones, once per fixture (the notice above is the dedupe key)
+    const linked = silent.map((p) => (p as { user_id?: string | null }).user_id).filter((u): u is string => Boolean(u))
+    const pushed = await pushToUsers(club.id, linked, {
+      title: `are you in for ${fixture.data.opponent}?`,
+      body: 'tap to say in, out or unsure',
+      url: '/team',
+      tag: `call:${fixture.data.id}`,
+    }).catch(() => null)
+
     out.push({
       status: 'done',
       club: club.name,
       fixture: fixture.data.opponent,
       chased: silent.map((p) => p.name),
+      pushed: pushed?.sent ?? 0,
     })
   }
 

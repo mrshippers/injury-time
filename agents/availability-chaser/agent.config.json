@@ -8,7 +8,7 @@
     "handoff": "haiku"
   },
   "harness": {
-    "role": "Find players with no call for the next fixture and post one notice naming them.",
+    "role": "Find players with no call for the next fixture, post one notice naming them for the staff, and push the silent players who have an account, once per fixture.",
     "context_sources": [
       "supabase://ghkazaxuznltpxfzvxny/match_calls",
       "supabase://ghkazaxuznltpxfzvxny/fixtures",
@@ -29,8 +29,8 @@
     ]
   },
   "comms": {
-    "actuation": "notifications table, kind=call, read in the app by manager and coach",
-    "note": "no outbound email. players have no email column and inventing an address is worse than not sending."
+    "actuation": "notifications table, kind=call, read in the app by manager and coach; plus one web push per fixture to silent players with a linked account (push_subscriptions, 0013)",
+    "note": "no email. players have no email column and inventing an address is worse than not sending. the push goes only to a device the player turned on themselves"
   },
   "memory": {
     "store": "files",
@@ -63,24 +63,26 @@
   },
   "environment": "production",
   "scope": [
+    "supabase://ghkazaxuznltpxfzvxny/clubs (real clubs: is_demo=false; plus demo_writable=true. never a public-data club like Belstone)",
     "supabase://ghkazaxuznltpxfzvxny/match_calls",
     "supabase://ghkazaxuznltpxfzvxny/fixtures",
-    "supabase://ghkazaxuznltpxfzvxny/players (kilburn-athletic only; belstone is public data, never chased)"
+    "supabase://ghkazaxuznltpxfzvxny/players",
+    "supabase://ghkazaxuznltpxfzvxny/push_subscriptions (read, prune dead endpoints)"
   ],
   "permissions": {
     "enforced_at": "infrastructure",
     "capabilities": {
-      "db_read": "clubs, fixtures, players, match_calls",
-      "db_write": "notifications insert only",
+      "db_read": "clubs, fixtures, players, match_calls, push_subscriptions",
+      "db_write": "notifications insert; push_subscriptions delete (dead endpoints only)",
       "message_send": false,
       "mint_child_key": false
     },
-    "note": "the route refuses without CRON_SECRET, and RLS refuses a write outside the club. neither depends on the model"
+    "note": "route refuses without CRON_SECRET. service role since 30 Sep 2026 (real clubs are private to anon), so the code is the scope: the club filter above, every read and write keyed to that club id"
   },
   "tenancy": {
     "multi_tenant": true,
     "isolation": "club_slug",
-    "note": "clubs open to try (clubs.demo_writable) only. a real club shown from public data is never chased: the query filters on the column, and anon cannot write there anyway since 0010. was a name match on 'Belstone' until 30 Sep 2026"
+    "note": "every real club and every club open to try, each on its own rows; a public-data club (is_demo and not demo_writable) is never chased. pushes only reach that club's own members' devices"
   },
   "audit": {
     "store": "supabase://ghkazaxuznltpxfzvxny/notifications",
@@ -89,7 +91,7 @@
     "note": "the notice body IS the retained input - the names that were silent at run time, kept beside the action they caused"
   },
   "actions": {
-    "idempotency_key": "chase:{fixture_id}:{player_id}"
+    "idempotency_key": "chase:{fixture_id} (one kind=call notice per fixture; the push rides on that notice, so a rerun pushes nobody)"
   },
   "runtime": {
     "kind": "vercel_cron",

@@ -10,3 +10,8 @@ Read before a pass (retrieve). Append after a verified outcome (record), failure
   (seen 1x, held 1x, last: 2026-09-30)
 - one chase per fixture, keyed to the fixture: a rerun reads the existing kind=call
   notice and files nothing. (seen 1x, held 1x, last: 2026-09-30)
+- 2026-09-30: after 0010 the chaser ran only for demo clubs (anon + demo_writable), so it
+  chased no real squad at all and a push from it would reach made-up players. Now service
+  role, real clubs plus clubs open to try, Belstone-type public-data clubs excluded; push
+  rides on the once-per-fixture notice. Rule: when a guard narrows who an agent can see,
+  re-check who it is FOR. (seen 1x, held 1x, last: 2026-09-30)

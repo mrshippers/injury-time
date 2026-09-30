@@ -37,9 +37,13 @@ function builder(name: string) {
   return chain
 }
 
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: () => ({ from: (name: string) => builder(name) }),
+// service role since 30 Sep: real clubs are private to anon
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: () => ({ from: (name: string) => builder(name) }),
 }))
+
+const pushToUsers = vi.fn()
+vi.mock('@/lib/push/send', () => ({ pushToUsers }))
 
 const { GET } = await import('@/app/api/cron/availability-chaser/route')
 
@@ -51,8 +55,9 @@ const authed = () =>
 beforeEach(() => {
   process.env.CRON_SECRET = 's3cret'
   inserted = []
+  pushToUsers.mockReset().mockResolvedValue({ sent: 1, pruned: 0, failed: 0 })
   tables = {
-    clubs: { data: [{ id: 'c1', name: 'Kilburn Athletic' }], error: null },
+    clubs: { data: [{ id: 'c1', name: 'Kilburn Athletic', is_demo: true, demo_writable: true }], error: null },
     fixtures: { data: [{ id: 'f1', match_date: '2099-01-01', opponent: 'Hendon', venue: 'H' }], error: null },
     players: { data: [{ id: 'p1', name: 'A Kane' }, { id: 'p2', name: 'B Toney' }], error: null },
     match_calls: { data: [{ player_id: 'p1' }], error: null },
@@ -83,12 +88,35 @@ describe('availability chaser', () => {
     expect(inserted[0].body).toBe('B Toney')
   })
 
-  it('does not post a second notice for the same fixture', async () => {
+  it('does not post a second notice for the same fixture, and pushes nobody again', async () => {
     tables.notifications = { data: [{ id: 'n1' }], error: null }
     const res = await GET(authed())
     const body = await res.json()
     expect(body.results[0].already_notified).toBe(true)
     expect(inserted).toHaveLength(0)
+    expect(pushToUsers).not.toHaveBeenCalled()
+  })
+
+  it("chases a real club's own squad and pushes the silent players who have an account", async () => {
+    tables.clubs = { data: [{ id: 'r1', name: 'Real Town FC', is_demo: false, demo_writable: false }], error: null }
+    tables.players = { data: [{ id: 'p1', name: 'A Kane', user_id: 'u1' }, { id: 'p2', name: 'B Toney', user_id: 'u2' }, { id: 'p3', name: 'C Nolink', user_id: null }], error: null }
+    const res = await GET(authed())
+    const body = await res.json()
+    expect(body.results[0].chased).toEqual(['B Toney', 'C Nolink'])
+    expect(pushToUsers).toHaveBeenCalledTimes(1)
+    expect(pushToUsers.mock.calls[0][0]).toBe('r1')
+    expect(pushToUsers.mock.calls[0][1]).toEqual(['u2'])
+    expect(pushToUsers.mock.calls[0][2]).toMatchObject({ url: '/team', tag: 'call:f1' })
+    expect(body.results[0].pushed).toBe(1)
+  })
+
+  it('a push that throws never costs the chase its notice', async () => {
+    pushToUsers.mockRejectedValue(new Error('push service down'))
+    const res = await GET(authed())
+    const body = await res.json()
+    expect(res.status).toBe(200)
+    expect(inserted).toHaveLength(1)
+    expect(body.results[0].pushed).toBe(0)
   })
 
   it('reports DEGRADED rather than an empty chase when a query fails', async () => {
@@ -105,8 +133,8 @@ describe('availability chaser', () => {
     // Belstone, and a second real club the old name check would have chased
     tables.clubs = {
       data: [
-        { id: 'b', name: 'Belstone', demo_writable: false },
-        { id: 'r', name: 'Real Town FC', demo_writable: false },
+        { id: 'b', name: 'Belstone', is_demo: true, demo_writable: false },
+        { id: 'r', name: 'Public Data United', is_demo: true, demo_writable: false },
       ],
       error: null,
     }

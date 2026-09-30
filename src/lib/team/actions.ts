@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { CALL_STATUSES, CLUB_ROLES, NOTIFICATION_KINDS, type CallStatus, type ClubRole, type NotificationKind } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
+import { pushToClub } from "@/lib/push/send";
 
 /**
  * Server actions are reachable by direct POST, so every field is re-checked
@@ -93,6 +94,8 @@ export async function postNoticeAction(input: PostNoticeInput): Promise<{ ok: tr
       .select("id")
       .single();
     if (error) throw error;
+    // the tap on the shoulder; the notice row above is the record, so a push failure never fails the post
+    await pushToClub(viewer.club.id, audience, { title, body: body ?? undefined, url: "/team", tag: `notice:${data.id}` }, viewer.userId).catch(() => null);
     revalidatePath("/team");
     return { ok: true, id: data.id };
   } catch (e) {
