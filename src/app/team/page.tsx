@@ -33,9 +33,9 @@ export default async function TeamPage() {
     <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 py-7 sm:px-8 sm:py-9">
       <div className="mb-6 border-b border-line pb-4">
         {viewer.guest ? (
-          <p className="flex items-center gap-2 text-[13px] text-ink-dim">
-            <span aria-hidden className="inline-block h-2.5 w-2.5 border border-ink-dim" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink">notifications</span>
+          <p className="text-[13px] leading-relaxed text-ink-dim">
+            <span aria-hidden className="mr-2 inline-block h-2.5 w-2.5 border border-ink-dim align-[-1px]" />
+            <span className="mr-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink">notifications</span>
             come with a club account: the gaffer&apos;s notices and match calls, straight to your phone
           </p>
         ) : (

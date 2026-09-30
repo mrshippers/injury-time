@@ -188,11 +188,11 @@ export function NotifyToggle() {
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <span className="flex items-center gap-2 text-[13px] text-ink-dim">
-        <span aria-hidden className={`inline-block h-2.5 w-2.5 ${state === "on" ? "bg-mint" : "border border-ink-dim"}`} />
-        <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink">notifications</span>
+      <p className="min-w-0 flex-1 basis-60 text-[13px] leading-relaxed text-ink-dim">
+        <span aria-hidden className={`mr-2 inline-block h-2.5 w-2.5 align-[-1px] ${state === "on" ? "bg-mint" : "border border-ink-dim"}`} />
+        <span className="mr-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink">notifications</span>
         {line[state]}
-      </span>
+      </p>
       {state === "off" ? (
         <button type="button" className={PRIMARY} disabled={busy} onClick={turnOn}>
           {busy ? "turning on" : "turn on"}
