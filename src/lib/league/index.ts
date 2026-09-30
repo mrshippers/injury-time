@@ -42,7 +42,16 @@ export type RefreshReport = {
   progress: number;
   playersUpdated: string[];
   unmatched: string[];
+  /** what actually moved since the last run, not what was rewritten: this is the drift */
+  resultsChanged: string[];
+  playersChanged: string[];
+  /** a table dated this as_of was not there before */
+  tableNew: boolean;
 };
+
+/** "22 Sep v Maidenhead Town 5-1" */
+const resultLabel = (r: { match_date: string; opponent: string; goals_for: number; goals_against: number }) =>
+  `${r.match_date} v ${r.opponent} ${r.goals_for}-${r.goals_against}`;
 
 type Db = SupabaseClient<Database>;
 
@@ -50,6 +59,19 @@ type Db = SupabaseClient<Database>;
 export async function refreshSeason(db: Db, club: Pick<Club, "id" | "name" | "slug">, season: { source: SeasonSource; data: SeasonData }, today: string): Promise<RefreshReport> {
   const { data } = season;
   const cid = club.id;
+
+  // read what is there first, so the report can say what changed rather than what was rewritten
+  const [beforeRes, tableRes] = await Promise.all([
+    db.from("results").select("match_date, opponent, goals_for, goals_against, scorers").eq("club_id", cid),
+    db.from("league_standings").select("id").eq("club_id", cid).eq("as_of", data.asOf || today).limit(1),
+  ]);
+  if (beforeRes.error) throw beforeRes.error;
+  if (tableRes.error) throw tableRes.error;
+  const before = new Map((beforeRes.data ?? []).map((r) => [`${r.match_date}|${r.opponent}`, `${r.goals_for}-${r.goals_against}|${(r.scorers ?? []).join(",")}`]));
+  const resultsChanged = data.results
+    .filter((r) => before.get(`${r.match_date}|${r.opponent}`) !== `${r.goals_for}-${r.goals_against}|${r.scorers.join(",")}`)
+    .map(resultLabel);
+  const tableNew = data.standings.length > 0 && (tableRes.data ?? []).length === 0;
 
   if (data.results.length) {
     const { error } = await db.from("results").upsert(
@@ -113,8 +135,11 @@ export async function refreshSeason(db: Db, club: Pick<Club, "id" | "name" | "sl
     perPlayer.set(p.id, { ...(perPlayer.get(p.id) ?? {}), goals: g.goals });
   }
   const playersUpdated: string[] = [];
+  const playersChanged: string[] = [];
   for (const [id, stats] of perPlayer) {
     const current = list.find((p) => p.id === id)!;
+    const was = current.external_stats ?? {};
+    if ((stats.apps !== undefined && stats.apps !== was.apps) || (stats.goals !== undefined && stats.goals !== was.goals)) playersChanged.push(current.name);
     const merged: ExternalStats = { ...(current.external_stats ?? {}), ...stats, as_of: data.asOf || today, source: season.source };
     const { error } = await db.from("players").update({ external_stats: merged }).eq("id", id);
     if (error) throw error;
@@ -129,5 +154,8 @@ export async function refreshSeason(db: Db, club: Pick<Club, "id" | "name" | "sl
     progress: data.progress.length,
     playersUpdated,
     unmatched: [...new Set(unmatched)],
+    resultsChanged,
+    playersChanged,
+    tableNew,
   };
 }

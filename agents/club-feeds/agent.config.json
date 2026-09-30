@@ -1,0 +1,106 @@
+{
+  "name": "club-feeds",
+  "bucket": "Software",
+  "autonomous": true,
+  "model": {
+    "primary": "sonnet",
+    "fallback": "haiku",
+    "handoff": "haiku"
+  },
+  "harness": {
+    "role": "Nightly, pull each connected club's season from Football Web Pages with that club's OWN key, and leave the club its last good season when the feed fails.",
+    "context_sources": [
+      "supabase://ghkazaxuznltpxfzvxny/club_feed_keys (RLS on, no policies: service role only)",
+      "supabase://ghkazaxuznltpxfzvxny/clubs (fwp_team_id)",
+      "https://www.footballwebpages.co.uk/api (FWP-API-Key header, 10 requests a minute per key)"
+    ],
+    "constraints": [
+      "Injury Time holds no key of its own: a club without a key is not synced, never borrowed another's",
+      "one club at a time, at most three requests per club, inside the 10 a minute limit",
+      "writes only what the feed publishes: results, fixtures, standings, progress, players.external_stats",
+      "a failed sync never empties a season: the last good rows stay, the failure is written to that club's key row",
+      "never prints or returns a key"
+    ],
+    "done_when": "every club with a key has last_sync_at today and a last_sync_note that is either 'synced N results' or the reason it failed, and the run returns done, nothing-to-do (no keys) or degraded naming each failed club",
+    "verify_command": "npx vitest run tests/unit/club-feed.test.ts"
+  },
+  "tools": {
+    "allow": [
+      "supabase"
+    ]
+  },
+  "comms": {
+    "actuation": "club_feed_keys.last_sync_note, shown to that club's staff on /club; the run's own 503 on failure, visible in Vercel's cron log",
+    "note": "no email, no notification row: the club page is where a manager looks when their table looks wrong"
+  },
+  "memory": {
+    "store": "files",
+    "tier": [
+      "session",
+      "long_term"
+    ],
+    "lessons_ledger": "./LESSONS.md",
+    "learning_beats": [
+      "retrieve",
+      "record"
+    ]
+  },
+  "gate": {
+    "confidence_threshold": 0.75,
+    "max_gate_failures": 3
+  },
+  "loop": {
+    "time_cap_seconds": 300,
+    "heartbeat_seconds": 86400,
+    "warm_handover_to": "supabase://ghkazaxuznltpxfzvxny/club_feed_keys.last_sync_note (per club, read on /club)",
+    "circuit_breaker": {
+      "max_consecutive_tool_failures": 3,
+      "on_trip": "report_degraded"
+    }
+  },
+  "predeploy": {
+    "task_completion": true,
+    "verification_quality": true
+  },
+  "environment": "production",
+  "scope": [
+    "supabase://ghkazaxuznltpxfzvxny/club_feed_keys (read keys, write last_sync_*)",
+    "supabase://ghkazaxuznltpxfzvxny/clubs (season_source, season_synced_at)",
+    "supabase://ghkazaxuznltpxfzvxny/results",
+    "supabase://ghkazaxuznltpxfzvxny/fixtures",
+    "supabase://ghkazaxuznltpxfzvxny/league_standings",
+    "supabase://ghkazaxuznltpxfzvxny/league_progress",
+    "supabase://ghkazaxuznltpxfzvxny/players (external_stats column only)"
+  ],
+  "permissions": {
+    "enforced_at": "infrastructure",
+    "capabilities": {
+      "db_read": "club_feed_keys, clubs, players, results, league_standings",
+      "db_write": "results, fixtures, league_standings, league_progress, players.external_stats, clubs.season_*, club_feed_keys.last_sync_*",
+      "message_send": false,
+      "mint_child_key": false
+    },
+    "note": "route refuses without CRON_SECRET; keys sit in a table with RLS on and no policies, so only the service role reads them; each club is synced with its own key and every write keyed to that club's id"
+  },
+  "tenancy": {
+    "multi_tenant": true,
+    "isolation": "club_id",
+    "note": "one key per club, used only for that club's rows; a key is never tried against another club"
+  },
+  "audit": {
+    "store": "supabase://ghkazaxuznltpxfzvxny/club_feed_keys",
+    "retain_inbound": true,
+    "retention_days": 365,
+    "note": "last_sync_at and last_sync_note per club; the upstream response itself is not kept, the rows it produced are"
+  },
+  "actions": {
+    "idempotency_key": "upserts on natural keys: results (club_id, match_date, opponent), standings (club_id, as_of, team), progress (club_id, match_no); fixtures insert only the missing ones"
+  },
+  "runtime": {
+    "kind": "vercel_cron",
+    "path": "/api/cron/club-feeds",
+    "schedule": "15 6 * * *",
+    "source": "src/app/api/cron/club-feeds/route.ts",
+    "tests": "tests/unit/club-feed.test.ts"
+  }
+}

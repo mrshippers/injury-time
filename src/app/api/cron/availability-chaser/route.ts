@@ -22,7 +22,6 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase/env'
  */
 export const dynamic = 'force-dynamic'
 
-const CLUB_SLUG_EXCLUDED = 'Belstone'
 const MAX_CONSECUTIVE_FAILURES = 3
 
 type Degraded = { status: 'degraded'; reason: string; failures: number }
@@ -49,7 +48,9 @@ export async function GET(request: Request) {
   let failures = 0
   const degrade = (reason: string): Degraded => ({ status: 'degraded', reason, failures })
 
-  const clubs = await db.from('clubs').select('id, name').neq('name', CLUB_SLUG_EXCLUDED)
+  // only clubs open to try: a real club shown from public data (Belstone) has no
+  // calls to chase and is read-only since 0010. keyed on the column, not a name
+  const clubs = await db.from('clubs').select('id, name').eq('demo_writable', true)
   if (clubs.error) return Response.json(degrade(`clubs: ${clubs.error.message}`), { status: 503 })
   if (!clubs.data?.length) {
     return Response.json({ status: 'nothing-to-do', club: '-', chased: [] } satisfies Summary)

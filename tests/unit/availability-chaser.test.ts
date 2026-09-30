@@ -22,14 +22,18 @@ function builder(name: string) {
   const t = tables[name] ?? { data: [], error: null }
   const chain: Record<string, unknown> = {}
   const self = () => chain
-  for (const m of ['select', 'eq', 'neq', 'gte', 'order', 'limit']) chain[m] = self
-  chain.maybeSingle = async () => ({ data: t.data?.[0] ?? null, error: t.error })
+  // eq/neq really filter the rows, so a test can prove which clubs a query lets through
+  let rows = t.data
+  for (const m of ['select', 'gte', 'order', 'limit']) chain[m] = self
+  chain.eq = (col: string, v: unknown) => ((rows = rows?.filter((r) => !(col in r) || r[col] === v) ?? null), chain)
+  chain.neq = (col: string, v: unknown) => ((rows = rows?.filter((r) => !(col in r) || r[col] !== v) ?? null), chain)
+  chain.maybeSingle = async () => ({ data: rows?.[0] ?? null, error: t.error })
   chain.insert = async (row: Row) => {
     if (t.error) return { error: t.error }
     inserted.push(row)
     return { error: null }
   }
-  chain.then = (resolve: (v: TableData) => unknown) => resolve(t)
+  chain.then = (resolve: (v: TableData) => unknown) => resolve({ data: rows, error: t.error })
   return chain
 }
 
@@ -97,8 +101,15 @@ describe('availability chaser', () => {
     expect(inserted).toHaveLength(0)
   })
 
-  it('never chases Belstone', async () => {
-    tables.clubs = { data: [], error: null }
+  it('never chases a real club shown from public data, whatever it is called', async () => {
+    // Belstone, and a second real club the old name check would have chased
+    tables.clubs = {
+      data: [
+        { id: 'b', name: 'Belstone', demo_writable: false },
+        { id: 'r', name: 'Real Town FC', demo_writable: false },
+      ],
+      error: null,
+    }
     const res = await GET(authed())
     const body = await res.json()
     expect(body.results ?? []).toHaveLength(0)

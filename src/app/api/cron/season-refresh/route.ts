@@ -61,24 +61,35 @@ export async function GET(request: Request) {
     return Response.json({ status: 'degraded', reason: `write: ${(e as Error).message}` }, { status: 503 })
   }
 
-  const drifted = report.results > 0 || report.fixturesAdded > 0 || report.playersUpdated.length > 0
+  // drift is what moved since last night, not the rows rewritten: counting rewrites
+  // filed the same "10 results refreshed" notice every morning for weeks
+  const drifted = report.resultsChanged.length > 0 || report.fixturesAdded > 0 || report.playersChanged.length > 0 || report.tableNew
   if (!drifted) {
     return Response.json({ status: 'nothing-to-do', club: club.data.name, ran_at: new Date().toISOString(), report })
   }
 
-  // File what drifted, same channel as every other agent's finding: a
-  // notification row a human reads in the app, not a silent write.
   const summary = [
+    report.resultsChanged.length ? `new or changed results: ${report.resultsChanged.join('; ')}` : null,
     report.fixturesAdded ? `${report.fixturesAdded} fixture(s) added` : null,
-    report.results ? `${report.results} result row(s) refreshed` : null,
-    report.playersUpdated.length ? `${report.playersUpdated.length} player(s) updated` : null,
-    report.unmatched.length ? `${report.unmatched.length} name(s) unmatched: ${report.unmatched.join(', ')}` : null,
+    report.tableNew ? 'a newer league table' : null,
+    report.playersChanged.length ? `apps or goals moved for ${report.playersChanged.join(', ')}` : null,
+    report.unmatched.length ? `${report.unmatched.length} name(s) the feed gives that match no one, or more than one: ${report.unmatched.join(', ')}` : null,
   ].filter(Boolean).join('; ')
+
+  // idempotency key season-refresh:belstone:{run_date}: a rerun the same day files nothing new
+  const title = `Belstone season refreshed (${season.source})`
+  const dup = await db.from('notifications').select('id').eq('club_id', club.data.id).eq('title', title).gte('created_at', `${today}T00:00:00Z`).limit(1)
+  if (dup.error) {
+    return Response.json({ status: 'degraded', reason: `notify check: ${dup.error.message}`, report }, { status: 503 })
+  }
+  if ((dup.data ?? []).length) {
+    return Response.json({ status: 'done', already_notified: true, club: club.data.name, report })
+  }
 
   const write = await db.from('notifications').insert({
     club_id: club.data.id,
     kind: 'notice',
-    title: `Belstone season refreshed (${season.source})`,
+    title,
     body: summary,
     audience: ['manager', 'coach'],
   })

@@ -20,9 +20,9 @@
       "belstone only - this agent never touches Kilburn or any other club",
       "writes only what the league publishes: results, fixtures, standings, progress, and season-numbers on players",
       "never invents injuries, availability or training data for these real people",
-      "one notice per run, only when something actually drifted"
+      "one notice per run date, and only when something moved: a result new or changed, a fixture added, a newer table, apps or goals changed. rows rewritten with the same numbers are not drift"
     ],
-    "done_when": "a notifications row of kind 'notice' exists for today naming what drifted, or the run reports nothing-to-do because the feed had nothing new",
+    "done_when": "a notifications row of kind 'notice' exists for today naming what moved, or the run reports nothing-to-do because nothing moved since the last run",
     "verify_command": "npx vitest run tests/unit/season-refresh.test.ts"
   },
   "tools": {
@@ -80,7 +80,7 @@
       "message_send": false,
       "mint_child_key": false
     },
-    "note": "the route refuses without CRON_SECRET, and RLS scopes every write to the club row it read. neither depends on the model"
+    "note": "the route refuses without CRON_SECRET. since 0010 Belstone is read-only to anon, so this job writes with the service role: RLS does not scope it, the code does (one club row read by slug, every write keyed to its id). the table's own date comes from the data, never the run"
   },
   "tenancy": {
     "multi_tenant": false,
@@ -94,7 +94,7 @@
     "note": "the notice body is the diff itself: fixtures added, results refreshed, players updated, names the feed could not match"
   },
   "actions": {
-    "idempotency_key": "season-refresh:belstone:{run_date}"
+    "idempotency_key": "season-refresh:belstone:{run_date} (route checks for today's notice by title before filing)"
   },
   "runtime": {
     "kind": "vercel_cron",

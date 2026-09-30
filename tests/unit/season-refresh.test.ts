@@ -26,8 +26,9 @@ function builder(name: string) {
   const t = tables[name] ?? { data: null, error: null }
   const chain: Record<string, unknown> = {}
   const self = () => chain
-  for (const m of ['select', 'eq']) chain[m] = self
+  for (const m of ['select', 'eq', 'gte']) chain[m] = self
   chain.maybeSingle = async () => ({ data: t.data, error: t.error })
+  chain.limit = async () => ({ data: t.data, error: t.error })
   chain.insert = async (row: Row) => {
     if (t.error) return { error: t.error }
     inserted.push(row)
@@ -50,7 +51,7 @@ const { GET } = await import('@/app/api/cron/season-refresh/route')
 const authed = () =>
   new Request('http://x/api/cron/season-refresh', { headers: { authorization: 'Bearer s3cret' } })
 
-const emptyReport = { source: 'snapshot', results: 0, fixturesAdded: 0, standings: 0, progress: 0, playersUpdated: [], unmatched: [] }
+const emptyReport = { source: 'snapshot', results: 0, fixturesAdded: 0, standings: 0, progress: 0, playersUpdated: [], unmatched: [], resultsChanged: [], playersChanged: [], tableNew: false }
 
 beforeEach(() => {
   process.env.CRON_SECRET = 's3cret'
@@ -87,8 +88,10 @@ describe('season refresh', () => {
     refreshSeason.mockResolvedValue({
       ...emptyReport,
       fixturesAdded: 2,
-      results: 1,
+      results: 17,
+      resultsChanged: ['2026-09-22 v Maidenhead Town 5-1'],
       playersUpdated: ['A Kane'],
+      playersChanged: ['A Kane'],
       unmatched: ['J Smith'],
     })
     const res = await GET(authed())
@@ -99,6 +102,26 @@ describe('season refresh', () => {
     expect(inserted[0].kind).toBe('notice')
     expect(inserted[0].body).toContain('2 fixture(s) added')
     expect(inserted[0].body).toContain('J Smith')
+    expect(inserted[0].body).toContain('Maidenhead Town 5-1')
+  })
+
+  it('a night that rewrote every row but changed nothing is nothing-to-do, not a notice', async () => {
+    // what prod did for weeks: 10 results upserted, 20 players rewritten, same numbers, a notice every morning
+    refreshSeason.mockResolvedValue({ ...emptyReport, results: 10, standings: 22, progress: 9, playersUpdated: Array(20).fill('x'), unmatched: ['Kimber'] })
+    const res = await GET(authed())
+    const body = await res.json()
+    expect(body.status).toBe('nothing-to-do')
+    expect(inserted).toHaveLength(0)
+  })
+
+  it('a second run the same day files nothing new', async () => {
+    refreshSeason.mockResolvedValue({ ...emptyReport, tableNew: true })
+    tables.notifications = { data: [{ id: 'n1' }], error: null }
+    const res = await GET(authed())
+    const body = await res.json()
+    expect(body.status).toBe('done')
+    expect(body.already_notified).toBe(true)
+    expect(inserted).toHaveLength(0)
   })
 
   it('reports DEGRADED, not nothing-to-do, when the club lookup fails', async () => {

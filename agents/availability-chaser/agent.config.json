@@ -80,7 +80,7 @@
   "tenancy": {
     "multi_tenant": true,
     "isolation": "club_slug",
-    "note": "two clubs share this agent. Belstone is real and public-data-only, Kilburn is fictional. the boundary is the club slug and it is enforced on the key, not in the constraints"
+    "note": "clubs open to try (clubs.demo_writable) only. a real club shown from public data is never chased: the query filters on the column, and anon cannot write there anyway since 0010. was a name match on 'Belstone' until 30 Sep 2026"
   },
   "audit": {
     "store": "supabase://ghkazaxuznltpxfzvxny/notifications",
