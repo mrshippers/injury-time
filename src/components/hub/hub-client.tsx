@@ -8,6 +8,7 @@
 import { useState, useTransition } from "react";
 
 import { saveHubAction, type HubState } from "@/lib/hub/actions";
+import { mintClaimAction } from "@/lib/hub/claim";
 import { POSITION_WORD, type Moment } from "@/lib/hub/hub";
 import { setCallAction } from "@/lib/team/actions";
 import { CALL_STATUSES, FEET, HUB_POSITIONS, type CallStatus, type HubProfile } from "@/lib/types";
@@ -202,5 +203,55 @@ export function ShareLink({ path }: { path: string }) {
     >
       {copied ? "link copied" : "copy my link"}
     </button>
+  );
+}
+
+/** Manager or coach: make the link that hands this page to the player. A new link kills the old one. */
+export function HandOver({ playerId, firstName }: { playerId: string; firstName: string }) {
+  const [link, setLink] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [pending, start] = useTransition();
+  return (
+    <div>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          className={PRIMARY}
+          disabled={pending}
+          onClick={() =>
+            start(async () => {
+              const r = await mintClaimAction(playerId);
+              if (r.ok) {
+                setLink(new URL(r.path, window.location.origin).toString());
+                setError(null);
+              } else setError(r.error);
+            })
+          }
+        >
+          {pending ? "making it" : link ? "make a new link" : `hand it to ${firstName}`}
+        </button>
+        {link ? (
+          <button
+            type="button"
+            className={GHOST}
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(link);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1600);
+              } catch {
+                setCopied(false);
+              }
+            }}
+          >
+            {copied ? "copied" : "copy the link"}
+          </button>
+        ) : null}
+      </div>
+      {link ? <p className="num mt-3 break-all text-[12.5px] text-ink-dim">{link}</p> : null}
+      {link ? <p className="mt-2 text-[12.5px] text-ink-faint">{`send it to ${firstName} however you talk: the team chat is fine. a new link stops this one working.`}</p> : null}
+      {error ? <p role="alert" className="mt-3 text-[13px] text-doubt">{error}</p> : null}
+    </div>
   );
 }

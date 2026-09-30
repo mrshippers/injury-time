@@ -392,6 +392,18 @@ export type Database = {
         Args: { token: string }
         Returns: 'withdrawn' | 'unknown_link'
       }
+      mint_player_claim: {
+        Args: { pid: string }
+        Returns: string
+      }
+      claim_status: {
+        Args: { token: string }
+        Returns: { first_name: string; club_name: string; claimed: boolean }[]
+      }
+      claim_player: {
+        Args: { token: string }
+        Returns: string
+      }
     }
   }
 }

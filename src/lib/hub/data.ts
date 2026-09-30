@@ -30,6 +30,12 @@ export type Hub = {
   /** the viewer is this player (or a guest trying the demo on them): they can call in or out */
   canCall: boolean;
   readOnly: boolean;
+  /** the player's own account is linked: the page is theirs */
+  claimed: boolean;
+  /** a real club's manager or coach can hand the page over with a link */
+  canHandOver: boolean;
+  /** a guest trying the demo: show how handing over works, without a button */
+  demoHandOver: boolean;
 };
 
 const DAY = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "Europe/London" });
@@ -112,5 +118,8 @@ export async function getHub(playerId: string): Promise<Hub | null> {
     canEdit: !viewer.readOnly && (own || staff || viewer.guest),
     canCall: !viewer.readOnly && (own || viewer.guest),
     readOnly: viewer.readOnly,
+    claimed: p.user_id !== null,
+    canHandOver: !viewer.guest && staff && !club.is_demo,
+    demoHandOver: viewer.guest && club.demo_writable,
   };
 }

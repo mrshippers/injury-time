@@ -9,5 +9,8 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     await supabase.auth.exchangeCodeForSession(code);
   }
-  return NextResponse.redirect(new URL("/squad", url.origin));
+  // back to where the sign-in started (a claim link), same site only: "/x" yes, "//evil" and "https://" no
+  const next = url.searchParams.get("next");
+  const safe = next && /^\/(?![\/\\])/.test(next) ? next : "/squad";
+  return NextResponse.redirect(new URL(safe, url.origin));
 }

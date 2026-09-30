@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { HubCall, HubEditor, ShareLink } from "@/components/hub/hub-client";
+import { HandOver, HubCall, HubEditor, ShareLink } from "@/components/hub/hub-client";
 import { Shirt } from "@/components/hub/shirt";
 import { getHub, shortDate } from "@/lib/hub/data";
 import { POSITION_WORD } from "@/lib/hub/hub";
@@ -237,6 +237,30 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
           </div>
         ) : null}
       </Section>
+
+      {hub.claimed || hub.canHandOver || hub.demoHandOver ? (
+        <Section label="whose page" className="mt-14 border-t border-line pt-10">
+          {hub.claimed ? (
+            <p className="flex items-center gap-3 text-[14px] text-ink">
+              <span aria-hidden className="inline-block h-2.5 w-2.5 bg-mint" />
+              {`claimed: ${first} runs this page from their own account`}
+            </p>
+          ) : hub.canHandOver ? (
+            <>
+              <p className="mb-4 flex items-center gap-3 text-[14px] text-ink-dim">
+                <span aria-hidden className="inline-block h-2.5 w-2.5 border border-ink-dim" />
+                {`not claimed yet. hand it over and ${first} fills it in from their own phone.`}
+              </p>
+              <HandOver playerId={player.id} firstName={first} />
+            </>
+          ) : (
+            <p className="max-w-[62ch] text-[14px] text-ink-dim">
+              <span aria-hidden className="mr-3 inline-block h-2.5 w-2.5 border border-ink-dim align-middle" />
+              {`on a real club the manager hands this page over with a link: ${first} signs in with an email, says it's them, and it's theirs. the demo can't, its players are made up.`}
+            </p>
+          )}
+        </Section>
+      ) : null}
     </main>
   );
 }
