@@ -42,7 +42,7 @@ export default async function ClubPage() {
     : viewer.role !== "manager"
       ? "Only the club's manager connects the league feed."
       : null;
-  const resultAllowed = viewer.guest ? club.season_source === "manual" : viewer.role === "manager" || viewer.role === "coach";
+  const resultAllowed = viewer.guest ? !viewer.readOnly && club.season_source === "manual" : viewer.role === "manager" || viewer.role === "coach";
   const resultReason = viewer.guest && club.season_source !== "manual"
     ? `${club.name} is a real club shown from its public data, so results are not typed in here.`
     : !resultAllowed

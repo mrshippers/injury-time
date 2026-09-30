@@ -63,7 +63,7 @@ export async function removeFeedKeyAction(): Promise<ActionState> {
  */
 export async function addResultAction(input: ResultInput): Promise<ActionState> {
   const viewer = await getViewer();
-  if (viewer.guest && viewer.club.season_source !== "manual") {
+  if (viewer.readOnly || (viewer.guest && viewer.club.season_source !== "manual")) {
     return { ok: false, message: `${viewer.club.name} is a real club shown from its public data; results are not typed in here` };
   }
   if (!viewer.guest && viewer.role !== "manager" && viewer.role !== "coach") return { ok: false, message: "only the manager or a coach enters results" };

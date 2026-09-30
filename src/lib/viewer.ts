@@ -19,6 +19,8 @@ export type Viewer = {
   club: Club;
   role: ClubRole;
   guest: boolean;
+  /** a guest on a real club shown from public data: sees everything, changes nothing */
+  readOnly: boolean;
   /** the player row linked to this user, if they are a player */
   playerId: string | null;
   can: (capability: Capability) => boolean;
@@ -90,7 +92,8 @@ export async function getViewer(): Promise<Viewer> {
     role,
     guest,
     playerId,
-    can: (capability) => can(role, capability),
+    readOnly: guest && !club.demo_writable,
+    can: (capability) => !(guest && !club.demo_writable) && can(role, capability),
   };
 }
 

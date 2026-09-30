@@ -36,6 +36,11 @@ function builder(name: string) {
   return chain
 }
 
+// the route writes with the service role since Belstone went read-only (0010)
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: () => ({ from: (name: string) => builder(name) }),
+}))
+
 vi.mock('@supabase/supabase-js', () => ({
   createClient: () => ({ from: (name: string) => builder(name) }),
 }))

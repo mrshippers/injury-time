@@ -1,6 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
-
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase/env'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { loadSeason, refreshSeason } from '@/lib/league'
 import belstoneSnapshot from '../../../../../scripts/belstone-2026-27.json'
 import type { Snapshot } from '@/lib/league/normalise'
@@ -34,7 +32,9 @@ export async function GET(request: Request) {
   const offered = request.headers.get('authorization')
   if (!secret || offered !== `Bearer ${secret}`) return unauthorised()
 
-  const db = createClient(SUPABASE_URL(), SUPABASE_ANON_KEY())
+  // Belstone is read-only to everyone but the server (0010), so this job writes
+  // with the service role; the anon key it used before is now refused.
+  const db = createAdminClient()
 
   const club = await db.from('clubs').select('id, name, slug, season').eq('slug', CLUB_SLUG).maybeSingle()
   if (club.error) {

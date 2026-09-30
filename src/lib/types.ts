@@ -72,6 +72,8 @@ export type Club = {
   settings: ClubSettings
   /** where the season on screen came from; the hub names it, never "live" for a snapshot */
   season_source: SeasonSourceKind
+  /** a demo club anyone may try writes on (fictional Kilburn); false = read-only to guests (real Belstone) */
+  demo_writable: boolean
   season_synced_at: TimestampString | null
   created_at: TimestampString
 }
@@ -224,7 +226,7 @@ export type Database = {
     Tables: {
       clubs: {
         Row: Club
-        Insert: Insertable<Club, 'is_demo' | 'slug' | 'ground' | 'division' | 'season' | 'founded' | 'fwp_team_id' | 'colours' | 'settings' | 'season_source' | 'season_synced_at'>
+        Insert: Insertable<Club, 'is_demo' | 'slug' | 'ground' | 'division' | 'season' | 'founded' | 'fwp_team_id' | 'colours' | 'settings' | 'season_source' | 'season_synced_at' | 'demo_writable'>
         Update: Partial<Club>
         Relationships: []
       }

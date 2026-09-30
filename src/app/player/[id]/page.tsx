@@ -20,7 +20,7 @@ export default async function PlayerPage(props: PageProps<"/player/[id]">) {
   if (!profile) notFound();
 
   const defaultMode = profile.club.settings?.health_language ?? "plain";
-  const canEditBody = viewer.guest || viewer.can("edit_body");
+  const canEditBody = viewer.can("edit_body") || (viewer.guest && !viewer.readOnly);
   const current = profile.injuries.find((i) => i.resolved_on === null) ?? null;
   let rtpSteps: RtpStep[] = [];
   if (current) {

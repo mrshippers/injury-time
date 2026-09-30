@@ -84,7 +84,7 @@ export default async function Home() {
           {viewer.guest ? (
             <>
               <span aria-hidden className="text-line-strong">/</span>
-              <span>looking as a guest manager</span>
+              <span>{viewer.readOnly ? "a real club, read only: switch to Kilburn Athletic to try everything" : "looking as a guest manager"}</span>
             </>
           ) : null}
         </p>

@@ -17,6 +17,7 @@ export type SaveBodyResult = { ok: true; params: BodyParams | null } | { ok: fal
  */
 export async function saveBodyParams(playerId: string, input: unknown): Promise<SaveBodyResult> {
   const viewer = await getViewer();
+  if (viewer.readOnly) return { ok: false, error: "this club is read-only: a real club shown from its public data" };
   if (!viewer.guest && !viewer.can("edit_body")) return { ok: false, error: "only medical staff can change measurements" };
   if (typeof playerId !== "string" || !/^[0-9a-f-]{36}$/i.test(playerId)) return { ok: false, error: "bad player" };
 
