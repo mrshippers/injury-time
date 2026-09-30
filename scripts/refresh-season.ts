@@ -6,8 +6,8 @@
  * With FWP_API_KEY and FWP_TEAM_ID in the environment it reads Football Web
  * Pages; otherwise it reads scripts/<slug>-<season>.json. Either way it goes
  * through the same normaliser and the same upserts as the app would.
- * Supabase URL and anon key come from .env.local (row level security lets a
- * public club be written by anyone, a private club only by its staff).
+ * Supabase URL and the service role key come from .env.local: Belstone is
+ * read-only to everyone else since 0010.
  */
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
@@ -31,9 +31,9 @@ async function main() {
   loadEnvLocal();
   const slug = process.argv[2] ?? "belstone";
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) throw new Error("NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY missing");
-  const db = createClient<Database>(url, key);
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error("NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY missing");
+  const db = createClient<Database>(url, key, { auth: { persistSession: false } });
 
   const { data: club, error } = await db.from("clubs").select("*").eq("slug", slug).maybeSingle();
   if (error) throw error;

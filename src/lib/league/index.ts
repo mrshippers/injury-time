@@ -61,7 +61,8 @@ export async function refreshSeason(db: Db, club: Pick<Club, "id" | "name" | "sl
 
   if (data.standings.length) {
     const { error } = await db.from("league_standings").upsert(
-      data.standings.map((s) => ({ ...s, as_of: today, club_id: cid })),
+      // dated by the table itself, not the run: a snapshot read today is still the 26 sep table
+      data.standings.map((s) => ({ ...s, as_of: data.asOf || today, club_id: cid })),
       { onConflict: "club_id,as_of,team" },
     );
     if (error) throw error;
@@ -114,7 +115,7 @@ export async function refreshSeason(db: Db, club: Pick<Club, "id" | "name" | "sl
   const playersUpdated: string[] = [];
   for (const [id, stats] of perPlayer) {
     const current = list.find((p) => p.id === id)!;
-    const merged: ExternalStats = { ...(current.external_stats ?? {}), ...stats, as_of: today, source: season.source };
+    const merged: ExternalStats = { ...(current.external_stats ?? {}), ...stats, as_of: data.asOf || today, source: season.source };
     const { error } = await db.from("players").update({ external_stats: merged }).eq("id", id);
     if (error) throw error;
     playersUpdated.push(current.name);

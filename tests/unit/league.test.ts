@@ -39,26 +39,26 @@ describe("scorers", () => {
   });
   it("tallies the season from the snapshot", () => {
     const goals = Object.fromEntries(goalsByScorer(season.results).map((g) => [g.name, g.goals]));
-    expect(goals.Mcnally).toBe(4);
-    expect(goals.Gavin).toBe(4);
-    expect(goals.Tomkins).toBe(3);
-    expect(goals.Kimber).toBe(2);
-    expect(goals.Camara).toBe(2);
-    expect(goals.Ocran).toBe(2);
-    expect(goals.Joaquim).toBe(2);
+    expect(goals.Mcnally).toBe(7);
+    expect(goals.Gavin).toBe(6);
+    expect(goals.Thomaj).toBe(5);
+    expect(goals.Akinbulumo).toBe(4);
+    expect(goals.Tomkins).toBe(4);
+    expect(goals.Kimber).toBe(3);
+    expect(goals["Agyeman-Duah"]).toBe(2);
+    expect(goals.Ndukuba).toBe(2);
     expect(goals.Gilmas).toBe(1);
-    expect(goals.Ndukuba).toBe(1);
     const total = Object.values(goals).reduce((a, b) => a + b, 0);
-    // every league goal has a name on the feed; the two Vase goals do not
-    expect(total).toBe(21);
+    // 42 scored in every competition to 26 sep; the two at Enfield in the Vase have no names on the feed
+    expect(total).toBe(40);
   });
 });
 
 describe("the snapshot as a season", () => {
   it("splits played from still to play", () => {
-    expect(season.results).toHaveLength(10);
-    expect(season.fixtures).toHaveLength(36);
-    expect(season.fixtures[0]).toEqual({ match_date: "2026-09-05", kickoff: "15:00", opponent: "Westside", venue: "H", competition: "Combined Counties Div 1" });
+    expect(season.results).toHaveLength(17);
+    expect(season.fixtures).toHaveLength(31);
+    expect(season.fixtures[0]).toEqual({ match_date: "2026-10-03", kickoff: "15:00", opponent: "Woodley United", venue: "A", competition: "Combined Counties Div 1" });
     expect(season.results[0].scorers).toEqual(["Joaquim", "Ocran", "Camara", "Gavin"]);
     expect(season.results[0].ht_for).toBe(1);
   });
@@ -67,19 +67,19 @@ describe("the snapshot as a season", () => {
     const us = ourStanding(season.standings)!;
     expect(us.team).toBe("Belstone");
     expect(us.position).toBe(6);
-    expect([us.played, us.won, us.drawn, us.lost, us.gf, us.ga, us.gd, us.points]).toEqual([9, 6, 0, 3, 21, 9, 12, 18]);
-    expect(us.home).toEqual({ p: 4, w: 4, d: 0, l: 0 });
+    expect([us.played, us.won, us.drawn, us.lost, us.gf, us.ga, us.gd, us.points]).toEqual([14, 8, 3, 3, 31, 14, 17, 27]);
+    expect(us.home).toEqual({ p: 7, w: 6, d: 1, l: 0 });
   });
   it("league results alone make the points line, and the table agrees", () => {
-    expect(season.progress).toHaveLength(9);
-    expect(season.progress[season.progress.length - 1]).toEqual({ match_no: 9, match_date: "2026-09-02", points: 18, position: 6 });
-    expect(season.progress.map((p) => p.points)).toEqual([3, 6, 6, 9, 12, 12, 12, 15, 18]);
+    expect(season.progress).toHaveLength(14);
+    expect(season.progress[season.progress.length - 1]).toEqual({ match_no: 14, match_date: "2026-09-22", points: 27, position: 6 });
+    expect(season.progress.map((p) => p.points)).toEqual([3, 6, 6, 9, 12, 12, 12, 15, 18, 21, 22, 23, 24, 27]);
     expect(progressFrom([], null)).toEqual([]);
   });
   it("carries appearances and form", () => {
     expect(season.appearances).toHaveLength(20);
-    expect(season.appearances[0]).toEqual({ name: "Daniel Flynn", apps: 9 });
-    expect(formLetters(season.results)).toEqual(["W", "W", "L", "L", "W", "W"]);
+    expect(season.appearances[0]).toEqual({ name: "Daniel Flynn", apps: 15 });
+    expect(formLetters(season.results)).toEqual(["D", "W", "D", "D", "W", "W"]);
   });
 });
 
