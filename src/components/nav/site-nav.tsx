@@ -50,7 +50,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
       <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center justify-between gap-2 px-3 sm:px-8">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <Link href="/" className="pressable display flex shrink-0 items-center gap-1.5 text-[17px] leading-none text-ink" aria-label="injury time, hub">
-            <Mark size={26} className="-mt-0.5 shrink-0" />
+            <Mark height={19} className="shrink-0" />
             {/* on a phone the mark is the brand; the club picker and role need the room */}
             <span className="hidden sm:inline">
               injury time
