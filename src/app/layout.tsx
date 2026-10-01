@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Manrope, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { PhoneTabBar, SiteNav } from "@/components/nav/site-nav";
-import { InstallNudge, ServiceWorker } from "@/components/pwa/pwa";
+import { InstallNudge, ServiceWorker, TouchFeel } from "@/components/pwa/pwa";
 import { getViewer, listPublicClubs } from "@/lib/viewer";
 
 const manrope = Manrope({
@@ -44,6 +44,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <PhoneTabBar />
         <InstallNudge />
         <ServiceWorker />
+        <TouchFeel />
       </body>
     </html>
   );

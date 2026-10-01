@@ -206,3 +206,43 @@ export function NotifyToggle() {
     </div>
   );
 }
+
+/**
+ * Touch feel, app-wide. iOS Safari only paints :active when something listens
+ * for touchstart, so without this no press ever showed. Every tap on a control
+ * also gets a tick: vibrate where the browser has it (Android), and on iPhone
+ * (iOS 18+, no vibrate API) a click on a hidden native switch, which is the one
+ * thing Safari lets the web fire a haptic from.
+ */
+export function TouchFeel() {
+  useEffect(() => {
+    const noopTouch = () => {};
+    document.addEventListener("touchstart", noopTouch, { passive: true });
+
+    const label = document.createElement("label");
+    label.setAttribute("aria-hidden", "true");
+    label.style.cssText = "position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;left:-9px;top:0";
+    const sw = document.createElement("input");
+    sw.type = "checkbox";
+    sw.tabIndex = -1;
+    sw.setAttribute("switch", "");
+    label.appendChild(sw);
+    document.body.appendChild(label);
+    const canVibrate = typeof navigator.vibrate === "function";
+
+    const onClick = (e: MouseEvent) => {
+      if (label.contains(e.target as Node)) return;
+      const el = (e.target as Element | null)?.closest?.('button:not(:disabled), a[href], [role="button"], [role="tab"], label, summary');
+      if (!el || !window.matchMedia("(pointer: coarse)").matches) return;
+      if (canVibrate) navigator.vibrate(8);
+      else label.click();
+    };
+    document.addEventListener("click", onClick, true);
+    return () => {
+      document.removeEventListener("touchstart", noopTouch);
+      document.removeEventListener("click", onClick, true);
+      label.remove();
+    };
+  }, []);
+  return null;
+}

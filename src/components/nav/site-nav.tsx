@@ -45,7 +45,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
   return (
     <nav
       aria-label="modules"
-      className="sticky top-0 z-30 border-b border-line bg-pitch/85 backdrop-blur-md"
+      className="sticky top-0 z-30 border-b border-line bg-pitch/85 pt-[env(safe-area-inset-top)] backdrop-blur-md"
     >
       <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center justify-between gap-2 px-3 sm:px-8">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
@@ -130,33 +130,41 @@ export function PhoneTabBar() {
   const pathname = usePathname() ?? "/";
   if (pathname.startsWith("/login") || pathname.startsWith("/auth") || pathname.startsWith("/checkin")) return null;
   return (
-    <nav
-      aria-label="modules"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line-strong bg-panel sm:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)", boxShadow: "inset 0 1px 0 0 var(--sheen-edge)" }}
-    >
-      <ul className="grid h-14 grid-cols-6">
+    <nav aria-label="modules" className="tabbar fixed inset-x-0 bottom-0 z-30 sm:hidden">
+      <ul className="grid grid-cols-6 px-1.5 pt-1.5">
         {MODULES.map((m) => {
           const active = m.match(pathname);
           return (
-            <li key={m.href} className="relative">
+            <li key={m.href}>
               <Link
                 href={m.href}
                 aria-current={active ? "page" : undefined}
-                className={`pressable flex h-full min-h-[44px] items-center justify-center text-[13px] font-semibold tracking-[0.06em] outline-none transition-colors duration-[190ms] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
-                  active ? "text-ink" : "text-ink-dim"
-                }`}
+                className={`pressable tab ${active ? "is-active" : ""}`}
               >
-                {m.label}
+                <TabIcon name={m.label} />
+                <span>{m.label}</span>
               </Link>
-              <span
-                aria-hidden
-                className={`absolute inset-x-3 top-0 h-[2px] bg-mint transition-opacity duration-[190ms] ${active ? "opacity-100 glow-mint" : "opacity-0"}`}
-              />
             </li>
           );
         })}
       </ul>
     </nav>
+  );
+}
+
+/** One-stroke glyphs, drawn on the same 24 grid, round caps: lines, not boxes. */
+function TabIcon({ name }: { name: string }) {
+  const d: Record<string, string> = {
+    hub: "M4 11.5 12 5l8 6.5M6.5 10v8.5h11V10",
+    squad: "M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.5 8c.6-3 2.9-5 5.5-5s4.9 2 5.5 5M16 5.2a3 3 0 0 1 0 5.6M18 14.4c1.4.8 2.3 2.4 2.6 4.6",
+    team: "M5 6.5h14M5 12h14M5 17.5h9",
+    film: "M4.5 7.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-9Zm11 3.5 4-2.5v7l-4-2.5",
+    log: "M12 7v5l3 2M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z",
+    club: "M12 4c2.5 1.6 5 2.2 7 2.2 0 6.3-2.6 10.6-7 13.3-4.4-2.7-7-7-7-13.3 2 0 4.5-.6 7-2.2Z",
+  };
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d={d[name]} />
+    </svg>
   );
 }

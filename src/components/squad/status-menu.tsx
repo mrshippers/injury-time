@@ -107,7 +107,8 @@ export function StatusMenu({
 
   useEffect(() => {
     if (!shown) return;
-    panelRef.current?.querySelector<HTMLElement>("input, select, button")?.focus();
+    // preventScroll: on iOS a focus that scrolls fires the scroll-close below
+    panelRef.current?.querySelector<HTMLElement>("input, select, button")?.focus({ preventScroll: true });
   }, [shown]);
 
   useEffect(() => {
@@ -117,10 +118,15 @@ export function StatusMenu({
       if (panelRef.current?.contains(target) || triggerRef.current?.contains(target)) return;
       close(false);
     };
+    // a phone sheet is pinned to the bottom, so scrolling and the keyboard
+    // resizing the viewport must not close it; a desk popover is anchored, so they do
+    const sheet = window.matchMedia("(max-width: 639px)").matches;
     const onScrollOrResize = () => close(false);
     document.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("resize", onScrollOrResize);
-    window.addEventListener("scroll", onScrollOrResize, true);
+    if (!sheet) {
+      window.addEventListener("resize", onScrollOrResize);
+      window.addEventListener("scroll", onScrollOrResize, true);
+    }
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("resize", onScrollOrResize);
@@ -185,11 +191,14 @@ export function StatusMenu({
         aria-expanded={mounted}
         aria-label={`set availability for ${playerName}`}
         onClick={() => (mounted ? close(true) : open())}
-        className="pressable num relative z-10 rounded-[2px] border border-line px-1.5 py-1 text-[10.5px] tracking-[0.08em] text-ink-dim hover:border-line-strong hover:bg-panel-2 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint focus-visible:-outline-offset-1"
+        className="pressable ghost-chip num relative z-10 rounded-[2px] border border-line px-1.5 py-1 text-[10.5px] tracking-[0.08em] text-ink-dim hover:border-line-strong hover:bg-panel-2 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint focus-visible:-outline-offset-1"
       >
         SET
       </button>
 
+      {mounted && placement ? (
+        <div aria-hidden className={`sheet-scrim sm:hidden ${shown ? "is-shown" : ""}`} />
+      ) : null}
       {mounted && placement ? (
         <div
           ref={panelRef}
@@ -204,7 +213,7 @@ export function StatusMenu({
             width: Math.min(PANEL_WIDTH, typeof window === "undefined" ? PANEL_WIDTH : window.innerWidth - 16),
             transformOrigin: placement.origin,
           }}
-          className={`fixed z-50 border border-line-strong bg-panel-2 p-3 text-left shadow-[0_18px_44px_rgba(0,0,0,0.55)] transition-[opacity,transform] duration-[190ms] ease-[var(--ease-out-strong)] motion-reduce:transition-opacity ${
+          className={`status-sheet fixed z-50 border border-line-strong bg-panel-2 p-3 text-left shadow-[0_18px_44px_rgba(0,0,0,0.55)] transition-[opacity,transform] duration-[190ms] ease-[var(--ease-out-strong)] motion-reduce:transition-opacity ${
             shown ? "scale-100 opacity-100" : "scale-[0.97] opacity-0 motion-reduce:scale-100"
           }`}
         >

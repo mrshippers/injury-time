@@ -15,6 +15,7 @@ import type { AvailabilityStatus, ExternalStats, Position } from "@/lib/types";
 
 import { ConditionBar } from "./condition-bar";
 import { EditPlayerRow, SetPositionControl } from "./player-forms";
+import { shortDate } from "./format";
 import { StatusPill } from "./status-pill";
 import { StatusMenu } from "./status-menu";
 
@@ -44,6 +45,16 @@ function positionConfirmed(r: SquadRow): boolean {
   const s = r.player.external_stats as (ExternalStats & { position_confirmed?: boolean }) | null;
   return s?.position_confirmed !== false;
 }
+
+const PHONE_SORTS: { key: SortKey; dir: Dir; label: string }[] = [
+  { key: "number", dir: "asc", label: "by number" },
+  { key: "name", dir: "asc", label: "by name" },
+  { key: "position", dir: "asc", label: "by position" },
+  { key: "status", dir: "desc", label: "out first" },
+  { key: "training", dir: "desc", label: "red zone first" },
+  { key: "played", dir: "asc", label: "most played" },
+  { key: "goals", dir: "asc", label: "most goals" },
+];
 
 const HEAD = "annot sticky top-0 z-20 border-b border-line-strong bg-panel px-2 py-1.5 text-left font-normal";
 const CELL = "px-2 align-middle";
@@ -180,11 +191,46 @@ export function SquadList({
           placeholder="find a name"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          className={`${SELECT} min-w-0 flex-1 placeholder:text-ink-faint`}
+          className={`${SELECT} min-w-0 flex-1 placeholder:text-ink-faint max-sm:order-first max-sm:basis-full`}
         />
+        <select
+          aria-label="sort by"
+          className={`${SELECT} sm:hidden`}
+          value={`${sort.key}:${sort.dir}`}
+          onChange={(e) => {
+            const [key, dir] = e.target.value.split(":") as [SortKey, Dir];
+            setSort({ key, dir });
+          }}
+        >
+          {PHONE_SORTS.map((o) => (
+            <option key={`${o.key}:${o.dir}`} value={`${o.key}:${o.dir}`}>
+              {o.label}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <table className="w-full table-fixed border-collapse">
+      {/* phone: one card per player, nothing the desk table has is missing */}
+      <ul className="divide-y divide-line sm:hidden" aria-label="squad list">
+        {shown.map((row) => (
+          <SquadCard
+            key={row.player.id}
+            row={row}
+            selected={selectedPlayer === row.player.id}
+            onPitch={inXI.has(row.player.id)}
+            maxLoad={maxLoad}
+            canManage={canManage}
+            editing={editing === row.player.id}
+            onEdit={() => setEditing((e) => (e === row.player.id ? null : row.player.id))}
+            onDone={() => setEditing(null)}
+            onSelect={() => onSelect(row.player.id)}
+            onToggleIn={onToggleIn ? () => onToggleIn(row.player.id) : undefined}
+            positionConfirmed={positionConfirmed(row)}
+          />
+        ))}
+      </ul>
+
+      <table className="hidden w-full table-fixed border-collapse sm:table">
         <caption className="sr-only">Squad list: drag a name onto the pitch, or select a name and then a slot.</caption>
         <colgroup>
           <col className="w-9 sm:w-10" />
@@ -389,5 +435,99 @@ function SquadListRow({
         </tr>
       ) : null}
     </>
+  );
+}
+
+/**
+ * The phone row. Two lines instead of eight columns: who he is and whether he
+ * can play on top, the numbers underneath, the two thumb actions on the right.
+ */
+function SquadCard({
+  row,
+  selected,
+  onPitch,
+  maxLoad,
+  canManage,
+  editing,
+  onEdit,
+  onDone,
+  onSelect,
+  onToggleIn,
+  positionConfirmed,
+}: {
+  row: SquadRow;
+  selected: boolean;
+  onPitch: boolean;
+  maxLoad: number;
+  canManage: boolean;
+  editing: boolean;
+  onEdit: () => void;
+  onDone: () => void;
+  onSelect: () => void;
+  onToggleIn?: () => void;
+  positionConfirmed: boolean;
+}) {
+  const { player, availability, weekLoad, readiness, flag } = row;
+  const status = statusOf(row);
+  return (
+    <li data-player={player.id} data-on-pitch={onPitch ? "1" : undefined} className={`card-row ${selected ? "is-selected" : ""}`}>
+      <div className="flex items-center gap-3 px-3 py-3">
+        <button
+          type="button"
+          aria-label={`${selected ? "unselect" : "select"} ${player.name}`}
+          aria-pressed={selected}
+          onClick={onSelect}
+          className={`pressable num shirt-chip ${selected ? "is-selected" : onPitch ? "is-in" : ""}`}
+        >
+          {player.squad_number ?? "–"}
+        </button>
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-center gap-2">
+            <Link href={`/player/${player.id}`} className="pressable truncate text-[15px] font-semibold leading-tight text-ink">
+              {player.name}
+            </Link>
+            {onPitch ? (
+              <span aria-label="in the eleven" className="num shrink-0 rounded-full bg-mint/15 px-1.5 text-[10px] font-bold tracking-[0.1em] text-mint">
+                XI
+              </span>
+            ) : null}
+          </div>
+          <div className="num mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-dim">
+            {positionConfirmed ? <span className="tracking-[0.08em]">{player.position}</span> : <SetPositionControl player={player} />}
+            <StatusPill status={status} />
+            <span className={`font-semibold tracking-[0.06em] ${READINESS_TEXT[readiness.key]}`}>{readiness.word}</span>
+            <span>
+              {played(row)} pl · {goals(row)} g
+            </span>
+            {availability?.return_date ? <span>back {shortDate(availability.return_date)}</span> : null}
+          </div>
+          <div className="mt-2 max-w-[180px]">
+            <ConditionBar value={weekLoad} max={maxLoad} flag={flag} />
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          {onToggleIn ? (
+            <button
+              type="button"
+              aria-pressed={onPitch}
+              aria-label={onPitch ? `take ${player.name} out of the side` : `put ${player.name} in the side`}
+              onClick={onToggleIn}
+              className={`pressable toggle-in ${onPitch ? "is-on" : ""}`}
+            >
+              {onPitch ? "in" : "+ xi"}
+            </button>
+          ) : null}
+          <span className="flex items-center gap-1">
+            {canManage ? (
+              <button type="button" aria-label={`edit ${player.name}`} aria-expanded={editing} onClick={onEdit} className="pressable ghost-chip">
+                edit
+              </button>
+            ) : null}
+            <StatusMenu playerId={player.id} playerName={player.name} current={status} />
+          </span>
+        </div>
+      </div>
+      {editing ? <EditPlayerRow player={player} onDone={onDone} /> : null}
+    </li>
   );
 }

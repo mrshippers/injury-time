@@ -303,7 +303,7 @@ export function SquadRoom({ rows, nextFixture, saved, canManage, canPick }: Squa
       <div
         role="tablist"
         aria-label="squad room view"
-        className="sticky top-12 z-20 -mx-4 grid grid-cols-2 border-b border-line bg-pitch/95 px-4 py-2 backdrop-blur-md lg:hidden"
+        className="segmented sticky top-[var(--nav-h)] z-20 -mx-4 grid grid-cols-2 border-b border-line bg-pitch/95 px-4 py-2 backdrop-blur-md lg:hidden"
       >
         {(["squad", "side"] as const).map((v) => {
           const on = view === v;
@@ -383,7 +383,8 @@ export function SquadRoom({ rows, nextFixture, saved, canManage, canPick }: Squa
           data-testid="pitch"
           data-drag={drag ? drag.kind : undefined}
         >
-          {tokens ? (
+          {/* a hidden canvas still renders every frame; on a phone it only mounts on its own screen */}
+          {tokens && (!phone || view === "side") ? (
             <PitchScene
               formation={formation}
               xiIds={xiIds}

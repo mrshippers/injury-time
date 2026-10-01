@@ -30,7 +30,7 @@ export function StickyBar({
 }) {
   const disabled = loggedCount < 1 || isPending;
   return (
-    <div className="fixed inset-x-0 z-20 flex items-center justify-between gap-3 border-t border-line-strong bg-panel-2/90 px-3 py-3 backdrop-blur max-sm:bottom-[calc(56px+env(safe-area-inset-bottom))] sm:bottom-0 sm:px-6 sm:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+    <div className="fixed inset-x-0 z-20 flex items-center justify-between gap-3 border-t border-line-strong bg-panel-2/90 px-3 py-3 backdrop-blur max-sm:bottom-[calc(60px+env(safe-area-inset-bottom))] sm:bottom-0 sm:px-6 sm:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
       <p className="num text-sm text-ink-dim">
         <span className="font-semibold text-ink">{loggedCount}</span> of{" "}
         {totalCount} logged
