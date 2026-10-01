@@ -51,8 +51,11 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <Link href="/" className="pressable display flex shrink-0 items-center gap-1.5 text-[17px] leading-none text-ink" aria-label="injury time, hub">
             <Mark size={26} className="-mt-0.5 shrink-0" />
-            <span>injury time</span>
-            <span aria-hidden className="ml-[0.08em] inline-block h-[0.16em] w-[0.16em] bg-mint align-baseline" />
+            {/* on a phone the mark is the brand; the club picker and role need the room */}
+            <span className="hidden sm:inline">
+              injury time
+              <span aria-hidden className="ml-[0.08em] inline-block h-[0.16em] w-[0.16em] bg-mint align-baseline" />
+            </span>
           </Link>
           {canSwitch ? (
             <label className="flex min-w-0 items-center gap-1.5">
