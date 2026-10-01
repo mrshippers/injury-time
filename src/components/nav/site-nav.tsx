@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+
+import { Mark } from "@/components/brand/mark";
 import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
 
@@ -47,7 +49,8 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
     >
       <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center justify-between gap-2 px-3 sm:px-8">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-          <Link href="/" className="pressable display shrink-0 text-[17px] leading-none text-ink" aria-label="injury time, hub">
+          <Link href="/" className="pressable display flex shrink-0 items-center gap-1.5 text-[17px] leading-none text-ink" aria-label="injury time, hub">
+            <Mark size={26} className="-mt-0.5 shrink-0" />
             <span>injury time</span>
             <span aria-hidden className="ml-[0.08em] inline-block h-[0.16em] w-[0.16em] bg-mint align-baseline" />
           </Link>
