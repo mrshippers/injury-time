@@ -129,6 +129,11 @@ export function mapAppearances(body: unknown): { name: string; apps: number }[] 
   });
 }
 
+/** The appearance list alone: one request, for building a squad from the feed. */
+export async function loadAppearances(cfg: FwpConfig): Promise<{ name: string; apps: number }[]> {
+  return mapAppearances(await get(cfg, SEASON_FEED.endpoints.appearances, { team: cfg.teamId }));
+}
+
 export async function loadFromFwp(cfg: FwpConfig, teamName: string, asOf: string): Promise<SeasonData> {
   const [fr, table, apps] = await Promise.all([
     get(cfg, SEASON_FEED.endpoints.fixtures, { team: cfg.teamId }),

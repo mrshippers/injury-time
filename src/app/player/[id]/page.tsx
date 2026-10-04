@@ -10,6 +10,7 @@ import LanguageToggle, { HealthProvider } from "@/components/player/language-tog
 import LoadSparkline from "@/components/player/load-sparkline";
 import PlayerHeader from "@/components/player/player-header";
 import RtpPanel from "@/components/player/rtp-panel";
+import HealthPanel from "@/components/health/health-panel";
 import { createClient } from "@/lib/supabase/server";
 import type { RtpStep } from "@/lib/types";
 import StatTiles from "@/components/player/stat-tiles";
@@ -89,6 +90,8 @@ export default async function PlayerPage(props: PageProps<"/player/[id]">) {
             <AvailabilityTimeline events={profile.availabilityHistory} />
           </div>
         </div>
+
+        <HealthPanel viewer={viewer} player={profile.player} currentInjuryId={current?.id ?? null} />
 
         <p className="annot mt-16 text-gold-dim">{`// as of ${profile.asOf} · ${profile.club.name}`}</p>
       </main>

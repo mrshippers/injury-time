@@ -10,6 +10,8 @@ import { AvailabilityStrip } from "@/components/home/availability-strip";
 import { CongestionPanel } from "@/components/home/congestion-panel";
 import { findCongestion } from "@/lib/home/congestion";
 import { HubTiles, type Tile } from "@/components/home/hub-tiles";
+import { FirstWeek } from "@/components/home/first-week";
+import { firstWeek } from "@/lib/signup/actions";
 import { SeasonLine } from "@/components/home/season-line";
 import { FormVital, NextMatchVital, ScorersVital, WatchVital } from "@/components/home/vitals";
 import { StatReading } from "@/components/charts";
@@ -27,6 +29,7 @@ export const metadata = { title: "the hub - injury time." };
  */
 export default async function Home() {
   const viewer = await getViewer();
+  const week = await firstWeek();
   const [dash, board] = await Promise.all([getDashboard(), getSquadBoard()]);
   const { club, asOf, counts, lastSession } = dash;
   const season = await getHomeSeason(viewer.club.id, asOf);
@@ -89,6 +92,8 @@ export default async function Home() {
           ) : null}
         </p>
       </header>
+
+      <FirstWeek check={week} />
 
       {/* primary: the season, one number and one line */}
       <section aria-labelledby="season-heading" className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-end">

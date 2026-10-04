@@ -175,7 +175,11 @@ export function StatusMenu({
       const result = await setAvailabilityAction(payload);
       if (!result.ok) {
         setError(result.error);
+        // A refusal inside the 200ms close is still mounted, so setMounted alone
+        // changes nothing and the pending unmount took the error with it (the
+        // consent gate's fast "no" vanished on a warm server). Show it again.
         setMounted(true);
+        requestAnimationFrame(() => setShown(true));
       }
     });
   }

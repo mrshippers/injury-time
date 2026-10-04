@@ -222,3 +222,143 @@ stop on the first occurrence, not the third.
 5. System 6 season card.
 6. System 7 pilot. DPIA and solicitor in parallel, by a person, from step 1.
 7. System 8 when its gate opens. System 9 when a stranger proves it.
+
+---
+
+## Build record, 4 Oct 2026
+
+Built on `claude/implementation-brief-roadmap-8i938o`. Every number below came
+out of a command, named beside it. Where a number could not be measured here,
+the row says so instead of filling it in.
+
+### Where the numbers came from
+
+There is no Docker or Supabase project in the build container, so the build
+brought its own: `scripts/db/local.sh` (Postgres 16 with every migration, for
+the RLS probe) and `scripts/stack/up.sh` (Postgres, Supabase Auth and PostgREST
+release binaries behind one project URL, plus an SMTP catcher), so the e2e suite
+runs the **real magic-link sign-in** end to end. `npm run verify:local` runs
+the lot.
+
+### Budget, measured
+
+| metric | target | measured | command |
+|---|---|---|---|
+| sign-up, link to club with squad, at 390 x 844 | <= 60 s, <= 6 screens | **5.3 to 5.6 s over four runs, 5 screens** (a script typing; a person is slower, the screen count is the fixed part) | `tests/e2e/signup.spec.ts` |
+| sign-up, required fields before the club exists | <= 3 | **3 fields + 1 tick** (adults only: see deviation 6) | the form |
+| squad paste, 20 lines to 20 players | <= 2 s server time | **not isolated.** The dev server here logged no request timings; the paste sits inside the 5.6 s end-to-end run above. The action returns its own `ms` for a real measurement | signup.spec |
+| lock-screen answer, tap to row | p95 <= 3000 ms | **handler p95 0.09 ms in process; press to answer shown 38 ms in the worker.** A real phone and network not measured | `tests/unit/call-token.test.ts`, `tests/sw/lockscreen.spec.ts` |
+| lock-screen answer, rows per tap | exactly 1 | **2 rows from 20 accepted taps by 2 players** (upsert) | call-token.test |
+| lock-screen answer, expired or forged accepted | 0 | **0 of 30 refused cases** (expired 5, tampered 5, other club 5, played match 5, retired 1, read-only club 4, bad status 5) | call-token.test |
+| season card PNG | 1080 x 1350, <= 300 kB, <= 1500 ms p95 | **1080 x 1350, 76.2 kB, p95 84 ms** | `tests/unit/season-card.test.ts` |
+| season card, overflow across the fit grid | 0 cells | **0 of 32** | `npm run grid:card-fit` |
+| squad from feed, re-run | 0 new, 0 duplicates | **created 0, matched 19, held 1** | `tests/unit/squad-import.test.ts` |
+| squad from feed, list players created | >= 95%, every skip with a reason | **19 of 20 named players in automatically (95%), 1 held for the manager with the names it looks like, 1 blank row skipped with its reason.** Fixture is the documented FWP shape, not a recording (no key yet) | squad-import.test |
+| health data readable by the wrong role | 0 rows | **0** (matrix below) | `npm run db:probe` |
+| health data left after erasure | 0 rows | **0 in all 7 tables** | db:probe |
+| axe, new screens | 0 serious or critical | **0** on sign-up (3 screens) and the consent page. The join page and the card image are not axe-tested | signup.spec, consent.spec |
+| existing suite | green, nothing skipped | **not green: 39 passed, 4 failed, 0 skipped** on the local stack. 3 are stack gaps that fail the same way on `main` (realtime x2, the Belstone feed chart). 1 is mine: consent.spec step 6, handed back below. Unit: 198 passed | `scripts/stack/e2e.sh`, `vitest run` |
+
+The probe's matrix (rows about one player readable, by who is asking):
+
+```
+                           anon   outsider   teammate the player      coach    manager    medical
+injuries                      0          0          0          1          1          1          1
+availability_events           0          0          0          2          2          2          2
+session_loads                 0          0          0          1          1          1          1
+rtp_steps                     0          0          0          1          1          1          1
+medical_notes            denied          0          0          1          0          0          1
+player_checkins          denied          0          0          1          1          1          1
+health_consents          denied          0          0          1          1          1          1
+```
+
+Against migrations 0001 to 0013 the same probe showed a `player` writing a
+"severe knee" injury against a teammate and reading the squad's injuries: every
+club member could, through the API, with only the screens hiding it. 0014 closes it.
+
+### The grids
+
+`npm run grid:squad-match`. The first sweep used a similarity threshold to
+match, and **merged 11 different people at every threshold** (Tim Smith into Tom
+Smith scores like a one-letter typo). There is no threshold that works. Matching now
+rests only on equivalences; near misses are held for the manager:
+
+```
+variant                0.70     0.75     0.80     0.85     0.90     0.95
+case                     ok       ok       ok       ok       ok       ok
+accent                   ok       ok       ok       ok       ok       ok
+initial              22/3/0   22/3/0   22/3/0   22/3/0   22/2/1   22/2/1
+jnr/snr                  ok       ok       ok       ok       ok       ok
+swapped order            ok       ok       ok       ok       ok       ok
+typo distance 1          ??       ??       ??       ??       ??   0/24/1
+typo distance 2      2/23/0   2/23/0   2/23/0   2/23/0   2/23/0   2/6/17
+stranger                 ??       ??       ??   0/11/1   0/11/1    0/8/4
+false merges at the shipping threshold (0.85): 0
+```
+
+`npm run grid:card-fit`: name length 4 to 32 x stat width 1 to 4 digits, 0 cells clip.
+
+### Requirements broken, and why (the prime directive)
+
+1. **"Squad from the feed, numbers and all" (system 4).** The appearance list has
+   no shirt numbers. The import leaves them empty and says so.
+2. **"In, out and unsure as buttons" (system 3).** Chrome allows two notification
+   buttons (`Notification.maxActions` is 2; found by the browser test, not by
+   reading). Chrome shows in and out; "unsure" is a tap on the body, which opens the
+   team page. iPhone shows none, as the roadmap said.
+3. **"Pick the threshold from a column with no !!" (system 4).** No column was
+   free of `!!` while similarity could match. Similarity now only decides what is
+   held for review.
+4. **`players.date_of_birth` (system 5).** Every teammate can read `players`, so
+   the date of birth lives on `health_consents` (staff and the player only).
+5. **"Availability rate" on the season card (system 6).** It is derived from
+   injury status, so it is health data. Assists and minutes replace it.
+6. **Adults only is enforced at consent, not at every player row.** Sign-up asks
+   for one tick ("an adult side"); each player's date of birth is checked when they
+   consent. A date of birth for every pasted name would break the minute and put
+   the date where teammates read it.
+7. **Load data is read-gated but not write-gated** (`session_loads` rows carry
+   minutes and goals too). It is the first open question in `docs/legal/dpia.md`.
+8. **Wider than asked:** writes to injuries, availability and loads are now staff
+   roles only, and adding players is manager or coach only. A player could write
+   them before.
+9. **Verify commands as built:** `npm run grid:squad-match` / `grid:card-fit`
+   (not `grid -- <mode>`), `npm run db:probe`, `npm run test:sw`,
+   `scripts/stack/e2e.sh`.
+
+### Not done, and whose it is
+
+- **System 5, legal:** `docs/legal/dpia.md` is a draft with seven open questions.
+  A solicitor's sign-off is a person's job and is not recorded.
+- **System 7, pilot:** the first-week check is built (`first_week_check`, on the
+  hub for staff until 3 of 3). Finding the clubs is a person's job.
+- **System 8, pricing:** no Stripe code, by design. `scripts/pricing-gate.sql` reads
+  0 clubs past four weeks: the gate is closed.
+- **System 9, the design gate:** not passed. It needs a club nobody has spoken to.
+- **Production:** migrations 0014 and 0015 are not applied anywhere but the local
+  stack. `CALL_TOKEN_SECRET` (32+ characters) must be set in Vercel for the
+  notification buttons; without it, pushes still go, without buttons.
+- **Stack gaps:** the local stack has no realtime server and no Belstone season,
+  so `team.spec` (two realtime tests) and `home.spec` (the feed chart) fail there
+  on `main` too. They need the live project.
+
+### Handed back under the stop rule
+
+**System 5, the refusal the manager sees after an erasure.** `tests/e2e/consent.spec.ts`
+step 6 failed on three passes in the full suite (it passed alone once, early):
+
+- what holds: the database refuses the doubt. The squad table shows `0 doubts`
+  and Sam still `FIT` at the moment of failure, and `npm run db:probe` proves the
+  write is refused after withdrawal and after erasure.
+- what fails: the status panel closes as the write goes out and should come back
+  with "Sam has not given consent for health data yet". At step 6 it never comes
+  back (no dialog, no alert within 20 s). Step 1 (the same refusal, first action
+  on a cold server) shows it.
+- found on the way and fixed (`status-menu.tsx`): a refusal that lands inside the
+  panel's 200 ms close was re-mounting a panel that was still mounted, so nothing
+  showed it, and the pending unmount took the error away. That is a real race.
+  The fix did not make step 6 pass, so it is either not the cause or not the only one.
+- not yet known: whether step 6's save reaches the server at all. The local dev
+  server logged no request lines, so the evidence that would settle it is missing.
+  The next step is to log the action's result in the browser (`page.on("console")`)
+  or watch `/squad`'s POST in the Playwright trace, and only then change code.

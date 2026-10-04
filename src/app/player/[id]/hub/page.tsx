@@ -2,13 +2,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { HandOver, HubCall, HubEditor, ShareLink } from "@/components/hub/hub-client";
+import { SeasonCardShare } from "@/components/hub/season-card-share";
 import { Shirt } from "@/components/hub/shirt";
 import { getHub, shortDate } from "@/lib/hub/data";
 import { POSITION_WORD } from "@/lib/hub/hub";
 import { clock } from "@/lib/film/urls";
 import { getViewer } from "@/lib/viewer";
+import { ConsentForm } from "@/components/health/consent-form";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+
+/** the latest date of birth that is 18 today (the database checks it again) */
+const adultBorn = () => {
+  const d = new Date();
+  d.setUTCFullYear(d.getUTCFullYear() - 18);
+  return d.toISOString().slice(0, 10);
+};
 
 const SQUAD_POSITION: Record<string, string> = { GK: "goalkeeper", DF: "defender", MF: "midfielder", FW: "forward" };
 const KIND_WORD: Record<string, string> = { goal: "goal", save: "save", chance: "chance made", shot: "shot", press: "press won", set_piece: "set piece" };
@@ -37,6 +47,11 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
     ["goals", stats.goals],
     ...(logged ? ([["assists", stats.assists], ["minutes", stats.minutes]] as [string, number][]) : []),
   ];
+  // the player's own say over their health data (0014), on their own page
+  const ownReal = viewer.playerId === player.id && !club.is_demo;
+  const consent = ownReal
+    ? (await (await createClient()).from("health_consents").select("withdrawn_at").eq("player_id", player.id).maybeSingle()).data
+    : null;
   const share = hub.clubGoals ? Math.round((stats.goals / hub.clubGoals) * 100) : 0;
   const road = [...(profile?.previous_clubs ?? []), club.name];
   const about: [string, string | null][] = [
@@ -60,6 +75,11 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
           <ShareLink path={`/player/${player.id}/hub`} />
         </div>
       </div>
+      {club.is_demo || viewer.playerId === player.id || (!viewer.guest && viewer.role !== "player") ? (
+        <div className="mt-4 flex justify-end">
+          <SeasonCardShare playerId={player.id} firstName={first} fileName={`${player.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-season`} />
+        </div>
+      ) : null}
 
       {/* the programme page */}
       <header className="mt-8 grid grid-cols-1 items-end gap-8 border-b border-line-strong pb-10 md:grid-cols-[minmax(0,1fr)_220px]">
@@ -259,6 +279,12 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
               {`on a real club the manager hands this page over with a link: ${first} signs in with an email, says it's them, and it's theirs. the demo can't, its players are made up.`}
             </p>
           )}
+        </Section>
+      ) : null}
+
+      {ownReal ? (
+        <Section label="your health data" className="mt-14 border-t border-line pt-10">
+          <ConsentForm route={{ kind: "account", playerId: player.id }} clubName={club.name} consented={!!consent && !consent.withdrawn_at}  maxDob={adultBorn()} />
         </Section>
       ) : null}
     </main>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { setAvailability } from "@/lib/data";
+import { consentError } from "@/lib/health/consent";
 import {
   AVAILABILITY_STATUSES,
   BODY_REGIONS,
@@ -87,9 +88,8 @@ export async function setAvailabilityAction(
     revalidatePath("/squad");
     return { ok: true };
   } catch (error) {
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : "could not save that",
-    };
+    // the consent gate (0014) speaks Postgres; say it in words the manager can act on
+    const message = error instanceof Error ? error.message : (error as { message?: string })?.message ?? "could not save that";
+    return { ok: false, error: consentError(message) };
   }
 }

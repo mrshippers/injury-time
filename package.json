@@ -14,7 +14,10 @@
     "verify": "vitest run && playwright test",
     "grid:squad-match": "tsx scripts/grid-squad-match.ts",
     "db:probe": "bash -c 'eval \"$(scripts/db/local.sh)\" && tsx scripts/rls-probe.ts'",
-    "test:sw": "playwright test -c playwright.sw.config.ts"
+    "test:sw": "playwright test -c playwright.sw.config.ts",
+    "grid:card-fit": "tsx scripts/grid-card-fit.ts",
+    "test:e2e:local": "scripts/stack/e2e.sh",
+    "verify:local": "vitest run && npm run db:probe && npm run grid:squad-match && npm run grid:card-fit && npm run test:sw && scripts/stack/e2e.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",

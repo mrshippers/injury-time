@@ -15,3 +15,11 @@ Read before a pass (retrieve). Append after a verified outcome (record), failure
   role, real clubs plus clubs open to try, Belstone-type public-data clubs excluded; push
   rides on the once-per-fixture notice. Rule: when a guard narrows who an agent can see,
   re-check who it is FOR. (seen 1x, held 1x, last: 2026-09-30)
+- 2026-10-04 FAIL (caught before ship): the chase push was built with three
+  buttons, in / out / unsure. Chrome allows two (Notification.maxActions = 2) and
+  drops the third without a word, so "unsure" would never have been answerable
+  from a notification. Found by tests/sw/lockscreen.spec.ts asserting the buttons
+  in a real Chromium, not by reading the spec. Fix: sw.js shows as many as the
+  browser allows and the body says "not sure? tap to open". Rule: a platform
+  limit is a number to read at runtime, not an assumption in the payload.
+  (seen 1x, held 1x, last: 2026-10-04)

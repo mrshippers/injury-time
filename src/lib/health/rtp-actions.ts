@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Injury } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
 
+import { consentError } from "./consent";
 import { planSteps } from "./rtp";
 
 type Res = { ok: true } | { ok: false; error: string };
@@ -29,7 +30,7 @@ export async function setRtpPlanAction(injuryId: string, returnOn: string): Prom
   const del = await supabase.from("rtp_steps").delete().eq("injury_id", injuryId);
   if (del.error) return { ok: false, error: del.error.message };
   const ins = await supabase.from("rtp_steps").insert(plan.map((p) => ({ ...p, club_id: viewer.club.id, injury_id: injuryId })));
-  if (ins.error) return { ok: false, error: ins.error.message };
+  if (ins.error) return { ok: false, error: consentError(ins.error.message) };
   // the plan's end is the expected return everyone else reads
   await supabase.from("injuries").update({ expected_return: returnOn }).eq("id", injuryId);
 
@@ -46,7 +47,7 @@ export async function tickRtpStepAction(stepId: string, done: boolean): Promise<
     .update({ done_on: done ? today() : null })
     .eq("id", stepId)
     .eq("club_id", viewer.club.id);
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: consentError(error.message) };
   revalidatePath("/", "layout");
   return { ok: true };
 }
