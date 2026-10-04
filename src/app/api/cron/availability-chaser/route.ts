@@ -1,4 +1,5 @@
-import { pushToUsers } from '@/lib/push/send'
+import { pushMatchCall } from '@/lib/push/send'
+import { callSigner } from '@/lib/push/sign'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
@@ -146,13 +147,8 @@ export async function GET(request: Request) {
     }
 
     // the players themselves, on their phones, once per fixture (the notice above is the dedupe key)
-    const linked = silent.map((p) => (p as { user_id?: string | null }).user_id).filter((u): u is string => Boolean(u))
-    const pushed = await pushToUsers(club.id, linked, {
-      title: `are you in for ${fixture.data.opponent}?`,
-      body: 'tap to say in, out or unsure',
-      url: '/team',
-      tag: `call:${fixture.data.id}`,
-    }).catch(() => null)
+    // each with in / out / unsure buttons signed for that player alone (lib/push/call-token.ts)
+    const pushed = await pushMatchCall(club.id, fixture.data, silent as { id: string; user_id: string | null }[], callSigner()).catch(() => null)
 
     out.push({
       status: 'done',

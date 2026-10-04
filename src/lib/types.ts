@@ -75,6 +75,10 @@ export type Club = {
   /** a demo club anyone may try writes on (fictional Kilburn); false = read-only to guests (real Belstone) */
   demo_writable: boolean
   season_synced_at: TimestampString | null
+  /** who signed the club up (0015); null for clubs made by hand */
+  created_by?: string | null
+  /** the person who signed up confirmed an adult side (0015); consent checks each player (0014) */
+  adult_side_confirmed_at?: TimestampString | null
   created_at: TimestampString
 }
 
@@ -331,7 +335,7 @@ export type Database = {
       }
       match_calls: {
         Row: MatchCall
-        Insert: Omit<MatchCall, 'id' | 'note' | 'updated_at'> & Partial<Pick<MatchCall, 'id' | 'note' | 'updated_at'>>
+        Insert: Omit<MatchCall, 'id' | 'note' | 'updated_at' | 'via'> & Partial<Pick<MatchCall, 'id' | 'note' | 'updated_at' | 'via'>>
         Update: Partial<MatchCall>
         Relationships: []
       }
@@ -383,6 +387,30 @@ export type Database = {
         Update: Partial<HubProfile>
         Relationships: []
       }
+      health_consents: {
+        Row: HealthConsent
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      medical_notes: {
+        Row: MedicalNote
+        Insert: Insertable<MedicalNote, 'injury_id' | 'created_by'>
+        Update: Partial<Pick<MedicalNote, 'body'>>
+        Relationships: []
+      }
+      health_erasures: {
+        Row: HealthErasure
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      staff_invites: {
+        Row: StaffInvite
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       player_checkins: {
         Row: PlayerCheckin
         Insert: Insertable<PlayerCheckin, 'checkin_on' | 'last_rpe'>
@@ -420,6 +448,50 @@ export type Database = {
       claim_player: {
         Args: { token: string }
         Returns: string
+      }
+      give_health_consent: {
+        Args: { pid: string; dob: DateString; wording: string }
+        Returns: 'given'
+      }
+      give_health_consent_by_link: {
+        Args: { token: string; dob: DateString; wording: string }
+        Returns: 'given' | 'unknown_link'
+      }
+      health_consent_status: {
+        Args: { token: string }
+        Returns: { first_name: string; club_name: string; consented: boolean; wording_version: string | null }[]
+      }
+      withdraw_health_consent: {
+        Args: { pid: string }
+        Returns: 'withdrawn'
+      }
+      erase_player_health: {
+        Args: { pid: string }
+        Returns: Record<string, number>
+      }
+      erase_player_health_by_link: {
+        Args: { token: string }
+        Returns: Record<string, number>
+      }
+      create_club: {
+        Args: { club_name: string; league: string; my_role: string; adult_side: boolean }
+        Returns: string
+      }
+      mint_staff_invite: {
+        Args: { cid: string; invite_role: string }
+        Returns: string
+      }
+      staff_invite_status: {
+        Args: { token: string }
+        Returns: { club_name: string; role: 'coach' | 'medical'; usable: boolean }[]
+      }
+      accept_staff_invite: {
+        Args: { token: string }
+        Returns: string
+      }
+      first_week_check: {
+        Args: { cid: string }
+        Returns: { squad_in: boolean; staff_joined: boolean; push_answered: boolean }[]
       }
     }
   }
@@ -486,6 +558,8 @@ export type MatchCall = {
   player_id: string
   status: CallStatus
   note: string | null
+  /** 'push' when answered from the notification's own buttons (0015) */
+  via: 'app' | 'push'
   updated_at: TimestampString
 }
 
@@ -605,4 +679,50 @@ export type PlayerCheckinLink = {
   token: string
   consent_at: TimestampString | null
   created_at: TimestampString
+}
+
+/* ── health data, lawful before live (0014) ───────────────────────────── */
+
+export type HealthConsent = {
+  player_id: string
+  club_id: string
+  wording_version: string
+  date_of_birth: DateString | null
+  via: 'account' | 'link'
+  given_by: string | null
+  given_at: TimestampString
+  withdrawn_at: TimestampString | null
+}
+
+/** Short, medical staff and the player themself only; the manager never reads it. */
+export type MedicalNote = {
+  id: string
+  club_id: string
+  player_id: string
+  injury_id: string | null
+  body: string
+  created_by: string | null
+  created_at: TimestampString
+}
+
+export type HealthErasure = {
+  id: string
+  club_id: string
+  player_id: string | null
+  requested_by: string | null
+  erased_at: TimestampString
+  counts: Record<string, number>
+}
+
+/* ── staff invites (0015) ─────────────────────────────────────────────── */
+
+export type StaffInvite = {
+  token: string
+  club_id: string
+  role: 'coach' | 'medical'
+  created_by: string | null
+  created_at: TimestampString
+  expires_at: TimestampString
+  used_by: string | null
+  used_at: TimestampString | null
 }
