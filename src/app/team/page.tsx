@@ -20,7 +20,7 @@ export const metadata = { title: "the team - injury time." };
  * in, what did the gaffer say. Everything on it moves in real time.
  */
 export default async function TeamPage() {
-  const { viewer, next, daysUntil, players, calls, notices, attendance, now, asOf } = await getTeamPage();
+  const { viewer, next, daysUntil, players, calls, usual, notices, attendance, now, asOf } = await getTeamPage();
   // RLS returns rows only to staff of a real club; a guest or a player gets none
   const staff = !viewer.guest && viewer.can("view_squad_health");
   let checkins: PlayerCheckin[] = [];
@@ -88,6 +88,7 @@ export default async function TeamPage() {
               fixture={next}
               players={players}
               calls={calls}
+              usual={usual}
               role={viewer.role}
               ownPlayerId={viewer.role === "player" ? viewer.playerId : null}
             />

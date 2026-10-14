@@ -1,4 +1,4 @@
-import { FeedKeyForm, ResultForm } from "@/components/club/club-forms";
+import { FeedKeyForm, ResultForm, type Awaiting } from "@/components/club/club-forms";
 import { FeedSquad } from "@/components/club/feed-squad";
 import { StaffInvites, type InviteRow } from "@/components/club/staff-invites";
 import { longDate } from "@/components/squad/format";
@@ -38,6 +38,15 @@ export default async function ClubPage() {
     .eq("club_id", club.id)
     .order("match_date", { ascending: false })
     .limit(6);
+
+  // games already played with no score in yet: the result form opens on the latest of them
+  const since = new Date(Date.parse(today) - 21 * 86_400_000).toISOString().slice(0, 10);
+  const [{ data: pastFixtures }, { data: scored }] = await Promise.all([
+    supabase.from("fixtures").select("match_date, opponent, venue, competition").eq("club_id", club.id).gte("match_date", since).lte("match_date", today).order("match_date", { ascending: false }),
+    supabase.from("results").select("match_date, opponent").eq("club_id", club.id).gte("match_date", since),
+  ]);
+  const have = new Set((scored ?? []).map((r) => `${r.match_date}|${r.opponent}`));
+  const awaiting = (pastFixtures ?? []).filter((f) => !have.has(`${f.match_date}|${f.opponent}`)).slice(0, 4) as Awaiting[];
 
   // the manager's own links out, newest first (0015: RLS shows them to the manager only)
   let invites: InviteRow[] = [];
@@ -130,7 +139,7 @@ export default async function ClubPage() {
         <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
           Cup ties, friendlies, or every game if the club has no feed. The points line and the form rebuild from what you enter.
         </p>
-        <ResultForm allowed={resultAllowed} reason={resultReason} today={today} />
+        <ResultForm allowed={resultAllowed} reason={resultReason} today={today} awaiting={awaiting} />
         {results?.length ? (
           <ul className="mt-6 border-t border-line" aria-label="latest results">
             {results.map((r) => (

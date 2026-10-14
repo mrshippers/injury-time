@@ -20,13 +20,27 @@ export function SeasonLine({ ctx, results, fixtures, asOf }: { ctx: SeasonContex
   const horizon = Math.min(SEASON_BENCHMARKS.gamesInSeason, Math.max(played + 6, ctx.leagueGamesToChristmas > 0 ? xmasIndex + 3 : played + Math.min(leagueLeft, 12)));
   const maxY = Math.max(ctx.points + 10, Math.ceil((SEASON_BENCHMARKS.promotionPpg * horizon + 4) / 10) * 10);
 
+  // each dot is the game that made it: won, drawn or lost, said in words on hover, focus or tap
+  const leagueGames = results.filter((r) => isLeague(r.competition)).sort((a, b) => a.match_date.localeCompare(b.match_date));
   const series: LineSeries[] = [
     {
       name: "points",
       rank: 0,
       reading: `${ctx.points}`,
       glow: true,
-      points: ctx.line.map((p) => ({ x: p.matchNo, y: p.points, label: `game ${p.matchNo}, ${shortDate(p.date)}: ${p.points} pts` })),
+      points: ctx.line.map((p, i) => {
+        const g = leagueGames.length === ctx.line.length ? leagueGames[i] : undefined;
+        if (!g) return { x: p.matchNo, y: p.points, label: `game ${p.matchNo}, ${shortDate(p.date)}: ${p.points} pts` };
+        const tone = g.goals_for > g.goals_against ? "win" : g.goals_for === g.goals_against ? "draw" : "loss";
+        const verb = tone === "win" ? "Won" : tone === "draw" ? "Drew" : "Lost";
+        const score = `${g.goals_for}-${g.goals_against}`;
+        return {
+          x: p.matchNo,
+          y: p.points,
+          tone,
+          tip: [`${verb} ${score} ${g.venue === "A" ? "at" : "v"} ${g.opponent}`, `${shortDate(p.date)} · ${p.points} pts after ${p.matchNo}`] as [string, string],
+        };
+      }),
     },
   ];
   const refs = (promotion: string, playoffs: string): ReferenceLine[] => [
@@ -74,7 +88,7 @@ export function SeasonLine({ ctx, results, fixtures, asOf }: { ctx: SeasonContex
   const wide = ticks(5, 10);
   const narrow = ticks(10, 20);
   const shared = {
-    title: `points after each league game, ${ctx.points} after ${played}`,
+    title: `points after each league game, ${ctx.points} after ${played}. Hover or tap a dot for the result.`,
     series,
     xDomain: [0, horizon] as [number, number],
     yDomain: [0, maxY] as [number, number],
@@ -85,6 +99,11 @@ export function SeasonLine({ ctx, results, fixtures, asOf }: { ctx: SeasonContex
 
   return (
     <div>
+      <ul className="num mb-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-ink-dim" aria-label="what the dots mean">
+        <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block size-2.5 rounded-full bg-[var(--win)]" />won</li>
+        <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block size-2.5 rounded-full bg-ink" />drawn</li>
+        <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block size-2.5 rounded-full border-[2px] border-out bg-panel" />lost</li>
+      </ul>
       <div className="hidden md:block">
         <HairlineLine {...shared} references={references} xTicks={wide.x} yTicks={wide.y} width={860} height={250} readingWidth={120} />
       </div>

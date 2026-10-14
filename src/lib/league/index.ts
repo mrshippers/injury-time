@@ -10,6 +10,7 @@ import type { Club, Database, ExternalStats, Player } from "@/lib/types";
 
 import { fwpConfigFromEnv, loadFromFwp } from "./fwp";
 import { fromSnapshot, matchPlayer, type SeasonData, type Snapshot } from "./normalise";
+import { reconcileFixtures, type DiaryRow } from "./reconcile";
 
 export type { SeasonData, SeasonFixture, SeasonProgress, SeasonResult, SeasonStanding } from "./normalise";
 export { divisionLine, formLetters, goalsByScorer, isLeague, matchPlayer, normaliseKickoff, ourStanding, parseScorer, progressFrom } from "./normalise";
@@ -34,16 +35,22 @@ export async function loadSeason(
   return { source: "snapshot", data: fromSnapshot(opts.snapshot) };
 }
 
+export type DriftResult = { match_date: string; opponent: string; venue: "H" | "A"; competition: string; goals_for: number; goals_against: number };
+
 export type RefreshReport = {
   source: SeasonSource;
   results: number;
   fixturesAdded: number;
+  /** moved to a new date, or dropped by the feed */
+  fixturesChanged: number;
   standings: number;
   progress: number;
   playersUpdated: string[];
   unmatched: string[];
   /** what actually moved since the last run, not what was rewritten: this is the drift */
   resultsChanged: string[];
+  /** the same rows, structured, so a notice can say them in words */
+  resultsDetail: DriftResult[];
   playersChanged: string[];
   /** a table dated this as_of was not there before */
   tableNew: boolean;
@@ -68,9 +75,9 @@ export async function refreshSeason(db: Db, club: Pick<Club, "id" | "name" | "sl
   if (beforeRes.error) throw beforeRes.error;
   if (tableRes.error) throw tableRes.error;
   const before = new Map((beforeRes.data ?? []).map((r) => [`${r.match_date}|${r.opponent}`, `${r.goals_for}-${r.goals_against}|${(r.scorers ?? []).join(",")}`]));
-  const resultsChanged = data.results
-    .filter((r) => before.get(`${r.match_date}|${r.opponent}`) !== `${r.goals_for}-${r.goals_against}|${r.scorers.join(",")}`)
-    .map(resultLabel);
+  const changedRows = data.results.filter((r) => before.get(`${r.match_date}|${r.opponent}`) !== `${r.goals_for}-${r.goals_against}|${r.scorers.join(",")}`);
+  const resultsChanged = changedRows.map(resultLabel);
+  const resultsDetail: DriftResult[] = changedRows.map((r) => ({ match_date: r.match_date, opponent: r.opponent, venue: r.venue as "H" | "A", competition: r.competition, goals_for: r.goals_for, goals_against: r.goals_against }));
   const tableNew = data.standings.length > 0 && (tableRes.data ?? []).length === 0;
 
   if (data.results.length) {
@@ -98,18 +105,41 @@ export async function refreshSeason(db: Db, club: Pick<Club, "id" | "name" | "sl
     if (error) throw error;
   }
 
-  // fixtures have no unique key of their own: add the ones we do not have
+  // the diary follows the feed: add new games, move a rescheduled one in place (its calls follow),
+  // drop one the feed dropped, and never delete a row somebody has answered a call for or built a side on
   let fixturesAdded = 0;
+  let fixturesChanged = 0;
   if (data.fixtures.length) {
-    const { data: existing, error } = await db.from("fixtures").select("match_date, opponent").eq("club_id", cid);
+    const { data: existing, error } = await db.from("fixtures").select("id, match_date, opponent, competition, venue, kickoff").eq("club_id", cid).gte("match_date", today);
     if (error) throw error;
-    const have = new Set((existing ?? []).map((f) => `${f.match_date}|${f.opponent}`));
-    const missing = data.fixtures.filter((f) => !have.has(`${f.match_date}|${f.opponent}`));
-    if (missing.length) {
-      const { error: iErr } = await db.from("fixtures").insert(missing.map((f) => ({ ...f, club_id: cid })));
-      if (iErr) throw iErr;
-      fixturesAdded = missing.length;
+    const ids = (existing ?? []).map((f) => f.id);
+    const hasWork = new Set<string>();
+    if (ids.length) {
+      const [calls, sides] = await Promise.all([db.from("match_calls").select("fixture_id").in("fixture_id", ids), db.from("lineups").select("fixture_id").in("fixture_id", ids)]);
+      if (calls.error) throw calls.error;
+      if (sides.error) throw sides.error;
+      for (const r of [...(calls.data ?? []), ...(sides.data ?? [])]) hasWork.add(r.fixture_id as string);
     }
+    const plan = reconcileFixtures(
+      (existing ?? []) as DiaryRow[],
+      data.fixtures.map((f) => ({ match_date: f.match_date, opponent: f.opponent, competition: f.competition, venue: f.venue as "H" | "A", kickoff: f.kickoff ?? null })),
+      today,
+      hasWork,
+    );
+    for (const m of plan.move) {
+      const { error: mErr } = await db.from("fixtures").update(m.patch).eq("id", m.id);
+      if (mErr) throw mErr;
+    }
+    if (plan.remove.length) {
+      const { error: dErr } = await db.from("fixtures").delete().in("id", plan.remove);
+      if (dErr) throw dErr;
+    }
+    if (plan.insert.length) {
+      const { error: iErr } = await db.from("fixtures").insert(plan.insert.map((f) => ({ ...f, club_id: cid })));
+      if (iErr) throw iErr;
+    }
+    fixturesAdded = plan.insert.length;
+    fixturesChanged = plan.move.length + plan.remove.length;
   }
 
   // season numbers onto players, by name; ambiguous names stay untouched
@@ -150,11 +180,13 @@ export async function refreshSeason(db: Db, club: Pick<Club, "id" | "name" | "sl
     source: season.source,
     results: data.results.length,
     fixturesAdded,
+    fixturesChanged,
     standings: data.standings.length,
     progress: data.progress.length,
     playersUpdated,
     unmatched: [...new Set(unmatched)],
     resultsChanged,
+    resultsDetail,
     playersChanged,
     tableNew,
   };

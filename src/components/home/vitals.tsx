@@ -4,7 +4,8 @@ import type { SquadRow } from "@/lib/data";
 import type { HomeSeason } from "@/lib/home/data";
 import type { SeasonContext } from "@/lib/home/season-context";
 import { READINESS_TEXT } from "@/lib/readiness";
-import type { AvailabilityStatus, Fixture } from "@/lib/types";
+import { isLeague } from "@/lib/home/season-context";
+import type { AvailabilityStatus, Fixture, Result } from "@/lib/types";
 import { shortDate } from "@/components/squad/format";
 
 import { HairlineLine, MarkRow, RungBars } from "@/components/charts";
@@ -28,7 +29,7 @@ function Vital({ label, aside, children }: { label: string; aside?: React.ReactN
   );
 }
 
-export function NextMatchVital({ next, daysUntil, fit, calls, squadSize }: { next: Fixture | null; daysUntil: number | null; fit: number; calls: HomeSeason["calls"]; squadSize: number }) {
+export function NextMatchVital({ next, daysUntil, fit, calls, squadSize, last }: { next: Fixture | null; daysUntil: number | null; fit: number; calls: HomeSeason["calls"]; squadSize: number; last: Result | null }) {
   const when = daysUntil === null ? "" : daysUntil === 0 ? "today" : daysUntil === 1 ? "tomorrow" : `in ${daysUntil} days`;
   return (
     <Vital label="next match" aside={next ? <span className="num text-[11.5px] text-ink-dim">{when}</span> : null}>
@@ -42,7 +43,10 @@ export function NextMatchVital({ next, daysUntil, fit, calls, squadSize }: { nex
             {next.opponent}
             <span className="ml-2 text-[14px] font-semibold tracking-[0.1em] text-ink-dim">({next.venue})</span>
           </p>
-          <p className="text-[12.5px] text-ink-dim">{next.competition}</p>
+          <p className="text-[12.5px] text-ink-dim">
+            {isLeague(next.competition) ? null : <span className="num mr-2 border border-gold-dim px-1.5 py-px text-[10px] font-semibold tracking-[0.12em] text-gold">CUP TIE</span>}
+            {next.competition}
+          </p>
           <p className="mt-1 text-[12.5px] text-ink-dim">
             <span className="num font-semibold text-ink">{fit}</span> available ·{" "}
             {calls.total === 0 ? (
@@ -62,11 +66,33 @@ export function NextMatchVital({ next, daysUntil, fit, calls, squadSize }: { nex
           <Link href="/squad" className="pressable mt-1 self-start text-[12.5px] font-semibold text-mint">
             pick the side
           </Link>
+          {last ? <LastTimeOut r={last} /> : null}
         </div>
       ) : (
         <p className="text-[12.5px] text-ink-dim">No fixture in the diary. The next match is what everything on this page is for.</p>
       )}
     </Vital>
+  );
+}
+
+/** The last game in any competition: the cup tie on Saturday counts as much as a league one. */
+function LastTimeOut({ r }: { r: Result }) {
+  const tone = r.goals_for > r.goals_against ? "W" : r.goals_for === r.goals_against ? "D" : "L";
+  const box = tone === "W" ? "border-[var(--win)]/50 text-[var(--win)]" : tone === "L" ? "border-out/50 text-out" : "border-line-strong text-ink";
+  return (
+    <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-line pt-3 text-[12.5px] text-ink-dim">
+      <span className="annot text-[10px]">last time out</span>
+      <span className={`num flex h-6 w-6 items-center justify-center rounded-[2px] border bg-pitch text-[11.5px] font-semibold ${box}`}>{tone}</span>
+      <span className="num font-semibold text-ink">
+        {r.goals_for}-{r.goals_against}
+      </span>
+      <span>
+        {r.venue === "A" ? "at" : "v"} {r.opponent}
+      </span>
+      <span className="num">
+        · {r.competition} · {shortDate(r.match_date)}
+      </span>
+    </p>
   );
 }
 

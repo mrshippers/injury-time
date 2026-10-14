@@ -67,6 +67,36 @@ export async function setCallAction(input: SetCallInput): Promise<{ ok: true } |
   }
 }
 
+export type SetCallsInput = { fixtureId: string; calls: { playerId: string; status: string }[] };
+
+/** Staff fill several answers in one go (the usual answers of whoever has not answered). One round trip, one upsert. */
+export async function setCallsBulkAction(input: SetCallsInput): Promise<{ ok: true; saved: number } | Fail> {
+  try {
+    const viewer = await getViewer();
+    if (viewer.role === "player") throw new Error("only staff can answer for the squad");
+    const fixtureId = text(input?.fixtureId, "fixtureId", 64, true)!;
+    if (!Array.isArray(input?.calls) || input.calls.length === 0) throw new Error("nothing to save");
+    if (input.calls.length > 60) throw new Error("too many answers in one go");
+    const now = new Date().toISOString();
+    const rows = input.calls.map((c) => ({
+      club_id: viewer.club.id,
+      fixture_id: fixtureId,
+      player_id: text(c?.playerId, "playerId", 64, true)!,
+      status: oneOf(CALL_STATUSES, c?.status, "status") as CallStatus,
+      note: null,
+      via: "app" as const,
+      updated_at: now,
+    }));
+    const supabase = await createClient();
+    const { error } = await supabase.from("match_calls").upsert(rows, { onConflict: "fixture_id,player_id" });
+    if (error) throw error;
+    revalidatePath("/team");
+    return { ok: true, saved: rows.length };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "could not save the answers" };
+  }
+}
+
 export type PostNoticeInput = { kind: string; title: string; body?: string; audience?: string[]; fixtureId?: string | null };
 
 /** Staff post to the squad. Guests on a demo club may too; that is how the demo is tried. */

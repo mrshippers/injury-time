@@ -77,8 +77,12 @@ export function FeedKeyForm({ connected, allowed, reason }: { connected: boolean
   );
 }
 
-export function ResultForm({ allowed, reason, today }: { allowed: boolean; reason: string | null; today: string }) {
-  const [f, setF] = useState({ matchDate: today, opponent: "", venue: "H", competition: "", goalsFor: "", goalsAgainst: "", scorers: "" });
+export type Awaiting = { match_date: string; opponent: string; venue: "H" | "A"; competition: string };
+
+export function ResultForm({ allowed, reason, today, awaiting = [] }: { allowed: boolean; reason: string | null; today: string; awaiting?: Awaiting[] }) {
+  // the game that is waiting for its score is already in the diary: the form opens on it
+  const first = awaiting[0];
+  const [f, setF] = useState({ matchDate: first?.match_date ?? today, opponent: first?.opponent ?? "", venue: first?.venue ?? "H", competition: first?.competition ?? "", goalsFor: "", goalsAgainst: "", scorers: "" });
   const [state, setState] = useState<ActionState>(null);
   const [pending, start] = useTransition();
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF((s) => ({ ...s, [k]: e.target.value }));
@@ -96,6 +100,26 @@ export function ResultForm({ allowed, reason, today }: { allowed: boolean; reaso
       }}
       className="mt-4"
     >
+      {awaiting.length > 0 ? (
+        <div className="mb-3 flex flex-wrap items-center gap-2" role="group" aria-label="games waiting for a result">
+          <span className={LABEL}>waiting for a score</span>
+          {awaiting.map((a) => {
+            const on = f.matchDate === a.match_date && f.opponent === a.opponent;
+            return (
+              <button
+                key={`${a.match_date}-${a.opponent}`}
+                type="button"
+                aria-pressed={on}
+                disabled={!allowed || pending}
+                onClick={() => setF((s) => ({ ...s, matchDate: a.match_date, opponent: a.opponent, venue: a.venue, competition: a.competition, goalsFor: "", goalsAgainst: "" }))}
+                className={`pressable num h-9 border px-3 text-[12px] ${on ? "border-mint text-mint" : "border-line-strong text-ink-dim hover:text-ink"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint`}
+              >
+                {a.venue === "A" ? "at" : "v"} {a.opponent} · {a.match_date.slice(5)}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
       <fieldset disabled={!allowed || pending} className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1.5">
           <span className={LABEL}>date</span>

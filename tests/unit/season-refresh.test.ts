@@ -51,7 +51,7 @@ const { GET } = await import('@/app/api/cron/season-refresh/route')
 const authed = () =>
   new Request('http://x/api/cron/season-refresh', { headers: { authorization: 'Bearer s3cret' } })
 
-const emptyReport = { source: 'snapshot', results: 0, fixturesAdded: 0, standings: 0, progress: 0, playersUpdated: [], unmatched: [], resultsChanged: [], playersChanged: [], tableNew: false }
+const emptyReport = { source: 'snapshot', results: 0, fixturesAdded: 0, standings: 0, progress: 0, playersUpdated: [], unmatched: [], resultsChanged: [], resultsDetail: [], playersChanged: [], tableNew: false }
 
 beforeEach(() => {
   process.env.CRON_SECRET = 's3cret'
@@ -84,12 +84,13 @@ describe('season refresh', () => {
     expect(inserted).toHaveLength(0)
   })
 
-  it('files one notice naming what drifted', async () => {
+  it('files one notice that says the result in words', async () => {
     refreshSeason.mockResolvedValue({
       ...emptyReport,
       fixturesAdded: 2,
       results: 17,
-      resultsChanged: ['2026-09-22 v Maidenhead Town 5-1'],
+      resultsChanged: ['2026-10-10 v Baldock Town 4-2'],
+      resultsDetail: [{ match_date: '2026-10-10', opponent: 'Baldock Town', venue: 'H', competition: 'FA Vase 1', goals_for: 4, goals_against: 2 }],
       playersUpdated: ['A Kane'],
       playersChanged: ['A Kane'],
       unmatched: ['J Smith'],
@@ -100,9 +101,20 @@ describe('season refresh', () => {
     expect(body.status).toBe('done')
     expect(inserted).toHaveLength(1)
     expect(inserted[0].kind).toBe('notice')
-    expect(inserted[0].body).toContain('2 fixture(s) added')
-    expect(inserted[0].body).toContain('J Smith')
-    expect(inserted[0].body).toContain('Maidenhead Town 5-1')
+    expect(inserted[0].title).toBe('Belstone: won 4-2 v Baldock Town')
+    expect(inserted[0].body).toContain('Sat 10 Oct, FA Vase 1: won 4-2 v Baldock Town')
+    expect(inserted[0].body).toContain('2 new fixtures in the diary')
+    // machine words never reach the board
+    expect(`${inserted[0].title} ${inserted[0].body}`).not.toMatch(/snapshot|row\(s\)|name\(s\)|J Smith|A Kane/)
+  })
+
+  it('a fresher table or app counts alone is done quietly, no notice', async () => {
+    refreshSeason.mockResolvedValue({ ...emptyReport, tableNew: true, playersChanged: ['A Kane'], unmatched: ['Kimber'] })
+    const res = await GET(authed())
+    const body = await res.json()
+    expect(body.status).toBe('done')
+    expect(body.quiet).toBe(true)
+    expect(inserted).toHaveLength(0)
   })
 
   it('a night that rewrote every row but changed nothing is nothing-to-do, not a notice', async () => {
@@ -115,7 +127,7 @@ describe('season refresh', () => {
   })
 
   it('a second run the same day files nothing new', async () => {
-    refreshSeason.mockResolvedValue({ ...emptyReport, tableNew: true })
+    refreshSeason.mockResolvedValue({ ...emptyReport, fixturesAdded: 1 })
     tables.notifications = { data: [{ id: 'n1' }], error: null }
     const res = await GET(authed())
     const body = await res.json()

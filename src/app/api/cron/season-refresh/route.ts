@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { loadSeason, refreshSeason } from '@/lib/league'
 import belstoneSnapshot from '../../../../../scripts/belstone-2026-27.json'
 import type { Snapshot } from '@/lib/league/normalise'
+import { describeDrift } from '@/lib/league/drift'
 
 /**
  * Belstone season refresh.
@@ -63,21 +64,19 @@ export async function GET(request: Request) {
 
   // drift is what moved since last night, not the rows rewritten: counting rewrites
   // filed the same "10 results refreshed" notice every morning for weeks
-  const drifted = report.resultsChanged.length > 0 || report.fixturesAdded > 0 || report.playersChanged.length > 0 || report.tableNew
+  const drifted = report.resultsChanged.length > 0 || report.fixturesAdded > 0 || (report.fixturesChanged ?? 0) > 0 || report.playersChanged.length > 0 || report.tableNew
   if (!drifted) {
     return Response.json({ status: 'nothing-to-do', club: club.data.name, ran_at: new Date().toISOString(), report })
   }
 
-  const summary = [
-    report.resultsChanged.length ? `new or changed results: ${report.resultsChanged.join('; ')}` : null,
-    report.fixturesAdded ? `${report.fixturesAdded} fixture(s) added` : null,
-    report.tableNew ? 'a newer league table' : null,
-    report.playersChanged.length ? `apps or goals moved for ${report.playersChanged.join(', ')}` : null,
-    report.unmatched.length ? `${report.unmatched.length} name(s) the feed gives that match no one, or more than one: ${report.unmatched.join(', ')}` : null,
-  ].filter(Boolean).join('; ')
+  const note = describeDrift(report, club.data.name)
+  if (!note) {
+    // the table or someone's numbers moved but nothing a person reads as news
+    return Response.json({ status: 'done', quiet: true, club: club.data.name, ran_at: new Date().toISOString(), report })
+  }
 
-  // idempotency key season-refresh:belstone:{run_date}: a rerun the same day files nothing new
-  const title = `Belstone season refreshed (${season.source})`
+  // idempotency key: the same words filed on the same run date file nothing new
+  const title = note.title
   const dup = await db.from('notifications').select('id').eq('club_id', club.data.id).eq('title', title).gte('created_at', `${today}T00:00:00Z`).limit(1)
   if (dup.error) {
     return Response.json({ status: 'degraded', reason: `notify check: ${dup.error.message}`, report }, { status: 503 })
@@ -90,7 +89,7 @@ export async function GET(request: Request) {
     club_id: club.data.id,
     kind: 'notice',
     title,
-    body: summary,
+    body: note.body,
     audience: ['manager', 'coach'],
   })
   if (write.error) {

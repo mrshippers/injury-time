@@ -13,6 +13,8 @@ import { HubTiles, type Tile } from "@/components/home/hub-tiles";
 import { FirstWeek } from "@/components/home/first-week";
 import { firstWeek } from "@/lib/signup/actions";
 import { SeasonLine } from "@/components/home/season-line";
+import { CupsSection } from "@/components/home/cups";
+import { lastResult } from "@/lib/home/cups";
 import { FormVital, NextMatchVital, ScorersVital, WatchVital } from "@/components/home/vitals";
 import { StatReading } from "@/components/charts";
 import { longDate, shortDate } from "@/components/squad/format";
@@ -141,11 +143,13 @@ export default async function Home() {
 
       {/* secondary: the vitals */}
       <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2 xl:grid-cols-[1.1fr_1fr_1fr_1.2fr]">
-        <NextMatchVital next={next} daysUntil={daysUntil} fit={counts.fit} calls={season.calls} squadSize={dash.squadSize} />
+        <NextMatchVital next={next} daysUntil={daysUntil} fit={counts.fit} calls={season.calls} squadSize={dash.squadSize} last={lastResult(season.results)} />
         <FormVital ctx={ctx} results={season.results} />
         <ScorersVital feed={season.feedScorers} logged={dash.topScorers} feedAsOf={season.feedAsOf} />
         <WatchVital rows={dash.watchList} hasLoad={hasLoad} backSoon={dash.backSoon} />
       </div>
+
+      <CupsSection results={season.results} fixtures={season.fixtures} asOf={asOf} />
 
       {ctx.hasSeason ? (
         <div className="mt-10">

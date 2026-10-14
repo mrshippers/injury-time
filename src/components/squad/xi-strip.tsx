@@ -7,6 +7,7 @@
 import type { SquadRow } from "@/lib/data";
 import type { Formation } from "@/lib/lineup";
 import { READINESS_TEXT } from "@/lib/readiness";
+import { positionKnown } from "@/lib/squad/position";
 
 export function XiStrip({
   formation,
@@ -40,7 +41,7 @@ export function XiStrip({
       <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
         {formation.slots.map((slot, i) => {
           const row = xiIds[i] ? byId.get(xiIds[i]!) : null;
-          const outOfPosition = !!row && row.player.position !== slot.role;
+          const outOfPosition = !!row && positionKnown(row.player) && row.player.position !== slot.role;
           return (
             <li key={i} className="flex items-stretch border-b border-line">
               <button

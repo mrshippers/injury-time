@@ -29,6 +29,7 @@
 
   /* condition (FM) */
   --fit: #3ddc84;
+  --win: #2ff3c4;               /* bright aqua-leaning green: the blue channel carries it for deuteranopia */
   --doubt: #f5a623;
   --out: #e5484d;
   --susp: #ffd60a;             /* card yellow */
@@ -586,3 +587,33 @@ html {
     padding-bottom: 0;
   }
 }
+
+/* chart result dots: the tip shows on hover, keyboard focus or tap, no script */
+.result-dot { cursor: default; outline: none; }
+.result-dot .result-tip { opacity: 0; transition: opacity 120ms var(--ease-out-strong, ease-out); }
+.result-dot:hover .result-tip, .result-dot:focus .result-tip, .result-dot:focus-visible .result-tip { opacity: 1; }
+.result-dot:focus-visible circle:nth-of-type(2) { stroke: var(--mint); stroke-width: 2; }
+
+/* the call switch: a thumb that slides between three stops and wears the app's status shapes */
+.call-thumb {
+  border: 1px solid transparent;
+  border-radius: 1px;
+  transition: transform 190ms var(--ease-out-strong), background-color 190ms var(--ease-out-strong);
+}
+.call-thumb-in { background: var(--win); color: var(--mint-ink); }
+.call-thumb-unsure {
+  border-color: var(--doubt);
+  color: var(--doubt);
+  background: linear-gradient(to top, color-mix(in oklab, var(--doubt) 30%, transparent) 50%, transparent 50%);
+}
+.call-thumb-out {
+  border-color: var(--out);
+  color: var(--out);
+  background: repeating-linear-gradient(-45deg, color-mix(in oklab, var(--out) 26%, transparent) 0 2px, transparent 2px 6px);
+}
+.call-thumb-ghost { border: 1px dashed var(--line-strong); }
+@media (prefers-reduced-motion: reduce) { .call-thumb { transition: none; } }
+/* the row's left rule repeats the answer in a pattern: solid, dashed, dotted */
+.call-row[data-status="in"] { border-left-color: var(--win); }
+.call-row[data-status="unsure"] { border-left-color: var(--doubt); border-left-style: dashed; }
+.call-row[data-status="out"] { border-left-color: var(--out); border-left-style: dotted; }

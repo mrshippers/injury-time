@@ -8,7 +8,7 @@
     "division": "Division One",
     "step": 6,
     "season": "2026-27",
-    "source": "footballwebpages.co.uk + belstonefc.com, read from the public pages 30 Sep 2026 (results to 26 Sep)",
+    "source": "footballwebpages.co.uk + belstonefc.com, read from the public pages 14 Oct 2026 (results to 10 Oct)",
     "officials": [
       {
         "name": "Aaron Lincoln",
@@ -230,7 +230,7 @@
       "scorers": [
         "Agyeman-Duah (2)",
         "Akinbulumo",
-        "Thomaj"
+        "Lewis Thomas"
       ]
     },
     {
@@ -256,7 +256,7 @@
       "ht_against": 1,
       "attendance": 52,
       "scorers": [
-        "Thomaj (3)",
+        "Lewis Thomas (3)",
         "Akinbulumo (2)"
       ]
     },
@@ -273,7 +273,7 @@
       "scorers": [
         "Akinbulumo",
         "Gavin (2)",
-        "Thomaj",
+        "Lewis Thomas",
         "Mcnally (pen)",
         "Tomkins"
       ]
@@ -283,28 +283,48 @@
       "venue": "A",
       "opponent": "Woodley United",
       "competition": "Combined Counties Div 1",
-      "kickoff": "3pm"
+      "goals_for": 1,
+      "goals_against": 4,
+      "ht_for": 0,
+      "ht_against": 3,
+      "attendance": 56,
+      "scorers": [
+        "McNally (pen)"
+      ]
     },
     {
       "date": "2026-10-06",
       "venue": "H",
       "opponent": "Bovingdon",
       "competition": "CCL Div One Challenge Cup 1",
-      "kickoff": "7.45pm"
-    },
-    {
-      "date": "2026-10-10",
-      "venue": "A",
-      "opponent": "Langley",
-      "competition": "Combined Counties Div 1",
-      "kickoff": "3pm"
+      "goals_for": 6,
+      "goals_against": 1,
+      "ht_for": 4,
+      "ht_against": 1,
+      "attendance": 47,
+      "scorers": [
+        "Tomkins",
+        "Gavin",
+        "Park",
+        "McNally",
+        "Agyeman-Duah (2)"
+      ]
     },
     {
       "date": "2026-10-10",
       "venue": "H",
       "opponent": "Baldock Town",
       "competition": "FA Vase 1",
-      "kickoff": "3pm"
+      "goals_for": 4,
+      "goals_against": 2,
+      "ht_for": 1,
+      "ht_against": 2,
+      "attendance": 102,
+      "scorers": [
+        "McNally (2, 1 pen)",
+        "Gavin",
+        "Akinbulumo"
+      ]
     },
     {
       "date": "2026-10-17",
@@ -321,17 +341,10 @@
       "kickoff": "7.45pm"
     },
     {
-      "date": "2026-10-24",
-      "venue": "H",
-      "opponent": "Berks County",
-      "competition": "Combined Counties Div 1",
-      "kickoff": "3pm"
-    },
-    {
       "date": "2026-10-31",
       "venue": "H",
-      "opponent": "PFC Victoria London",
-      "competition": "Combined Counties Div 1",
+      "opponent": "Wisbech Town",
+      "competition": "FA Vase 2",
       "kickoff": "3pm"
     },
     {
@@ -347,6 +360,13 @@
       "opponent": "Colliers Wood United",
       "competition": "Combined Counties Div 1",
       "kickoff": "3pm"
+    },
+    {
+      "date": "2026-11-17",
+      "venue": "A",
+      "opponent": "Oxhey Jets",
+      "competition": "CCL Div One Challenge Cup 2",
+      "kickoff": "7.30pm"
     },
     {
       "date": "2026-11-21",
@@ -499,6 +519,30 @@
   "table": [
     {
       "position": 1,
+      "team": "Brook House",
+      "home": {
+        "p": 10,
+        "w": 8,
+        "d": 2,
+        "l": 0
+      },
+      "away": {
+        "p": 7,
+        "w": 3,
+        "d": 2,
+        "l": 2
+      },
+      "played": 17,
+      "won": 11,
+      "drawn": 4,
+      "lost": 2,
+      "gf": 41,
+      "ga": 22,
+      "gd": 19,
+      "points": 37
+    },
+    {
+      "position": 2,
       "team": "PFC Victoria London",
       "home": {
         "p": 9,
@@ -507,70 +551,22 @@
         "l": 1
       },
       "away": {
-        "p": 7,
+        "p": 9,
         "w": 4,
-        "d": 1,
+        "d": 3,
         "l": 2
       },
-      "played": 16,
+      "played": 18,
       "won": 10,
-      "drawn": 3,
+      "drawn": 5,
       "lost": 3,
-      "gf": 48,
-      "ga": 19,
-      "gd": 29,
-      "points": 33
-    },
-    {
-      "position": 2,
-      "team": "Langley",
-      "home": {
-        "p": 8,
-        "w": 7,
-        "d": 0,
-        "l": 1
-      },
-      "away": {
-        "p": 6,
-        "w": 3,
-        "d": 1,
-        "l": 2
-      },
-      "played": 14,
-      "won": 10,
-      "drawn": 1,
-      "lost": 3,
-      "gf": 41,
+      "gf": 51,
       "ga": 22,
-      "gd": 19,
-      "points": 31
+      "gd": 29,
+      "points": 35
     },
     {
       "position": 3,
-      "team": "Brook House",
-      "home": {
-        "p": 9,
-        "w": 7,
-        "d": 2,
-        "l": 0
-      },
-      "away": {
-        "p": 5,
-        "w": 2,
-        "d": 2,
-        "l": 1
-      },
-      "played": 14,
-      "won": 9,
-      "drawn": 4,
-      "lost": 1,
-      "gf": 34,
-      "ga": 17,
-      "gd": 17,
-      "points": 31
-    },
-    {
-      "position": 4,
       "team": "Westside",
       "home": {
         "p": 8,
@@ -579,46 +575,142 @@
         "l": 0
       },
       "away": {
-        "p": 7,
-        "w": 3,
+        "p": 8,
+        "w": 4,
         "d": 1,
         "l": 3
       },
-      "played": 15,
-      "won": 9,
+      "played": 16,
+      "won": 10,
       "drawn": 3,
       "lost": 3,
-      "gf": 43,
-      "ga": 16,
-      "gd": 27,
-      "points": 30
+      "gf": 46,
+      "ga": 18,
+      "gd": 28,
+      "points": 33
+    },
+    {
+      "position": 4,
+      "team": "Langley",
+      "home": {
+        "p": 9,
+        "w": 7,
+        "d": 1,
+        "l": 1
+      },
+      "away": {
+        "p": 7,
+        "w": 3,
+        "d": 2,
+        "l": 2
+      },
+      "played": 16,
+      "won": 10,
+      "drawn": 3,
+      "lost": 3,
+      "gf": 44,
+      "ga": 25,
+      "gd": 19,
+      "points": 33
     },
     {
       "position": 5,
       "team": "Wembley",
       "home": {
-        "p": 8,
-        "w": 4,
+        "p": 9,
+        "w": 5,
         "d": 2,
         "l": 2
       },
       "away": {
-        "p": 7,
+        "p": 8,
         "w": 5,
         "d": 1,
+        "l": 2
+      },
+      "played": 17,
+      "won": 10,
+      "drawn": 3,
+      "lost": 4,
+      "gf": 43,
+      "ga": 24,
+      "gd": 19,
+      "points": 33
+    },
+    {
+      "position": 6,
+      "team": "Colliers Wood United",
+      "home": {
+        "p": 9,
+        "w": 7,
+        "d": 1,
         "l": 1
+      },
+      "away": {
+        "p": 6,
+        "w": 2,
+        "d": 2,
+        "l": 2
       },
       "played": 15,
       "won": 9,
       "drawn": 3,
       "lost": 3,
-      "gf": 37,
-      "ga": 22,
-      "gd": 15,
+      "gf": 34,
+      "ga": 20,
+      "gd": 14,
       "points": 30
     },
     {
-      "position": 6,
+      "position": 7,
+      "team": "Bovingdon",
+      "home": {
+        "p": 10,
+        "w": 4,
+        "d": 5,
+        "l": 1
+      },
+      "away": {
+        "p": 7,
+        "w": 4,
+        "d": 1,
+        "l": 2
+      },
+      "played": 17,
+      "won": 8,
+      "drawn": 6,
+      "lost": 3,
+      "gf": 29,
+      "ga": 23,
+      "gd": 6,
+      "points": 30
+    },
+    {
+      "position": 8,
+      "team": "Holmer Green",
+      "home": {
+        "p": 10,
+        "w": 6,
+        "d": 2,
+        "l": 2
+      },
+      "away": {
+        "p": 7,
+        "w": 2,
+        "d": 2,
+        "l": 3
+      },
+      "played": 17,
+      "won": 8,
+      "drawn": 4,
+      "lost": 5,
+      "gf": 36,
+      "ga": 24,
+      "gd": 12,
+      "points": 28
+    },
+    {
+      "position": 9,
       "team": "Belstone",
       "home": {
         "p": 7,
@@ -627,46 +719,70 @@
         "l": 0
       },
       "away": {
-        "p": 7,
+        "p": 8,
         "w": 2,
         "d": 2,
-        "l": 3
+        "l": 4
       },
-      "played": 14,
+      "played": 15,
       "won": 8,
       "drawn": 3,
-      "lost": 3,
-      "gf": 31,
-      "ga": 14,
-      "gd": 17,
+      "lost": 4,
+      "gf": 32,
+      "ga": 18,
+      "gd": 14,
       "points": 27
     },
     {
-      "position": 7,
-      "team": "Bovingdon",
+      "position": 10,
+      "team": "London Samurai Rovers",
       "home": {
-        "p": 8,
-        "w": 3,
-        "d": 4,
-        "l": 1
+        "p": 6,
+        "w": 4,
+        "d": 0,
+        "l": 2
       },
       "away": {
-        "p": 7,
-        "w": 4,
-        "d": 1,
+        "p": 9,
+        "w": 3,
+        "d": 4,
         "l": 2
       },
       "played": 15,
       "won": 7,
-      "drawn": 5,
-      "lost": 3,
-      "gf": 26,
-      "ga": 21,
-      "gd": 5,
-      "points": 26
+      "drawn": 4,
+      "lost": 4,
+      "gf": 37,
+      "ga": 24,
+      "gd": 13,
+      "points": 25
     },
     {
-      "position": 8,
+      "position": 11,
+      "team": "Molesey",
+      "home": {
+        "p": 10,
+        "w": 6,
+        "d": 2,
+        "l": 2
+      },
+      "away": {
+        "p": 8,
+        "w": 1,
+        "d": 2,
+        "l": 5
+      },
+      "played": 18,
+      "won": 7,
+      "drawn": 4,
+      "lost": 7,
+      "gf": 36,
+      "ga": 38,
+      "gd": -2,
+      "points": 25
+    },
+    {
+      "position": 12,
       "team": "Berks County",
       "home": {
         "p": 5,
@@ -675,124 +791,52 @@
         "l": 2
       },
       "away": {
-        "p": 9,
+        "p": 11,
         "w": 4,
         "d": 3,
-        "l": 2
-      },
-      "played": 14,
-      "won": 7,
-      "drawn": 3,
-      "lost": 4,
-      "gf": 36,
-      "ga": 19,
-      "gd": 17,
-      "points": 24
-    },
-    {
-      "position": 9,
-      "team": "Colliers Wood United",
-      "home": {
-        "p": 8,
-        "w": 6,
-        "d": 1,
-        "l": 1
-      },
-      "away": {
-        "p": 5,
-        "w": 1,
-        "d": 2,
-        "l": 2
-      },
-      "played": 13,
-      "won": 7,
-      "drawn": 3,
-      "lost": 3,
-      "gf": 31,
-      "ga": 19,
-      "gd": 12,
-      "points": 24
-    },
-    {
-      "position": 10,
-      "team": "Holmer Green",
-      "home": {
-        "p": 9,
-        "w": 5,
-        "d": 2,
-        "l": 2
-      },
-      "away": {
-        "p": 6,
-        "w": 1,
-        "d": 2,
-        "l": 3
-      },
-      "played": 15,
-      "won": 6,
-      "drawn": 4,
-      "lost": 5,
-      "gf": 26,
-      "ga": 23,
-      "gd": 3,
-      "points": 22
-    },
-    {
-      "position": 11,
-      "team": "London Samurai Rovers",
-      "home": {
-        "p": 5,
-        "w": 3,
-        "d": 0,
-        "l": 2
-      },
-      "away": {
-        "p": 8,
-        "w": 3,
-        "d": 3,
-        "l": 2
-      },
-      "played": 13,
-      "won": 6,
-      "drawn": 3,
-      "lost": 4,
-      "gf": 28,
-      "ga": 22,
-      "gd": 6,
-      "points": 21
-    },
-    {
-      "position": 12,
-      "team": "Molesey",
-      "home": {
-        "p": 9,
-        "w": 5,
-        "d": 2,
-        "l": 2
-      },
-      "away": {
-        "p": 7,
-        "w": 1,
-        "d": 1,
-        "l": 5
+        "l": 4
       },
       "played": 16,
-      "won": 6,
+      "won": 7,
       "drawn": 3,
-      "lost": 7,
-      "gf": 32,
-      "ga": 35,
-      "gd": -3,
-      "points": 21
+      "lost": 6,
+      "gf": 38,
+      "ga": 24,
+      "gd": 14,
+      "points": 24
     },
     {
       "position": 13,
-      "team": "Spelthorne Sports",
+      "team": "Staines & Lammas (Middlesex)",
       "home": {
         "p": 9,
-        "w": 4,
+        "w": 1,
         "d": 4,
-        "l": 1
+        "l": 4
+      },
+      "away": {
+        "p": 9,
+        "w": 3,
+        "d": 4,
+        "l": 2
+      },
+      "played": 18,
+      "won": 4,
+      "drawn": 8,
+      "lost": 6,
+      "gf": 32,
+      "ga": 31,
+      "gd": 1,
+      "points": 20
+    },
+    {
+      "position": 14,
+      "team": "Spelthorne Sports",
+      "home": {
+        "p": 11,
+        "w": 5,
+        "d": 4,
+        "l": 2
       },
       "away": {
         "p": 6,
@@ -800,118 +844,94 @@
         "d": 1,
         "l": 5
       },
-      "played": 15,
-      "won": 4,
-      "drawn": 5,
-      "lost": 6,
-      "gf": 16,
-      "ga": 22,
-      "gd": -6,
-      "points": 17
-    },
-    {
-      "position": 14,
-      "team": "Maidenhead Town",
-      "home": {
-        "p": 6,
-        "w": 2,
-        "d": 2,
-        "l": 2
-      },
-      "away": {
-        "p": 8,
-        "w": 3,
-        "d": 0,
-        "l": 5
-      },
-      "played": 14,
+      "played": 17,
       "won": 5,
-      "drawn": 2,
+      "drawn": 5,
       "lost": 7,
-      "gf": 28,
-      "ga": 40,
-      "gd": -12,
-      "points": 17
+      "gf": 20,
+      "ga": 28,
+      "gd": -8,
+      "points": 20
     },
     {
       "position": 15,
-      "team": "Staines & Lammas (Middlesex)",
+      "team": "Maidenhead Town",
       "home": {
         "p": 8,
-        "w": 1,
+        "w": 2,
         "d": 3,
-        "l": 4
+        "l": 3
       },
       "away": {
-        "p": 8,
-        "w": 2,
-        "d": 4,
-        "l": 2
+        "p": 9,
+        "w": 3,
+        "d": 1,
+        "l": 5
       },
-      "played": 16,
-      "won": 3,
-      "drawn": 7,
-      "lost": 6,
-      "gf": 29,
-      "ga": 30,
-      "gd": -1,
-      "points": 16
+      "played": 17,
+      "won": 5,
+      "drawn": 4,
+      "lost": 8,
+      "gf": 35,
+      "ga": 48,
+      "gd": -13,
+      "points": 19
     },
     {
       "position": 16,
       "team": "Oxhey Jets",
       "home": {
+        "p": 9,
+        "w": 3,
+        "d": 2,
+        "l": 4
+      },
+      "away": {
         "p": 8,
         "w": 2,
         "d": 2,
         "l": 4
       },
-      "away": {
-        "p": 6,
-        "w": 2,
-        "d": 2,
-        "l": 2
-      },
-      "played": 14,
-      "won": 4,
+      "played": 17,
+      "won": 5,
       "drawn": 4,
-      "lost": 6,
-      "gf": 23,
-      "ga": 28,
-      "gd": -5,
-      "points": 16
+      "lost": 8,
+      "gf": 25,
+      "ga": 39,
+      "gd": -14,
+      "points": 19
     },
     {
       "position": 17,
       "team": "Edgware & Kingsbury",
       "home": {
-        "p": 6,
+        "p": 7,
         "w": 2,
         "d": 1,
-        "l": 3
+        "l": 4
       },
       "away": {
-        "p": 8,
-        "w": 1,
+        "p": 9,
+        "w": 2,
         "d": 1,
         "l": 6
       },
-      "played": 14,
-      "won": 3,
+      "played": 16,
+      "won": 4,
       "drawn": 2,
-      "lost": 9,
-      "gf": 19,
-      "ga": 44,
-      "gd": -25,
-      "points": 11
+      "lost": 10,
+      "gf": 24,
+      "ga": 46,
+      "gd": -22,
+      "points": 14
     },
     {
       "position": 18,
       "team": "Eagles Land Benfica",
       "home": {
-        "p": 4,
+        "p": 6,
         "w": 0,
-        "d": 2,
+        "d": 4,
         "l": 2
       },
       "away": {
@@ -920,23 +940,47 @@
         "d": 1,
         "l": 5
       },
-      "played": 12,
+      "played": 14,
       "won": 2,
-      "drawn": 3,
+      "drawn": 5,
       "lost": 7,
-      "gf": 13,
-      "ga": 32,
+      "gf": 18,
+      "ga": 37,
       "gd": -19,
-      "points": 9
+      "points": 11
     },
     {
       "position": 19,
+      "team": "Woodley United",
+      "home": {
+        "p": 6,
+        "w": 1,
+        "d": 3,
+        "l": 2
+      },
+      "away": {
+        "p": 9,
+        "w": 1,
+        "d": 1,
+        "l": 7
+      },
+      "played": 15,
+      "won": 2,
+      "drawn": 4,
+      "lost": 9,
+      "gf": 15,
+      "ga": 37,
+      "gd": -22,
+      "points": 10
+    },
+    {
+      "position": 20,
       "team": "Spartans Youth",
       "home": {
-        "p": 5,
+        "p": 6,
         "w": 1,
         "d": 0,
-        "l": 4
+        "l": 5
       },
       "away": {
         "p": 9,
@@ -944,47 +988,23 @@
         "d": 2,
         "l": 6
       },
-      "played": 14,
+      "played": 15,
       "won": 2,
       "drawn": 2,
-      "lost": 10,
+      "lost": 11,
       "gf": 18,
-      "ga": 37,
-      "gd": -19,
+      "ga": 39,
+      "gd": -21,
       "points": 8
-    },
-    {
-      "position": 20,
-      "team": "Woodley United",
-      "home": {
-        "p": 5,
-        "w": 0,
-        "d": 3,
-        "l": 2
-      },
-      "away": {
-        "p": 8,
-        "w": 1,
-        "d": 1,
-        "l": 6
-      },
-      "played": 13,
-      "won": 1,
-      "drawn": 4,
-      "lost": 8,
-      "gf": 11,
-      "ga": 34,
-      "gd": -23,
-      "points": 7
     },
     {
       "position": 21,
       "team": "FC Deportivo Galicia",
       "home": {
-        "p": 6,
+        "p": 7,
         "w": 1,
         "d": 0,
-        "l": 5
+        "l": 6
       },
       "away": {
         "p": 7,
@@ -992,93 +1012,101 @@
         "d": 3,
         "l": 4
       },
-      "played": 13,
+      "played": 14,
       "won": 1,
       "drawn": 3,
-      "lost": 9,
-      "gf": 14,
-      "ga": 31,
-      "gd": -17,
+      "lost": 10,
+      "gf": 16,
+      "ga": 34,
+      "gd": -18,
       "points": 6
     },
     {
       "position": 22,
       "team": "Shepherd's Bush",
       "home": {
-        "p": 6,
+        "p": 7,
         "w": 2,
         "d": 0,
-        "l": 4
+        "l": 5
       },
       "away": {
-        "p": 7,
+        "p": 9,
         "w": 0,
         "d": 0,
-        "l": 7
+        "l": 9
       },
-      "played": 13,
+      "played": 16,
       "won": 2,
       "drawn": 0,
-      "lost": 11,
-      "gf": 18,
-      "ga": 55,
-      "gd": -37,
+      "lost": 14,
+      "gf": 19,
+      "ga": 68,
+      "gd": -49,
       "points": 6
     }
   ],
-  "table_as_of": "2026-09-26",
+  "table_as_of": "2026-10-10",
   "appearances": [
     {
-      "name": "Daniel Flynn",
-      "appearances": 15
-    },
-    {
       "name": "Oliver Gilmas",
-      "appearances": 15
+      "appearances": 18
     },
     {
-      "name": "Aram Sarkissian",
-      "appearances": 15
+      "name": "Daniel Flynn",
+      "appearances": 17
     },
     {
       "name": "Joshua Gavin",
-      "appearances": 14
+      "appearances": 17
+    },
+    {
+      "name": "Aram Sarkissian",
+      "appearances": 17
     },
     {
       "name": "Aarush Yogarajan",
-      "appearances": 14
+      "appearances": 17
     },
     {
       "name": "Jan Desai",
-      "appearances": 13
+      "appearances": 15
+    },
+    {
+      "name": "Ibrahim Camara",
+      "appearances": 14
     },
     {
       "name": "James Kimber",
-      "appearances": 12
+      "appearances": 14
+    },
+    {
+      "name": "Eyituayo Akinbulumo",
+      "appearances": 13
+    },
+    {
+      "name": "Kayden Mandangu-Makangu",
+      "appearances": 13
+    },
+    {
+      "name": "Craige Tomkins",
+      "appearances": 13
     },
     {
       "name": "Jordan Mcnally",
       "appearances": 12
     },
     {
-      "name": "Ibrahim Camara",
-      "appearances": 11
-    },
-    {
-      "name": "Kayden Mandangu-Makangu",
-      "appearances": 11
-    },
-    {
       "name": "Mitchel Swain",
       "appearances": 11
     },
     {
-      "name": "Craige Tomkins",
-      "appearances": 11
+      "name": "Kushan Lewis Thomas",
+      "appearances": 8
     },
     {
-      "name": "Eyituayo Akinbulumo",
-      "appearances": 10
+      "name": "Roddick Agyeman-Duah",
+      "appearances": 7
     },
     {
       "name": "Hodje Joaquim",
@@ -1093,20 +1121,12 @@
       "appearances": 6
     },
     {
-      "name": "Roddick Agyeman-Duah",
-      "appearances": 5
-    },
-    {
       "name": "Youssef Enajar",
       "appearances": 5
     },
     {
-      "name": "Kushan Thomaj",
+      "name": "Jordon McNally",
       "appearances": 5
-    },
-    {
-      "name": "Amar Bowen",
-      "appearances": 4
     }
   ]
 }

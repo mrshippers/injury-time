@@ -23,6 +23,7 @@ import type { ReadinessKey } from "@/lib/readiness";
 import { opaque, type SceneTokens } from "@/components/three/tokens";
 import { growTurf } from "./grass";
 import { APRON_L, APRON_W, HALF_L, HALF_W, chalkGeometry, goalGeometry, netGeometry, slotToWorld } from "./pitch-geometry";
+import { positionKnown } from "@/lib/squad/position";
 
 export type DragSource = { kind: "list"; playerId: string } | { kind: "slot"; index: number };
 
@@ -163,9 +164,9 @@ function Rig({ reduced, busy, compact }: { reduced: boolean; busy: boolean; comp
   const dir = useRef(1);
   useEffect(() => {
     // a phone frame is tall and narrow: come up and over so the whole side fits
-    if (compact) camera.position.set(0, 124, -62);
-    else camera.position.set(0, 96, -104);
-    camera.lookAt(0, 0, -4);
+    if (compact) camera.position.set(0, 140, -88);
+    else camera.position.set(0, 104, -118);
+    camera.lookAt(0, 0, compact ? -24 : -10);
   }, [camera, compact]);
   // a slow sway between the azimuth limits: the map breathes, the user is never fighting it
   useFrame(() => {
@@ -176,7 +177,8 @@ function Rig({ reduced, busy, compact }: { reduced: boolean; busy: boolean; comp
       return;
     }
     c.autoRotate = true;
-    const a = c.getAzimuthalAngle();
+    // the camera stands behind our own goal (azimuth PI), so the sway is measured from there
+    const a = Math.atan2(Math.sin(c.getAzimuthalAngle() - Math.PI), Math.cos(c.getAzimuthalAngle() - Math.PI));
     if (a > 0.22) dir.current = -1;
     if (a < -0.22) dir.current = 1;
     c.autoRotateSpeed = 0.09 * dir.current;
@@ -184,7 +186,7 @@ function Rig({ reduced, busy, compact }: { reduced: boolean; busy: boolean; comp
   return (
     <OrbitControls
       ref={controls}
-      target={[0, 0, -4]}
+      target={[0, 0, compact ? -24 : -10]}
       enablePan={false}
       enableDamping
       dampingFactor={0.08}
@@ -192,8 +194,8 @@ function Rig({ reduced, busy, compact }: { reduced: boolean; busy: boolean; comp
       maxDistance={160}
       minPolarAngle={compact ? 0.3 : 0.42}
       maxPolarAngle={compact ? 0.72 : 1.02}
-      minAzimuthAngle={-0.55}
-      maxAzimuthAngle={0.55}
+      minAzimuthAngle={Math.PI - 0.55}
+      maxAzimuthAngle={Math.PI + 0.55}
       rotateSpeed={0.5}
       zoomSpeed={0.6}
       enabled={!busy}
@@ -311,7 +313,7 @@ function Token({ row, slotIndex, slot, t, selected, hovered, dragging, reduced, 
   const { camera, gl } = useThree();
   const probe = useMemo(() => ({ ray: new THREE.Raycaster(), plane: new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), ndc: new THREE.Vector2(), hit: new THREE.Vector3() }), []);
   const [tx, tz] = slotToWorld(slot.x, slot.depth);
-  const outOfPosition = row.player.position !== slot.role;
+  const outOfPosition = positionKnown(row.player) && row.player.position !== slot.role;
   const ring = outOfPosition ? t.gold : readinessColour(t, row.readiness.key);
   const first = useRef(true);
   const downAt = useRef<{ x: number; y: number } | null>(null);
