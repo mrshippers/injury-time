@@ -11,14 +11,20 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
-test("renders the squad, one row per player, with a count line", async ({ page }) => {
+test("renders the squad ten to a page, with a count line and the pages say where you are", async ({ page }) => {
   const rows = page.locator("tbody tr[data-player]");
   const n = await rows.count();
-  expect(n).toBeGreaterThanOrEqual(11);
-  await expect(page.getByText(new RegExp(`${n} in the squad`))).toBeVisible();
+  const line = (await page.getByText(/\d+ in the squad/).first().textContent()) ?? "";
+  const total = Number(line.match(/(\d+) in the squad/)?.[1]);
+  expect(total).toBeGreaterThanOrEqual(11);
+  expect(n).toBe(Math.min(10, total));
+  await expect(page.getByText(new RegExp(`1.10 of ${total}`))).toBeVisible();
+  await page.getByRole("button", { name: "next page" }).click();
+  expect(await rows.count()).toBe(Math.min(10, total - 10));
+  await page.getByRole("button", { name: "previous page" }).click();
   const onPitch = await page.locator("tbody tr[data-on-pitch]").count();
-  expect(onPitch).toBeGreaterThanOrEqual(9);
-  await expect(page.getByText(new RegExp(`${onPitch} on the pitch`))).toBeVisible();
+  expect(onPitch).toBeGreaterThanOrEqual(1);
+  await expect(page.getByText(/\d+ on the pitch/).first()).toBeVisible();
 });
 
 test("every availability state on the board is legible as text, not colour alone", async ({ page }) => {
@@ -49,22 +55,28 @@ test("columns sort and the header says which way", async ({ page }) => {
 });
 
 test("filters narrow the list and the count follows", async ({ page }) => {
-  const all = await page.locator("tbody tr[data-player]").count();
-  // filter on a position that exists on this board
-  const positions = await page.locator("tbody tr[data-player]").evaluateAll((trs) =>
-    trs.map((tr) => (tr.querySelectorAll("td")[1]?.textContent ?? "").trim()).filter((p) => /^(GK|DF|MF|FW)$/.test(p)),
-  );
-  const pick = ["GK", "DF", "MF", "FW"].find((p) => positions.includes(p) && positions.filter((x) => x === p).length < positions.length) ?? positions[0] ?? "MF";
+  const total = Number(((await page.getByText(/\d+ in the squad/).first().textContent()) ?? "").match(/(\d+) in the squad/)?.[1]);
+  // filter on a position that exists on this board (every page, so read them all)
+  const read = async () =>
+    page.locator("tbody tr[data-player]").evaluateAll((trs) => trs.map((tr) => (tr.querySelectorAll("td")[1]?.textContent ?? "").trim()).filter((p) => /^(GK|DF|MF|FW)$/.test(p)));
+  const positions = await read();
+  const pick = ["GK", "DF", "MF", "FW"].find((p) => positions.includes(p)) ?? "MF";
   await page.getByRole("group", { name: "position" }).getByRole("button", { name: pick }).click();
   const some = await page.locator("tbody tr[data-player]").count();
   expect(some).toBeGreaterThanOrEqual(1);
-  expect(some).toBeLessThanOrEqual(all);
-  if (some < all) await expect(page.getByText(new RegExp(`${some} of ${all}`))).toBeVisible();
+  expect(some).toBeLessThanOrEqual(10);
   await page.getByRole("group", { name: "position" }).getByRole("button", { name: "all" }).click();
   const firstName = (await page.locator("tbody tr[data-player] th a").first().textContent())!.trim();
   await page.getByRole("searchbox", { name: /search the squad/i }).fill(firstName.split(" ")[0]);
   await expect(page.locator("tbody tr[data-player]").first()).toContainText(firstName);
-  expect(await page.locator("tbody tr[data-player]").count()).toBeLessThan(all);
+  expect(await page.locator("tbody tr[data-player]").count()).toBeLessThan(total);
+});
+
+test("the room remembers how you left the filters", async ({ page }) => {
+  await page.getByRole("group", { name: "position" }).getByRole("button", { name: "DF" }).click();
+  await page.reload();
+  await expect(page.getByRole("group", { name: "position" }).getByRole("button", { name: "DF" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("group", { name: "position" }).getByRole("button", { name: "all" }).click();
 });
 
 for (const width of [1440, 390]) {

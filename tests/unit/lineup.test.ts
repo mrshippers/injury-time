@@ -92,3 +92,29 @@ describe("pickXI with nobody placed, last time's side and the calls", () => {
     expect(xi.picks.every((p) => p.row?.player.id !== "p2")).toBe(true);
   });
 });
+
+describe("the default when nothing else separates them", () => {
+  it("picks the man who has played most", () => {
+    const withApps = (n: number, apps: number): SquadRow => {
+      const r = row(n, "DF");
+      return { ...r, player: { ...r.player, external_stats: { apps } as never } };
+    };
+    const rows = [row(1, "GK"), withApps(2, 3), withApps(3, 18), withApps(4, 17), withApps(5, 16), withApps(6, 15)];
+    const xi = pickXI(rows, f442);
+    const dfs = xi.picks.filter((p) => p.slot.role === "DF").map((p) => p.row?.player.id);
+    expect(dfs.sort()).toEqual(["p3", "p4", "p5", "p6"]);
+  });
+});
+
+describe("players nobody has placed", () => {
+  it("the scorers go up front and the rest sit behind them", () => {
+    const flex = (n: number, apps: number, goals: number): SquadRow => {
+      const r = row(n, "MF");
+      return { ...r, player: { ...r.player, external_stats: { apps, goals, position_confirmed: false } as never } };
+    };
+    const rows = [row(1, "GK"), flex(2, 15, 12), flex(3, 15, 9), ...[4, 5, 6, 7, 8, 9, 10, 11].map((n) => flex(n, 15, 0))];
+    const xi = pickXI(rows, f442);
+    const front = xi.picks.filter((p) => p.slot.role === "FW").map((p) => p.row?.player.id).sort();
+    expect(front).toEqual(["p2", "p3"]);
+  });
+});

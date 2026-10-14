@@ -19,9 +19,9 @@ test.describe("the side", () => {
     await expect(page).toHaveURL(/\/squad$/);
   });
 
-  test("the shape is a dropdown of real templates, most common first, and is remembered", async ({ page }) => {
+  test("the formation is a dropdown of real templates, most common first, and is remembered", async ({ page }) => {
     await open(page);
-    const shape = page.getByRole("combobox", { name: /shape/i });
+    const shape = page.getByRole("combobox", { name: /formation/i });
     const options = await shape.locator("option").allTextContents();
     expect(options[0]).toMatch(/^4-2-3-1/);
     expect(options).toHaveLength(12);
@@ -35,8 +35,8 @@ test.describe("the side", () => {
       await expect(page.getByRole("button", { name: "saved" })).toBeVisible({ timeout: 15_000 });
     }
     await page.reload();
-    await expect(page.getByRole("combobox", { name: /shape/i })).toHaveValue("3-5-2");
-    await page.getByRole("combobox", { name: /shape/i }).selectOption("4-2-3-1");
+    await expect(page.getByRole("combobox", { name: /formation/i })).toHaveValue("3-5-2");
+    await page.getByRole("combobox", { name: /formation/i }).selectOption("4-2-3-1");
     const saveBack = page.getByRole("button", { name: /save for/ });
     if ((await saveBack.count()) > 0) {
       await saveBack.click();

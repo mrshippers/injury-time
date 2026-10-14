@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Crest } from "@/components/club/crest";
 import { AttendanceTrend } from "@/components/team/attendance-trend";
 import { CallBoard } from "@/components/team/call-board";
 import { CheckinsPanel } from "@/components/team/checkins-panel";
@@ -46,10 +47,13 @@ export default async function TeamPage() {
         <p className="annot">{`// the team · ${viewer.club.name.toLowerCase()}`}</p>
         {next ? (
           <>
-            <h1 className="display mt-2 text-4xl sm:text-5xl">
-              {next.venue === "H" ? `${next.opponent} at home` : `away at ${next.opponent}`}
-              <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
-            </h1>
+            <div className="mt-2 flex items-center gap-4">
+              <Crest team={next.opponent} size={52} className="max-sm:!size-10" />
+              <h1 className="display text-4xl sm:text-5xl">
+                {next.venue === "H" ? `${next.opponent} at home` : `away at ${next.opponent}`}
+                <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+              </h1>
+            </div>
             <p className="mt-3 text-[14px] text-ink-dim sm:text-[13.5px]">
               <span className="num text-ink">{longDate(next.match_date)}</span>
               {next.kickoff ? <span className="num"> · {next.kickoff}</span> : null}

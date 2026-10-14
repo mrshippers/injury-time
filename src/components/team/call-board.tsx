@@ -261,7 +261,7 @@ const STOPS: { status: CallStatus; word: string; thumb: string }[] = [
  * shows a dashed thumb where he went last time; tapping anywhere still answers.
  * Still a radio group underneath, with arrow keys.
  */
-function CallSwitch({
+export function CallSwitch({
   name,
   value,
   usual,

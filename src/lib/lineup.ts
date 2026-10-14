@@ -80,10 +80,22 @@ const COVER: Record<Position, Position[]> = {
   FW: ["MF"],
 };
 
-/** Steadiest first, then squad number: a deterministic order for the picker. */
+const goalsOf = (r: SquadRow): number => r.stats.goals || (r.player.external_stats as { goals?: number } | null)?.goals || 0;
+const goalRate = (r: SquadRow): number => {
+  const apps = appsOf(r);
+  return apps > 0 ? goalsOf(r) / apps : 0;
+};
+const appsOf = (r: SquadRow): number => r.stats.apps || (r.player.external_stats as { apps?: number } | null)?.apps || 0;
+
+/**
+ * Steadiest first, then who has played most (a club with no training data still has appearances, and
+ * the man with eighteen is a better default than the man with four), then squad number: a deterministic
+ * order for the picker.
+ */
 export function byForm(a: SquadRow, b: SquadRow): number {
   return (
     READINESS_RANK[a.readiness.key] - READINESS_RANK[b.readiness.key] ||
+    appsOf(b) - appsOf(a) ||
     (a.player.squad_number ?? 99) - (b.player.squad_number ?? 99)
   );
 }
@@ -151,11 +163,12 @@ export function fillEmpty(rows: SquadRow[], formation: Formation, current: (stri
     const own = pool.get(slot.role)!.shift();
     if (own) next[i] = own.player.id;
   });
-  // then the ones nobody has placed: any outfield slot, never the gloves
-  formation.slots.forEach((slot, i) => {
-    if (next[i] || slot.role === "GK") return;
-    const any = flex.shift();
-    if (any) next[i] = any.player.id;
+  // then the ones nobody has placed: any outfield slot, never the gloves. With no position to go on, goals a
+  // game is the hint: the scorers go up front and the rest sit behind them. Only a default, one swap undoes it.
+  const gaps = formation.slots.map((slot, i) => ({ slot, i })).filter((g) => !next[g.i] && g.slot.role !== "GK").sort((a, b) => a.slot.depth - b.slot.depth);
+  const chosen = flex.slice(0, gaps.length).sort((a, b) => goalRate(a) - goalRate(b));
+  gaps.forEach((g, j) => {
+    if (chosen[j]) next[g.i] = chosen[j].player.id;
   });
   formation.slots.forEach((slot, i) => {
     if (next[i]) return;

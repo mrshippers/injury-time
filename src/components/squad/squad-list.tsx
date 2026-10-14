@@ -9,6 +9,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { useStoredValue } from "@/components/three/tokens";
+
 import type { SquadRow } from "@/lib/data";
 import { READINESS_RANK, READINESS_TEXT, type ReadinessKey } from "@/lib/readiness";
 import { positionKnown } from "@/lib/squad/position";
@@ -46,6 +48,8 @@ function positionConfirmed(r: SquadRow): boolean {
   return positionKnown(r.player);
 }
 
+type Filters = { sort: { key: SortKey; dir: Dir }; position: Position | "all"; status: AvailabilityStatus | "all"; readiness: ReadinessKey | "all" };
+const DEFAULTS: Filters = { sort: { key: "number", dir: "asc" }, position: "all", status: "all", readiness: "all" };
 const PAGE_SIZE = 10;
 const FILTER_KEY = "injury-time.squad-filters";
 
@@ -90,29 +94,27 @@ export function SquadList({
   onToggleIn?: (id: string) => void;
   onDragStart: (playerId: string, e: PointerEvent) => void;
 }) {
-  const [sort, setSort] = useState<{ key: SortKey; dir: Dir }>({ key: "number", dir: "asc" });
-  const [position, setPosition] = useState<Position | "all">("all");
-  const [status, setStatus] = useState<AvailabilityStatus | "all">("all");
-  const [readiness, setReadiness] = useState<ReadinessKey | "all">("all");
+  // the room remembers how you left it: sort and filters come back on the next visit
+  const storedFilters = useStoredValue(FILTER_KEY);
+  const [mine, setMine] = useState<Filters | null>(null);
+  const filters: Filters = useMemo(() => {
+    if (mine) return mine;
+    try {
+      const f = storedFilters ? (JSON.parse(storedFilters) as Partial<Filters>) : null;
+      return f && f.sort && typeof f.sort.key === "string" ? { ...DEFAULTS, ...f } : DEFAULTS;
+    } catch {
+      return DEFAULTS;
+    }
+  }, [mine, storedFilters]);
+  const { sort, position, status, readiness } = filters;
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
   const [page, setPage] = useState(0);
-
-  // the room remembers how you left it: sort and filters come back on the next visit
-  useEffect(() => {
+  const remember = (patch: Partial<Filters>) => {
+    const next = { ...filters, ...patch };
+    setMine(next);
     try {
-      const raw = localStorage.getItem(FILTER_KEY);
-      if (!raw) return;
-      const f = JSON.parse(raw) as Partial<{ sort: { key: SortKey; dir: Dir }; position: Position | "all"; status: AvailabilityStatus | "all"; readiness: ReadinessKey | "all" }>;
-      if (f.sort && typeof f.sort.key === "string") setSort(f.sort);
-      if (f.position) setPosition(f.position);
-      if (f.status) setStatus(f.status);
-      if (f.readiness) setReadiness(f.readiness);
-    } catch {}
-  }, []);
-  const remember = (next: Partial<{ sort: { key: SortKey; dir: Dir }; position: Position | "all"; status: AvailabilityStatus | "all"; readiness: ReadinessKey | "all" }>) => {
-    try {
-      localStorage.setItem(FILTER_KEY, JSON.stringify({ sort, position, status, readiness, ...next }));
+      localStorage.setItem(FILTER_KEY, JSON.stringify(next));
     } catch {}
     setPage(0);
   };
@@ -150,9 +152,7 @@ export function SquadList({
 
   const maxLoad = rows.reduce((m, r) => Math.max(m, r.weekLoad), 0);
   const toggleSort = (key: SortKey) => {
-    const next: { key: SortKey; dir: Dir } = sort.key === key ? { key, dir: sort.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" };
-    setSort(next);
-    remember({ sort: next });
+    remember({ sort: sort.key === key ? { key, dir: sort.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" } });
   };
 
   const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
@@ -199,7 +199,6 @@ export function SquadList({
               type="button"
               aria-pressed={position === p}
               onClick={() => {
-                setPosition(p);
                 remember({ position: p });
               }}
               className={`pressable num h-7 px-2 text-[11px] font-semibold tracking-[0.06em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
@@ -211,9 +210,7 @@ export function SquadList({
           ))}
         </div>
         <select aria-label="availability" className={SELECT} value={status} onChange={(e) => {
-            const v = e.target.value as AvailabilityStatus | "all";
-            setStatus(v);
-            remember({ status: v });
+            remember({ status: e.target.value as AvailabilityStatus | "all" });
           }}>
           <option value="all">any status</option>
           <option value="fit">fit</option>
@@ -222,9 +219,7 @@ export function SquadList({
           <option value="suspended">suspended</option>
         </select>
         <select aria-label="training" className={SELECT} value={readiness} onChange={(e) => {
-            const v = e.target.value as ReadinessKey | "all";
-            setReadiness(v);
-            remember({ readiness: v });
+            remember({ readiness: e.target.value as ReadinessKey | "all" });
           }}>
           {READINESS_FILTERS.map((f) => (
             <option key={f.value} value={f.value}>
@@ -249,7 +244,6 @@ export function SquadList({
           value={`${sort.key}:${sort.dir}`}
           onChange={(e) => {
             const [key, dir] = e.target.value.split(":") as [SortKey, Dir];
-            setSort({ key, dir });
             remember({ sort: { key, dir } });
           }}
         >

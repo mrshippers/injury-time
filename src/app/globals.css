@@ -617,3 +617,6 @@ html {
 .call-row[data-status="in"] { border-left-color: var(--win); }
 .call-row[data-status="unsure"] { border-left-color: var(--doubt); border-left-style: dashed; }
 .call-row[data-status="out"] { border-left-color: var(--out); border-left-style: dotted; }
+
+/* a pitch page is not the app: no module nav, no tab bar while it is on screen */
+body:has([data-pilot]) nav[aria-label="modules"] { display: none; }

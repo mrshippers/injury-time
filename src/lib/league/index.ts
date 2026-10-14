@@ -176,6 +176,13 @@ export async function refreshSeason(db: Db, club: Pick<Club, "id" | "name" | "sl
     playersUpdated.push(current.name);
   }
 
+  // say how fresh the copy is: a snapshot is as old as its table, a live feed is as old as this run
+  {
+    const stamp = season.source === "snapshot" && data.asOf ? `${data.asOf}T12:00:00Z` : new Date().toISOString();
+    const { error } = await db.from("clubs").update({ season_synced_at: stamp }).eq("id", cid);
+    if (error) throw error;
+  }
+
   return {
     source: season.source,
     results: data.results.length,

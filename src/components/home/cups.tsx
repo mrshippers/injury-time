@@ -1,4 +1,5 @@
 import { cupRuns, type CupRun, type CupTie } from "@/lib/home/cups";
+import { Crest } from "@/components/club/crest";
 import type { Fixture, Result } from "@/lib/types";
 import { shortDate } from "@/components/squad/format";
 
@@ -52,9 +53,12 @@ export function CupsSection({ results, fixtures, asOf }: { results: Result[]; fi
                   ) : (
                     <p className="num mt-1.5 text-[12px] font-semibold tracking-[0.1em] text-gold">NEXT · {shortDate(t.date).toUpperCase()}</p>
                   )}
-                  <p className="mt-1 truncate text-[12.5px] text-ink">
-                    {t.venue === "A" ? "at " : "v "}
-                    {t.opponent}
+                  <p className="mt-1 flex items-center gap-1.5 truncate text-[12.5px] text-ink">
+                    <Crest team={t.opponent} size={16} />
+                    <span className="truncate">
+                      {t.venue === "A" ? "at " : "v "}
+                      {t.opponent}
+                    </span>
                   </p>
                   <p className="num text-[11px] text-ink-dim">
                     {t.tone ? shortDate(t.date) : `${t.venue === "H" ? "home" : "away"}${t.kickoff ? ` · ${t.kickoff}` : ""}`}

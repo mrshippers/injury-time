@@ -3,7 +3,7 @@
     "file": "belstone.png",
     "source": "club-site",
     "url": "https://www.belstonefc.com/ (header logo, images.pitchero.com/club_logos/72555)",
-    "note": "Source is black line art on white, kept with its white box (would vanish on dark if made transparent)"
+    "note": "Black line art on white in the source; turned into light line art on transparent so it reads on a dark screen."
   },
   "Brook House": {
     "file": "brook-house.png",
@@ -15,7 +15,7 @@
     "file": "pfc-victoria-london.png",
     "source": "wikipedia",
     "url": "https://en.wikipedia.org/wiki/File:PFC_Victoria_London_Logo.jpg",
-    "note": "No club site found; white box kept (white disc on white, cannot be cut out cleanly)"
+    "note": "White disc on white in the source; cut to the disc."
   },
   "Westside": {
     "file": "westside.png",
@@ -87,7 +87,7 @@
     "file": "maidenhead-town.png",
     "source": "club-site",
     "url": "https://maidenheadtownfc.co.uk/apple-touch-icon.png",
-    "note": "Native 180px apple-touch-icon; white box kept because the navy lion disappears on a dark background once cut out"
+    "note": "Dark-on-white source; turned into light line art on transparent so it reads on a dark screen."
   },
   "Oxhey Jets": {
     "file": "oxhey-jets.png",

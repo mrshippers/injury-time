@@ -9,6 +9,7 @@
  * onto a slot, drag a token between slots, or select a name and then a slot
  * (keyboard and touch). Nothing on the pitch is the only way to do anything.
  */
+import { Crest } from "@/components/club/crest";
 import dynamic from "next/dynamic";
 import { useEffect, useEffectEvent, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
 
@@ -88,31 +89,31 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
   const prefer = useMemo(() => new Set((previous?.xi ?? []).filter(Boolean) as string[]), [previous]);
   const callMap = useMemo(() => new Map(Object.entries(calls)), [calls]);
   const auto = useMemo(() => pickXI(rows, formation, { prefer, calls: callMap }).picks.map((p) => p.row?.player.id ?? null), [rows, formation, prefer, callMap]);
-  const [manual, setManual] = useState<{ formation: string; ids: (string | null)[] } | null>(
+  const [manualState, setManual] = useState<{ formation: string; ids: (string | null)[] } | null>(
     saved ? { formation: saved.formation, ids: saved.xi } : null,
   );
   // an unsaved draft survives a refresh: the lads should not have to rebuild a side because the page reloaded
   const draftKey = `injury-time.draft.${clubId}.${nextFixture?.id ?? "none"}`;
-  useEffect(() => {
-    if (saved) return;
+  const storedDraft = useStoredValue(draftKey);
+  const draft = useMemo(() => {
+    if (saved || !storedDraft) return null;
     try {
-      const raw = localStorage.getItem(draftKey);
-      if (!raw) return;
-      const d = JSON.parse(raw) as { formation: string; ids: (string | null)[] };
-      if (typeof d?.formation === "string" && Array.isArray(d.ids) && d.ids.length === 11) setManual({ formation: d.formation, ids: d.ids });
-    } catch {}
-    // read once on arrival
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      const d = JSON.parse(storedDraft) as { formation: string; ids: (string | null)[] };
+      return typeof d?.formation === "string" && Array.isArray(d.ids) && d.ids.length === 11 ? d : null;
+    } catch {
+      return null;
+    }
+  }, [storedDraft, saved]);
+  const manual = manualState ?? draft;
   useEffect(() => {
-    if (!manual || saved) return;
+    if (!manualState || saved) return;
     try {
-      localStorage.setItem(draftKey, JSON.stringify(manual));
+      localStorage.setItem(draftKey, JSON.stringify(manualState));
     } catch {}
-  }, [manual, saved, draftKey]);
+  }, [manualState, saved, draftKey]);
   const xiIds = manual && manual.formation === formation.name ? manual.ids : auto;
   const setXiIds = (update: (ids: (string | null)[]) => (string | null)[]) => {
-      setManual((m) => ({ formation: formation.name, ids: update(m && m.formation === formation.name ? m.ids : auto) }));
+      setManual({ formation: formation.name, ids: update(manual && manual.formation === formation.name ? manual.ids : auto) });
     };
 
   const inXI = useMemo(() => new Set(xiIds.filter(Boolean) as string[]), [xiIds]);
@@ -163,7 +164,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
       ? null
       : prefer.size > 0
         ? `filled from last match's eleven${carried < 11 ? `, ${11 - carried} change${11 - carried === 1 ? "" : "s"} for who is out` : ""}`
-        : "filled from who is in and in form";
+        : "filled from who is in and who has played most";
 
   /* ── one tap from the list: in he goes, to the first slot that fits him ── */
   const [toggleNote, setToggleNote] = useState<string | null>(null);
@@ -441,10 +442,13 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
             />
           ) : null}
           {nextFixture ? (
-            <p className="pointer-events-none absolute left-3 top-3 text-[11.5px] text-ink-dim">
+            <p className="pointer-events-none absolute left-3 top-3 flex items-center gap-2 text-[11.5px] text-ink-dim">
               <span className="num text-gold">{shortDate(nextFixture.match_date).toUpperCase()}</span>
-              {" · "}
-              {nextFixture.opponent} ({nextFixture.venue})
+              <span aria-hidden>·</span>
+              <Crest team={nextFixture.opponent} size={16} plain />
+              <span>
+                {nextFixture.opponent} ({nextFixture.venue})
+              </span>
             </p>
           ) : null}
           <p className="pointer-events-none absolute bottom-3 left-3 text-[10.5px] tracking-[0.12em] uppercase text-ink-dim">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Crest } from "@/components/club/crest";
 import type { SquadRow } from "@/lib/data";
 import type { HomeSeason } from "@/lib/home/data";
 import type { SeasonContext } from "@/lib/home/season-context";
@@ -39,9 +40,12 @@ export function NextMatchVital({ next, daysUntil, fit, calls, squadSize, last }:
             {weekday(next.match_date).toUpperCase()} {shortDate(next.match_date).toUpperCase()}
             {next.kickoff ? ` · ${next.kickoff}` : ""}
           </p>
-          <p className="display text-[28px] leading-none text-ink">
-            {next.opponent}
-            <span className="ml-2 text-[14px] font-semibold tracking-[0.1em] text-ink-dim">({next.venue})</span>
+          <p className="display flex items-center gap-3 text-[28px] leading-none text-ink">
+            <Crest team={next.opponent} size={34} />
+            <span>
+              {next.opponent}
+              <span className="ml-2 text-[14px] font-semibold tracking-[0.1em] text-ink-dim">({next.venue})</span>
+            </span>
           </p>
           <p className="text-[12.5px] text-ink-dim">
             {isLeague(next.competition) ? null : <span className="num mr-2 border border-gold-dim px-1.5 py-px text-[10px] font-semibold tracking-[0.12em] text-gold">CUP TIE</span>}
@@ -86,8 +90,8 @@ function LastTimeOut({ r }: { r: Result }) {
       <span className="num font-semibold text-ink">
         {r.goals_for}-{r.goals_against}
       </span>
-      <span>
-        {r.venue === "A" ? "at" : "v"} {r.opponent}
+      <span className="inline-flex items-center gap-1.5">
+        {r.venue === "A" ? "at" : "v"} <Crest team={r.opponent} size={16} /> {r.opponent}
       </span>
       <span className="num">
         · {r.competition} · {shortDate(r.match_date)}
