@@ -255,8 +255,8 @@ const STOPS: { status: CallStatus; word: string; thumb: string }[] = [
 ];
 
 /**
- * The answer as a three-detent switch plate: a hairline track with two notches and a
- * square-cut thumb that slides to the chosen stop. The thumb carries the word and a
+ * The answer as a switch on a hairline: one line through three notched stops, the words
+ * underneath, and a square-cut plate that slides along the line to the chosen stop. The thumb carries the word and a
  * shape (solid / half / struck), so the answer never rests on colour alone. Unanswered
  * shows a dashed thumb where he went last time; tapping anywhere still answers.
  * Still a radio group underneath, with arrow keys.
@@ -289,37 +289,34 @@ export function CallSwitch({
   };
   const at = value ? STOPS.findIndex((s) => s.status === value) : -1;
   const ghost = !value && usual ? STOPS.findIndex((s) => s.status === usual) : -1;
-  const width = large ? "sm:w-[216px]" : "sm:w-[168px]";
+  const width = large ? "sm:w-[240px]" : "sm:w-[196px]";
+  const plate = large ? "h-[28px] text-[13px]" : "h-[24px] text-[11px]";
   return (
     <div
       role="radiogroup"
       aria-label={`${name}: call`}
       onKeyDown={onKey}
-      className={`call-switch relative grid h-11 w-full grid-cols-3 border border-line bg-pitch ${width} ${large ? "sm:h-11" : "sm:h-9"} ${disabled ? "opacity-70" : ""}`}
+      className={`call-switch relative grid h-[54px] w-full grid-cols-3 ${width} ${large ? "sm:h-[58px]" : "sm:h-[50px]"} ${disabled ? "opacity-70" : ""}`}
     >
-      {/* the two notches between the stops */}
-      <span aria-hidden className="pointer-events-none absolute left-1/3 top-0 h-1.5 w-px bg-line-strong" />
-      <span aria-hidden className="pointer-events-none absolute left-2/3 top-0 h-1.5 w-px bg-line-strong" />
-      <span aria-hidden className="pointer-events-none absolute left-1/3 bottom-0 h-1.5 w-px bg-line-strong" />
-      <span aria-hidden className="pointer-events-none absolute left-2/3 bottom-0 h-1.5 w-px bg-line-strong" />
+      {/* one hairline through the three stops, a notch at each: the fourth official's board, not three boxes */}
+      <span aria-hidden className="pointer-events-none absolute left-[16.667%] right-[16.667%] top-[16px] h-px bg-line-strong" />
+      {[16.667, 50, 83.333].map((l) => (
+        <span key={l} aria-hidden className="pointer-events-none absolute top-[12px] h-[9px] w-px -translate-x-1/2 bg-line-strong" style={{ left: `${l}%` }} />
+      ))}
       {/* last time, as a marker only */}
       {ghost >= 0 ? (
-        <span
-          aria-hidden
-          className="call-thumb call-thumb-ghost pointer-events-none absolute inset-y-[3px] left-[3px] flex w-[calc((100%-6px)/3)] items-center justify-center"
-          style={{ transform: `translateX(${ghost * 100}%)` }}
-        >
-          <span className="num text-[10.5px] font-semibold uppercase tracking-[0.1em] text-ink-dim">{STOPS[ghost].word}?</span>
+        <span aria-hidden className="pointer-events-none absolute left-0 top-[4px] w-1/3 px-[6px]" style={{ transform: `translateX(${ghost * 100}%)` }}>
+          <span className={`call-thumb call-thumb-ghost flex items-center justify-center ${plate}`}>
+            <span className="num font-semibold uppercase tracking-[0.1em] text-ink-dim">{STOPS[ghost].word}?</span>
+          </span>
         </span>
       ) : null}
-      {/* the thumb: slides, never jumps */}
+      {/* the plate: slides along the line to the answer, never jumps */}
       {at >= 0 ? (
-        <span
-          aria-hidden
-          className={`call-thumb ${STOPS[at].thumb} pointer-events-none absolute inset-y-[3px] left-[3px] z-[1] flex w-[calc((100%-6px)/3)] items-center justify-center`}
-          style={{ transform: `translateX(${at * 100}%)` }}
-        >
-          <span className={`num font-bold uppercase tracking-[0.1em] ${large ? "text-[13px]" : "text-[12px] sm:text-[10.5px]"}`}>{STOPS[at].word}</span>
+        <span aria-hidden className="call-slide pointer-events-none absolute left-0 top-[4px] z-[1] w-1/3 px-[6px]" style={{ transform: `translateX(${at * 100}%)` }}>
+          <span className={`call-thumb ${STOPS[at].thumb} flex items-center justify-center ${plate}`}>
+            <span className="num font-bold uppercase tracking-[0.1em]">{STOPS[at].word}</span>
+          </span>
         </span>
       ) : null}
       {STOPS.map((s, i) => {
@@ -333,11 +330,9 @@ export function CallSwitch({
             disabled={disabled}
             tabIndex={on || (!value && s.status === "in") ? 0 : -1}
             onClick={() => onChoose(s.status)}
-            className={`pressable relative z-[2] flex items-center justify-center text-[12px] uppercase tracking-[0.1em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint disabled:cursor-default ${
-              on ? "text-transparent" : ghost === i ? "text-transparent" : "num font-medium text-ink-dim hover:text-ink sm:text-[10.5px]"
-            }`}
+            className="pressable relative z-[2] flex flex-col items-center justify-end pb-[5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint disabled:cursor-default"
           >
-            <span className={on || ghost === i ? "opacity-0" : undefined}>{s.word}</span>
+            <span className={`num text-[10.5px] uppercase tracking-[0.12em] ${on ? "text-transparent" : ghost === i ? "text-ink-dim" : "text-ink-dim hover:text-ink"}`}>{s.word}</span>
           </button>
         );
       })}

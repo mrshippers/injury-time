@@ -8,6 +8,7 @@
 import { revalidatePath } from "next/cache";
 
 import { FORMATION_TEMPLATES } from "@/lib/config";
+import { formationByName } from "@/lib/lineup";
 import { createClient } from "@/lib/supabase/server";
 import { POSITIONS, type ExternalStats, type Position } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
@@ -164,7 +165,22 @@ export async function saveLineupAction(input: { fixtureId: string; formation: st
       { onConflict: "club_id,fixture_id" },
     );
     if (error) throw error;
+    // a saved side says where each man plays: anyone with no position yet takes the one he was picked in
+    const slots = formationByName(input.formation).slots;
+    const picked = xi.flatMap((id, i) => (id ? [{ id, slot: slots[i] }] : []));
+    const { data: unset } = await supabase.from("players").select("id, external_stats").eq("club_id", viewer.club.id).in("id", picked.map((p) => p.id));
+    for (const row of unset ?? []) {
+      const stats = (row.external_stats as ExternalStats | null) ?? {};
+      if (stats.position_confirmed !== false) continue;
+      const { slot } = picked.find((p) => p.id === row.id)!;
+      await supabase
+        .from("players")
+        .update({ position: slot.role, external_stats: { ...stats, position_confirmed: true, position_source: `picked at ${slot.label} in a saved side` } })
+        .eq("id", row.id)
+        .eq("club_id", viewer.club.id);
+    }
     revalidatePath("/squad");
+    revalidatePath("/team");
     return { ok: true };
   } catch (e) {
     return fail(e);

@@ -16,7 +16,8 @@ import { useEffect, useEffectEvent, useMemo, useRef, useState, useSyncExternalSt
 import type { SquadRow } from "@/lib/data";
 import { FORMATIONS, formationByName, isAvailable, pickXI } from "@/lib/lineup";
 import { saveLineupAction } from "@/lib/squad/actions";
-import type { CallStatus, Fixture, SavedLineup } from "@/lib/types";
+import { positionKnown } from "@/lib/squad/position";
+import type { CallStatus, Fixture, Position, SavedLineup } from "@/lib/types";
 
 import { useIsPhone, useReducedMotion, useSceneTokens, useStoredValue } from "@/components/three/tokens";
 import type { DragSource } from "@/components/lineup/pitch-scene";
@@ -117,6 +118,20 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
     };
 
   const inXI = useMemo(() => new Set(xiIds.filter(Boolean) as string[]), [xiIds]);
+  const slotOf = useMemo(() => new Map(xiIds.flatMap((id, i) => (id ? [[id, formation.slots[i]] as const] : []))), [xiIds, formation]);
+  // depth against the formation: what it asks for, who is fit and placed there, who has no position yet
+  const depth = useMemo(() => {
+    const need: Record<Position, number> = { GK: 0, DF: 0, MF: 0, FW: 0 };
+    for (const sl of formation.slots) need[sl.role] += 1;
+    const have: Record<Position, number> = { GK: 0, DF: 0, MF: 0, FW: 0 };
+    let unset = 0;
+    for (const r of rows) {
+      if (!isAvailable(r) || calls[r.player.id] === "out") continue;
+      if (positionKnown(r.player)) have[r.player.position] += 1;
+      else unset += 1;
+    }
+    return { need, have, unset };
+  }, [rows, formation, calls]);
   const bench = useMemo(() => rows.filter((r) => isAvailable(r) && !inXI.has(r.player.id)), [rows, inXI]);
   const filled = xiIds.filter(Boolean).length;
 
@@ -368,9 +383,12 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
             {toggleNote}
           </p>
         ) : null}
+        {/* depth only means something once most of the squad has a position; until then it is a row of "short" */}
+        {depth.unset * 2 < depth.unset + Object.values(depth.have).reduce((a, b) => a + b, 0) ? <DepthLine depth={depth} formation={formation.name} /> : null}
         <SquadList
           rows={rows}
           inXI={inXI}
+          slotOf={slotOf}
           selectedPlayer={selectedPlayer}
           dragging={drag !== null}
           canManage={canManage}
@@ -481,6 +499,31 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
         </span>
       </div>
       <span className="sr-only">{FORMATIONS.length} formations available</span>
+    </div>
+  );
+}
+
+/**
+ * Depth against the formation, one line: what it asks for at each position against who is fit, has not
+ * said out, and has that position set. Short is a hollow square and the word, covered a filled one; the
+ * players with no position yet are counted out loud, so a bare "0" never reads as nobody.
+ */
+function DepthLine({ depth, formation }: { depth: { need: Record<Position, number>; have: Record<Position, number>; unset: number }; formation: string }) {
+  return (
+    <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 border border-line bg-panel px-3 py-2" aria-label={`depth for ${formation}`}>
+      <span className="annot text-[10.5px]">{`// depth for ${formation}`}</span>
+      {(["GK", "DF", "MF", "FW"] as const).map((p) => {
+        const short = depth.have[p] < depth.need[p];
+        return (
+          <span key={p} className="num inline-flex items-center gap-1.5 text-[11.5px] text-ink">
+            <span aria-hidden className={`inline-block size-2 ${short ? "border border-ink-dim" : "bg-ink"}`} />
+            {p} <span className="tabular-nums">{depth.have[p]}</span>
+            <span className="text-ink-dim">of {depth.need[p]}</span>
+            {short ? <span className="text-[10px] uppercase tracking-[0.1em] text-doubt">short</span> : null}
+          </span>
+        );
+      })}
+      {depth.unset > 0 ? <span className="num text-[11.5px] text-ink-dim">{depth.unset} with no position set</span> : null}
     </div>
   );
 }

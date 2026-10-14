@@ -54,7 +54,7 @@ export function XiStrip({
                   selectedSlot === i ? "bg-panel-2" : hovered === i ? "bg-panel-2/60" : "hover:bg-panel-2/60"
                 }`}
               >
-                <span className="num w-6 shrink-0 text-[10.5px] tracking-[0.08em] text-ink-dim">{slot.role}</span>
+                <span className="num w-7 shrink-0 text-[10.5px] tracking-[0.08em] text-ink-dim" title={slot.role}>{slot.label}</span>
                 <span className="num w-5 shrink-0 text-right text-[12px] text-ink-dim">{row?.player.squad_number ?? ""}</span>
                 <span className={`min-w-0 flex-1 truncate text-[13px] ${row ? "text-ink" : "text-out"}`}>
                   {row ? row.player.name : "empty"}

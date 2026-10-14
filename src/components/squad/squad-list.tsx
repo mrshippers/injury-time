@@ -13,7 +13,10 @@ import { useStoredValue } from "@/components/three/tokens";
 
 import type { SquadRow } from "@/lib/data";
 import { READINESS_RANK, READINESS_TEXT, type ReadinessKey } from "@/lib/readiness";
+import type { Slot } from "@/lib/lineup";
 import { positionKnown } from "@/lib/squad/position";
+
+import { PositionMap } from "./position-map";
 import type { AvailabilityStatus, ExternalStats, Position } from "@/lib/types";
 
 import { ConditionBar } from "./condition-bar";
@@ -53,10 +56,33 @@ const DEFAULTS: Filters = { sort: { key: "number", dir: "asc" }, position: "all"
 const PAGE_SIZE = 10;
 const FILTER_KEY = "injury-time.squad-filters";
 
-/** A position said, the setter for a manager, or an honest dash for everyone else. */
-function PositionCell({ row, canManage }: { row: SquadRow; canManage: boolean }) {
-  if (positionConfirmed(row)) return <>{row.player.position}</>;
-  return canManage ? <SetPositionControl player={row.player} /> : <span className="text-ink-faint" title="position not set">–</span>;
+/**
+ * A position said, with its dot on a fingernail pitch. Not set: where he plays in today's side (the slot's
+ * own name, marked as today's), the setter for a manager, or an honest dash. Never a guessed position.
+ */
+function PositionCell({ row, canManage, slot }: { row: SquadRow; canManage: boolean; slot?: Slot }) {
+  if (positionConfirmed(row)) {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <PositionMap spot={slot ?? null} group={row.player.position} />
+        {slot ? slot.label : row.player.position}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <PositionMap spot={slot ?? null} />
+      {slot ? (
+        <span className="text-ink-dim underline decoration-dotted underline-offset-2" title={`plays ${slot.label} in this side; his position is not set yet`}>
+          {slot.label}
+        </span>
+      ) : canManage ? (
+        <SetPositionControl player={row.player} />
+      ) : (
+        <span className="text-ink-faint" title="position not set">–</span>
+      )}
+    </span>
+  );
 }
 
 const PHONE_SORTS: { key: SortKey; dir: Dir; label: string }[] = [
@@ -83,9 +109,12 @@ export function SquadList({
   onSelect,
   onToggleIn,
   onDragStart,
+  slotOf,
 }: {
   rows: SquadRow[];
   inXI: Set<string>;
+  /** the slot each player in the side fills, for "where he plays today" */
+  slotOf?: Map<string, Slot>;
   selectedPlayer: string | null;
   dragging: boolean;
   canManage: boolean;
@@ -270,7 +299,7 @@ export function SquadList({
             onDone={() => setEditing(null)}
             onSelect={() => onSelect(row.player.id)}
             onToggleIn={onToggleIn ? () => onToggleIn(row.player.id) : undefined}
-            positionCell={<PositionCell row={row} canManage={canManage} />}
+            positionCell={<PositionCell row={row} canManage={canManage} slot={slotOf?.get(row.player.id)} />}
           />
         ))}
       </ul>
@@ -280,7 +309,7 @@ export function SquadList({
         <colgroup>
           <col className="w-9 sm:w-10" />
           <col />
-          <col className="w-[46px] sm:w-[58px]" />
+          <col className="w-[70px] sm:w-[80px]" />
           <col className="w-[60px] sm:w-[112px]" />
           <col className="hidden sm:table-column sm:w-[88px]" />
           <col className="hidden sm:table-column sm:w-7" />
@@ -307,7 +336,7 @@ export function SquadList({
             const selected = selectedPlayer === player.id;
             const onPitch = inXI.has(player.id);
             return (
-              <SquadListRow key={player.id} row={row} selected={selected} onPitch={onPitch} maxLoad={maxLoad} dragging={dragging} canManage={canManage} editing={editing === player.id} onEdit={() => setEditing((e) => (e === player.id ? null : player.id))} onDone={() => setEditing(null)} onSelect={() => onSelect(player.id)} onToggleIn={onToggleIn ? () => onToggleIn(player.id) : undefined} beginPress={beginPress} positionCell={<PositionCell row={row} canManage={canManage} />} />
+              <SquadListRow key={player.id} row={row} selected={selected} onPitch={onPitch} maxLoad={maxLoad} dragging={dragging} canManage={canManage} editing={editing === player.id} onEdit={() => setEditing((e) => (e === player.id ? null : player.id))} onDone={() => setEditing(null)} onSelect={() => onSelect(player.id)} onToggleIn={onToggleIn ? () => onToggleIn(player.id) : undefined} beginPress={beginPress} positionCell={<PositionCell row={row} canManage={canManage} slot={slotOf?.get(row.player.id)} />} />
             );
           })}
         </tbody>

@@ -27,7 +27,7 @@ test.describe("the side", () => {
     expect(options).toHaveLength(12);
     await shape.selectOption("3-5-2");
     await expect(xiItems(page)).toHaveCount(11);
-    await expect(xiItems(page).filter({ hasText: /^DF/ })).toHaveCount(3);
+    await expect(xiItems(page).filter({ hasText: /^CB/ })).toHaveCount(3);
     // a side saved for the fixture outranks the browser's memory, so save it if we can
     const save = page.getByRole("button", { name: /save for/ });
     if ((await save.count()) > 0) {
@@ -64,13 +64,15 @@ test.describe("the side", () => {
     await open(page);
     const a = xiItems(page).nth(1).getByRole("button").first();
     const b = xiItems(page).nth(2).getByRole("button").first();
-    const aText = (await a.textContent()) ?? "";
-    const bText = (await b.textContent()) ?? "";
+    // the slot keeps its own name (LB, CB); the man in it is what moves
+    const who = (t: string | null) => (t ?? "").replace(/^(GK|[LR]B|CB|DM|CM|[LR]M|AM|[LR]W|ST)/, "");
+    const aWho = who(await a.textContent());
+    const bWho = who(await b.textContent());
     await a.click();
     await expect(page.getByText("now pick a name, or another slot to swap")).toBeVisible();
     await b.click();
-    await expect(a).toHaveText(bText);
-    await expect(b).toHaveText(aText);
+    await expect.poll(async () => who(await a.textContent())).toBe(bWho);
+    await expect.poll(async () => who(await b.textContent())).toBe(aWho);
   });
 
   test("dragging a name from the list onto a shirt on the pitch places him there", async ({ page }) => {
