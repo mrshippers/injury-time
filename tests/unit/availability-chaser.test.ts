@@ -42,8 +42,8 @@ vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({ from: (name: string) => builder(name) }),
 }))
 
-const pushToUsers = vi.fn()
-vi.mock('@/lib/push/send', () => ({ pushToUsers }))
+const pushMatchCall = vi.fn()
+vi.mock('@/lib/push/send', () => ({ pushMatchCall }))
 
 const { GET } = await import('@/app/api/cron/availability-chaser/route')
 
@@ -55,7 +55,7 @@ const authed = () =>
 beforeEach(() => {
   process.env.CRON_SECRET = 's3cret'
   inserted = []
-  pushToUsers.mockReset().mockResolvedValue({ sent: 1, pruned: 0, failed: 0 })
+  pushMatchCall.mockReset().mockResolvedValue({ sent: 1, pruned: 0, failed: 0 })
   tables = {
     clubs: { data: [{ id: 'c1', name: 'Kilburn Athletic', is_demo: true, demo_writable: true }], error: null },
     fixtures: { data: [{ id: 'f1', match_date: '2099-01-01', opponent: 'Hendon', venue: 'H' }], error: null },
@@ -94,7 +94,7 @@ describe('availability chaser', () => {
     const body = await res.json()
     expect(body.results[0].already_notified).toBe(true)
     expect(inserted).toHaveLength(0)
-    expect(pushToUsers).not.toHaveBeenCalled()
+    expect(pushMatchCall).not.toHaveBeenCalled()
   })
 
   it("chases a real club's own squad and pushes the silent players who have an account", async () => {
@@ -103,15 +103,16 @@ describe('availability chaser', () => {
     const res = await GET(authed())
     const body = await res.json()
     expect(body.results[0].chased).toEqual(['B Toney', 'C Nolink'])
-    expect(pushToUsers).toHaveBeenCalledTimes(1)
-    expect(pushToUsers.mock.calls[0][0]).toBe('r1')
-    expect(pushToUsers.mock.calls[0][1]).toEqual(['u2'])
-    expect(pushToUsers.mock.calls[0][2]).toMatchObject({ url: '/team', tag: 'call:f1' })
+    expect(pushMatchCall).toHaveBeenCalledTimes(1)
+    expect(pushMatchCall.mock.calls[0][0]).toBe('r1')
+    expect(pushMatchCall.mock.calls[0][1]).toMatchObject({ id: 'f1', opponent: 'Hendon' })
+    // the silent players go to the sender; it drops the ones with no account (push-audience.test.ts)
+    expect(pushMatchCall.mock.calls[0][2].map((p: { id: string }) => p.id)).toEqual(['p2', 'p3'])
     expect(body.results[0].pushed).toBe(1)
   })
 
   it('a push that throws never costs the chase its notice', async () => {
-    pushToUsers.mockRejectedValue(new Error('push service down'))
+    pushMatchCall.mockRejectedValue(new Error('push service down'))
     const res = await GET(authed())
     const body = await res.json()
     expect(res.status).toBe(200)

@@ -17,7 +17,11 @@ export default async function LoginPage() {
         <h1 className="display text-4xl mb-8">the door code</h1>
         <LoginForm />
         <p className="mt-8 text-sm text-ink-faint">
-          No account? The demo squad room is open —{" "}
+          New club?{" "}
+          <a href="/start" className="text-mint underline-offset-4 hover:underline">
+            Sign it up
+          </a>
+          . Just looking? The demo squad room is open —{" "}
           <a href="/squad" className="text-mint underline-offset-4 hover:underline">
             walk straight in
           </a>

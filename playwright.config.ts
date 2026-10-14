@@ -8,6 +8,8 @@ export default defineConfig({
   use: {
     baseURL,
     viewport: { width: 1440, height: 900 },
+    // PW_CHROMIUM: a preinstalled Chromium when the pinned one is not downloaded (CI images, cloud sessions)
+    launchOptions: process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {},
     // Every spec starts on the fictional club. Belstone is real people and
     // real results; nothing a test writes may land on it. A spec that wants
     // Belstone sets the cookie itself.

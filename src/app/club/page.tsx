@@ -1,4 +1,6 @@
 import { FeedKeyForm, ResultForm } from "@/components/club/club-forms";
+import { FeedSquad } from "@/components/club/feed-squad";
+import { StaffInvites, type InviteRow } from "@/components/club/staff-invites";
 import { longDate } from "@/components/squad/format";
 import { sourceLine } from "@/lib/club/source";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -15,6 +17,8 @@ export const metadata = { title: "the club - injury time." };
  * key of its own; each club brings the free one Football Web Pages gives
  * non-league clubs, so every club reads its own data under its own terms.
  */
+const feedAllowedFor = (v: Awaited<ReturnType<typeof getViewer>>) => !v.guest && !v.club.is_demo && v.role === "manager";
+
 export default async function ClubPage() {
   const viewer = await getViewer();
   const club = viewer.club;
@@ -35,8 +39,15 @@ export default async function ClubPage() {
     .order("match_date", { ascending: false })
     .limit(6);
 
+  // the manager's own links out, newest first (0015: RLS shows them to the manager only)
+  let invites: InviteRow[] = [];
+  if (feedAllowedFor(viewer)) {
+    const { data } = await supabase.from("staff_invites").select("role, created_at, expires_at, used_at").eq("club_id", club.id).order("created_at", { ascending: false }).limit(10);
+    invites = (data ?? []) as InviteRow[];
+  }
+
   const source = sourceLine(club);
-  const feedAllowed = !viewer.guest && !club.is_demo && viewer.role === "manager";
+  const feedAllowed = feedAllowedFor(viewer);
   const feedReason = club.is_demo
     ? "This is a public demo club. A real club's manager, signed in, connects the club's own key here."
     : viewer.role !== "manager"
@@ -86,6 +97,31 @@ export default async function ClubPage() {
           </p>
         ) : null}
         <FeedKeyForm connected={!!feed} allowed={feedAllowed} reason={feedReason} />
+      </section>
+
+      <section aria-labelledby="feed-squad-h" className="mt-10 border-t border-line pt-6">
+        <p className="annot" id="feed-squad-h">{"// the squad from the feed"}</p>
+        <h2 className="mt-2 text-[20px] font-semibold text-ink">The league&apos;s list, not your typing</h2>
+        <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
+          With the feed connected, every name on the league&apos;s appearance list comes in. Anyone already in the squad is left as you set them. A
+          name that is close but not the same waits for you to say which. The feed has no shirt numbers, so those stay yours to add.
+        </p>
+        <FeedSquad allowed={feedAllowed && !!feed} reason={feedAllowed && !feed ? "Connect the league feed above first." : feedReason} />
+      </section>
+
+      <section aria-labelledby="staff-h" className="mt-10 border-t border-line pt-6">
+        <p className="annot" id="staff-h">{"// the staff"}</p>
+        <h2 className="mt-2 text-[20px] font-semibold text-ink">Bring your coaches and physio in</h2>
+        <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
+          A link for each person. A coach logs sessions and posts to the squad; medical keeps the injuries and the notes, which only medical and the
+          player themselves can read.
+        </p>
+        <StaffInvites
+          allowed={feedAllowed}
+          reason={club.is_demo ? "This is a public demo club. A real club's manager invites its own staff." : viewer.role !== "manager" ? "Only the manager invites staff." : null}
+          invites={invites}
+          clubName={club.name}
+        />
       </section>
 
       <section aria-labelledby="result-h" className="mt-10 border-t border-line pt-6">

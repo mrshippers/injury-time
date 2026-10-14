@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getViewer } from "@/lib/viewer";
 
 import { parseResultInput, type ResultInput } from "./result-input";
+import { importSquadFromFeedAction } from "@/lib/squad/feed-import";
+
 import { syncClubFeed } from "./sync";
 
 export type ActionState = { ok: boolean; message: string } | null;
@@ -40,9 +42,12 @@ export async function saveFeedKeyAction(input: { apiKey: string; teamId: string 
   if (error) return { ok: false, message: `the season synced but the key could not be kept (${error.message})` };
   await admin.from("clubs").update({ fwp_team_id: Number(teamId) }).eq("id", viewer.club.id);
 
+  // the squad comes with it (lib/squad/import.ts): new names created, near misses held for the manager
+  const squad = await importSquadFromFeedAction().catch(() => null);
   revalidatePath("/", "layout");
   const r = outcome.report;
-  return { ok: true, message: `connected: ${r.results} results, ${r.fixturesAdded} new fixtures, table of ${r.standings}` };
+  const squadLine = squad?.ok ? ` Squad: ${squad.message}` : squad ? ` The squad did not come in (${squad.message}); try "build the squad from the feed".` : "";
+  return { ok: true, message: `connected: ${r.results} results, ${r.fixturesAdded} new fixtures, table of ${r.standings}.${squadLine}` };
 }
 
 export async function removeFeedKeyAction(): Promise<ActionState> {

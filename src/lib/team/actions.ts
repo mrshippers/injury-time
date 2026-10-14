@@ -5,7 +5,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { CALL_STATUSES, CLUB_ROLES, NOTIFICATION_KINDS, type CallStatus, type ClubRole, type NotificationKind } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
-import { pushToClub } from "@/lib/push/send";
+import { pushMatchCall, pushToClub } from "@/lib/push/send";
+import { callSigner } from "@/lib/push/sign";
 
 /**
  * Server actions are reachable by direct POST, so every field is re-checked
@@ -53,6 +54,7 @@ export async function setCallAction(input: SetCallInput): Promise<{ ok: true } |
         player_id: playerId,
         status,
         note,
+        via: "app",
         updated_at: new Date().toISOString(),
       },
       { onConflict: "fixture_id,player_id" },
@@ -95,7 +97,17 @@ export async function postNoticeAction(input: PostNoticeInput): Promise<{ ok: tr
       .single();
     if (error) throw error;
     // the tap on the shoulder; the notice row above is the record, so a push failure never fails the post
-    await pushToClub(viewer.club.id, audience, { title, body: body ?? undefined, url: "/team", tag: `notice:${data.id}` }, viewer.userId).catch(() => null);
+    const isCall = kind === "call" && fixtureId !== null && audience.includes("player");
+    const others = isCall ? audience.filter((r) => r !== "player") : audience;
+    if (others.length) await pushToClub(viewer.club.id, others, { title, body: body ?? undefined, url: "/team", tag: `notice:${data.id}` }, viewer.userId).catch(() => null);
+    if (isCall) {
+      // players get in / out / unsure on the notification itself, signed for each of them
+      const [{ data: fixture }, { data: squad }] = await Promise.all([
+        supabase.from("fixtures").select("id, opponent").eq("id", fixtureId).eq("club_id", viewer.club.id).maybeSingle(),
+        supabase.from("players").select("id, user_id").eq("club_id", viewer.club.id).is("retired_on", null),
+      ]);
+      if (fixture) await pushMatchCall(viewer.club.id, fixture, squad ?? [], callSigner()).catch(() => null);
+    }
     revalidatePath("/team");
     return { ok: true, id: data.id };
   } catch (e) {
