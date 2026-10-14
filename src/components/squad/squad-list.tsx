@@ -9,8 +9,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { useStoredValue } from "@/components/three/tokens";
+
 import type { SquadRow } from "@/lib/data";
 import { READINESS_RANK, READINESS_TEXT, type ReadinessKey } from "@/lib/readiness";
+import { positionKnown } from "@/lib/squad/position";
 import type { AvailabilityStatus, ExternalStats, Position } from "@/lib/types";
 
 import { ConditionBar } from "./condition-bar";
@@ -42,8 +45,18 @@ function statusOf(r: SquadRow): AvailabilityStatus {
   return r.availability?.status ?? "fit";
 }
 function positionConfirmed(r: SquadRow): boolean {
-  const s = r.player.external_stats as (ExternalStats & { position_confirmed?: boolean }) | null;
-  return s?.position_confirmed !== false;
+  return positionKnown(r.player);
+}
+
+type Filters = { sort: { key: SortKey; dir: Dir }; position: Position | "all"; status: AvailabilityStatus | "all"; readiness: ReadinessKey | "all" };
+const DEFAULTS: Filters = { sort: { key: "number", dir: "asc" }, position: "all", status: "all", readiness: "all" };
+const PAGE_SIZE = 10;
+const FILTER_KEY = "injury-time.squad-filters";
+
+/** A position said, the setter for a manager, or an honest dash for everyone else. */
+function PositionCell({ row, canManage }: { row: SquadRow; canManage: boolean }) {
+  if (positionConfirmed(row)) return <>{row.player.position}</>;
+  return canManage ? <SetPositionControl player={row.player} /> : <span className="text-ink-faint" title="position not set">–</span>;
 }
 
 const PHONE_SORTS: { key: SortKey; dir: Dir; label: string }[] = [
@@ -81,12 +94,30 @@ export function SquadList({
   onToggleIn?: (id: string) => void;
   onDragStart: (playerId: string, e: PointerEvent) => void;
 }) {
-  const [sort, setSort] = useState<{ key: SortKey; dir: Dir }>({ key: "number", dir: "asc" });
-  const [position, setPosition] = useState<Position | "all">("all");
-  const [status, setStatus] = useState<AvailabilityStatus | "all">("all");
-  const [readiness, setReadiness] = useState<ReadinessKey | "all">("all");
+  // the room remembers how you left it: sort and filters come back on the next visit
+  const storedFilters = useStoredValue(FILTER_KEY);
+  const [mine, setMine] = useState<Filters | null>(null);
+  const filters: Filters = useMemo(() => {
+    if (mine) return mine;
+    try {
+      const f = storedFilters ? (JSON.parse(storedFilters) as Partial<Filters>) : null;
+      return f && f.sort && typeof f.sort.key === "string" ? { ...DEFAULTS, ...f } : DEFAULTS;
+    } catch {
+      return DEFAULTS;
+    }
+  }, [mine, storedFilters]);
+  const { sort, position, status, readiness } = filters;
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const remember = (patch: Partial<Filters>) => {
+    const next = { ...filters, ...patch };
+    setMine(next);
+    try {
+      localStorage.setItem(FILTER_KEY, JSON.stringify(next));
+    } catch {}
+    setPage(0);
+  };
 
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -120,8 +151,13 @@ export function SquadList({
   }, [rows, sort, position, status, readiness, q]);
 
   const maxLoad = rows.reduce((m, r) => Math.max(m, r.weekLoad), 0);
-  const toggleSort = (key: SortKey) =>
-    setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
+  const toggleSort = (key: SortKey) => {
+    remember({ sort: sort.key === key ? { key, dir: sort.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" } });
+  };
+
+  const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const at = Math.min(page, pageCount - 1);
+  const pageRows = shown.slice(at * PAGE_SIZE, at * PAGE_SIZE + PAGE_SIZE);
 
   /* press-then-move starts a drag; a plain press is a select */
   const press = useRef<{ id: string; x: number; y: number; pointerId: number } | null>(null);
@@ -162,7 +198,9 @@ export function SquadList({
               key={p}
               type="button"
               aria-pressed={position === p}
-              onClick={() => setPosition(p)}
+              onClick={() => {
+                remember({ position: p });
+              }}
               className={`pressable num h-7 px-2 text-[11px] font-semibold tracking-[0.06em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
                 position === p ? "bg-mint text-mint-ink" : "bg-panel-2 text-ink-dim hover:text-ink"
               }`}
@@ -171,14 +209,18 @@ export function SquadList({
             </button>
           ))}
         </div>
-        <select aria-label="availability" className={SELECT} value={status} onChange={(e) => setStatus(e.target.value as AvailabilityStatus | "all")}>
+        <select aria-label="availability" className={SELECT} value={status} onChange={(e) => {
+            remember({ status: e.target.value as AvailabilityStatus | "all" });
+          }}>
           <option value="all">any status</option>
           <option value="fit">fit</option>
           <option value="doubt">doubt</option>
           <option value="injured">out</option>
           <option value="suspended">suspended</option>
         </select>
-        <select aria-label="training" className={SELECT} value={readiness} onChange={(e) => setReadiness(e.target.value as ReadinessKey | "all")}>
+        <select aria-label="training" className={SELECT} value={readiness} onChange={(e) => {
+            remember({ readiness: e.target.value as ReadinessKey | "all" });
+          }}>
           {READINESS_FILTERS.map((f) => (
             <option key={f.value} value={f.value}>
               {f.label}
@@ -190,7 +232,10 @@ export function SquadList({
           aria-label="search the squad"
           placeholder="find a name"
           value={q}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setPage(0);
+          }}
           className={`${SELECT} min-w-0 flex-1 placeholder:text-ink-faint max-sm:order-first max-sm:basis-full`}
         />
         <select
@@ -199,7 +244,7 @@ export function SquadList({
           value={`${sort.key}:${sort.dir}`}
           onChange={(e) => {
             const [key, dir] = e.target.value.split(":") as [SortKey, Dir];
-            setSort({ key, dir });
+            remember({ sort: { key, dir } });
           }}
         >
           {PHONE_SORTS.map((o) => (
@@ -212,7 +257,7 @@ export function SquadList({
 
       {/* phone: one card per player, nothing the desk table has is missing */}
       <ul className="divide-y divide-line sm:hidden" aria-label="squad list">
-        {shown.map((row) => (
+        {pageRows.map((row) => (
           <SquadCard
             key={row.player.id}
             row={row}
@@ -225,7 +270,7 @@ export function SquadList({
             onDone={() => setEditing(null)}
             onSelect={() => onSelect(row.player.id)}
             onToggleIn={onToggleIn ? () => onToggleIn(row.player.id) : undefined}
-            positionConfirmed={positionConfirmed(row)}
+            positionCell={<PositionCell row={row} canManage={canManage} />}
           />
         ))}
       </ul>
@@ -257,19 +302,46 @@ export function SquadList({
           </tr>
         </thead>
         <tbody>
-          {shown.map((row) => {
+          {pageRows.map((row) => {
             const { player } = row;
             const selected = selectedPlayer === player.id;
             const onPitch = inXI.has(player.id);
             return (
-              <SquadListRow key={player.id} row={row} selected={selected} onPitch={onPitch} maxLoad={maxLoad} dragging={dragging} canManage={canManage} editing={editing === player.id} onEdit={() => setEditing((e) => (e === player.id ? null : player.id))} onDone={() => setEditing(null)} onSelect={() => onSelect(player.id)} onToggleIn={onToggleIn ? () => onToggleIn(player.id) : undefined} beginPress={beginPress} positionConfirmed={positionConfirmed(row)} />
+              <SquadListRow key={player.id} row={row} selected={selected} onPitch={onPitch} maxLoad={maxLoad} dragging={dragging} canManage={canManage} editing={editing === player.id} onEdit={() => setEditing((e) => (e === player.id ? null : player.id))} onDone={() => setEditing(null)} onSelect={() => onSelect(player.id)} onToggleIn={onToggleIn ? () => onToggleIn(player.id) : undefined} beginPress={beginPress} positionCell={<PositionCell row={row} canManage={canManage} />} />
             );
           })}
         </tbody>
       </table>
-      <p className="num border-t border-line px-3 py-1.5 text-[11px] text-ink-dim">
-        {shown.length === rows.length ? `${rows.length} in the squad` : `${shown.length} of ${rows.length}`} · {inXI.size} on the pitch
-      </p>
+      <div className="num flex items-center justify-between gap-3 border-t border-line px-3 py-1.5 text-[11px] text-ink-dim">
+        <p>
+          {shown.length === rows.length ? `${rows.length} in the squad` : `${shown.length} of ${rows.length}`} · {inXI.size} on the pitch
+        </p>
+        {pageCount > 1 ? (
+          <nav aria-label="squad pages" className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setPage(at - 1)}
+              disabled={at === 0}
+              aria-label="previous page"
+              className="pressable h-8 min-w-8 border border-line px-2 text-ink hover:bg-panel-2 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint max-sm:h-11 max-sm:min-w-11"
+            >
+              ‹
+            </button>
+            <span className="px-2 tabular-nums text-ink" aria-live="polite">
+              {at * PAGE_SIZE + 1}–{Math.min(shown.length, (at + 1) * PAGE_SIZE)} of {shown.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage(at + 1)}
+              disabled={at >= pageCount - 1}
+              aria-label="next page"
+              className="pressable h-8 min-w-8 border border-line px-2 text-ink hover:bg-panel-2 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint max-sm:h-11 max-sm:min-w-11"
+            >
+              ›
+            </button>
+          </nav>
+        ) : null}
+      </div>
       {rows.length === 0 ? <p className="px-4 py-8 text-center text-sm text-ink-dim">No players yet. Add one above.</p> : null}
     </div>
   );
@@ -322,7 +394,7 @@ function SquadListRow({
   onSelect,
   onToggleIn,
   beginPress,
-  positionConfirmed,
+  positionCell,
 }: {
   row: SquadRow;
   selected: boolean;
@@ -336,7 +408,7 @@ function SquadListRow({
   onSelect: () => void;
   onToggleIn?: () => void;
   beginPress: (e: React.PointerEvent, id: string, fromGrip: boolean) => void;
-  positionConfirmed: boolean;
+  positionCell: React.ReactNode;
 }) {
   const { player, availability, weekLoad, readiness, flag } = row;
   const status = statusOf(row);
@@ -386,7 +458,7 @@ function SquadListRow({
           </span>
         </th>
         <td className={`${CELL} num text-[11px] tracking-[0.08em] text-ink-dim`}>
-          {positionConfirmed ? player.position : <SetPositionControl player={player} />}
+          {positionCell}
         </td>
         <td className={CELL}>
           <StatusPill status={status} returnDate={availability?.return_date} />
@@ -453,7 +525,7 @@ function SquadCard({
   onDone,
   onSelect,
   onToggleIn,
-  positionConfirmed,
+  positionCell,
 }: {
   row: SquadRow;
   selected: boolean;
@@ -465,7 +537,7 @@ function SquadCard({
   onDone: () => void;
   onSelect: () => void;
   onToggleIn?: () => void;
-  positionConfirmed: boolean;
+  positionCell: React.ReactNode;
 }) {
   const { player, availability, weekLoad, readiness, flag } = row;
   const status = statusOf(row);
@@ -493,7 +565,7 @@ function SquadCard({
             ) : null}
           </div>
           <div className="num mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-dim">
-            {positionConfirmed ? <span className="tracking-[0.08em]">{player.position}</span> : <SetPositionControl player={player} />}
+            <span className="tracking-[0.08em]">{positionCell}</span>
             <StatusPill status={status} />
             <span className={`font-semibold tracking-[0.06em] ${READINESS_TEXT[readiness.key]}`}>{readiness.word}</span>
             <span>

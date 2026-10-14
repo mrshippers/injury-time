@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import snapshot from "../../scripts/belstone-2026-27.json";
+import snapshot from "../fixtures/belstone-2026-09-26.json";
 import { fromSnapshot, type Snapshot } from "../../src/lib/league/normalise";
 import { goalGames, milestones, moments, scoringRun, strikeRate } from "../../src/lib/hub/hub";
 import type { Clip, Result } from "../../src/lib/types";

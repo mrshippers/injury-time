@@ -10,7 +10,8 @@
 import { FORMATION_TEMPLATES, type FormationTemplate } from "@/lib/config";
 import type { SquadRow } from "@/lib/data";
 import { READINESS_RANK } from "@/lib/readiness";
-import type { Position } from "@/lib/types";
+import { positionKnown } from "@/lib/squad/position";
+import type { CallStatus, Position } from "@/lib/types";
 
 export type Slot = { role: Position; x: number; depth: number };
 export type Formation = { name: string; note: string; slots: Slot[] };
@@ -79,10 +80,22 @@ const COVER: Record<Position, Position[]> = {
   FW: ["MF"],
 };
 
-/** Steadiest first, then squad number: a deterministic order for the picker. */
+const goalsOf = (r: SquadRow): number => r.stats.goals || (r.player.external_stats as { goals?: number } | null)?.goals || 0;
+const goalRate = (r: SquadRow): number => {
+  const apps = appsOf(r);
+  return apps > 0 ? goalsOf(r) / apps : 0;
+};
+const appsOf = (r: SquadRow): number => r.stats.apps || (r.player.external_stats as { apps?: number } | null)?.apps || 0;
+
+/**
+ * Steadiest first, then who has played most (a club with no training data still has appearances, and
+ * the man with eighteen is a better default than the man with four), then squad number: a deterministic
+ * order for the picker.
+ */
 export function byForm(a: SquadRow, b: SquadRow): number {
   return (
     READINESS_RANK[a.readiness.key] - READINESS_RANK[b.readiness.key] ||
+    appsOf(b) - appsOf(a) ||
     (a.player.squad_number ?? 99) - (b.player.squad_number ?? 99)
   );
 }
@@ -91,41 +104,71 @@ export function isAvailable(row: SquadRow): boolean {
   return (row.availability?.status ?? "fit") === "fit";
 }
 
+/** What the picker may lean on besides form: who played last time, and who has answered for this match. */
+export type PickOpts = {
+  /** last match's eleven: the side he would name again if nobody was missing */
+  prefer?: ReadonlySet<string>;
+  calls?: ReadonlyMap<string, CallStatus>;
+};
+
+const callRank = (c: CallStatus | undefined) => (c === "in" ? 0 : c === "unsure" ? 2 : 1);
+
+/** Order the candidates: last time's eleven first, then who said in, then who has not said, then who is unsure, then form. */
+function byChoice(opts: PickOpts) {
+  return (a: SquadRow, b: SquadRow): number =>
+    Number(!opts.prefer?.has(a.player.id)) - Number(!opts.prefer?.has(b.player.id)) ||
+    callRank(opts.calls?.get(a.player.id)) - callRank(opts.calls?.get(b.player.id)) ||
+    byForm(a, b);
+}
+
+/** Fit, and has not said he is out. */
+function selectable(r: SquadRow, opts: PickOpts): boolean {
+  return isAvailable(r) && opts.calls?.get(r.player.id) !== "out";
+}
+
 /**
- * Fill a formation from the fit players, best form first, own role first.
- * Never invents a player: a slot nobody can fill stays empty, which is the
- * honest answer when a club is short.
+ * Fill a formation from the fit players: last time's eleven first, then who said in, then form, own role
+ * first. A player nobody has placed (position not set) fills any outfield slot once the known roles are
+ * done, and is never marked out of position. Never invents a player: a slot nobody can fill stays empty,
+ * which is the honest answer when a club is short.
  */
-export function pickXI(rows: SquadRow[], formation: Formation): Lineup {
-  const ids = fillEmpty(rows, formation, formation.slots.map(() => null));
+export function pickXI(rows: SquadRow[], formation: Formation, opts: PickOpts = {}): Lineup {
+  const ids = fillEmpty(rows, formation, formation.slots.map(() => null), opts);
   const byId = new Map(rows.map((r) => [r.player.id, r]));
   const picks: Pick[] = formation.slots.map((slot, i) => {
     const row = ids[i] ? (byId.get(ids[i]!) ?? null) : null;
-    return { slot, row, outOfPosition: !!row && row.player.position !== slot.role };
+    return { slot, row, outOfPosition: !!row && positionKnown(row.player) && row.player.position !== slot.role };
   });
   const inXI = new Set(ids.filter(Boolean) as string[]);
-  const bench = rows.filter((r) => isAvailable(r) && !inXI.has(r.player.id)).sort(byForm);
+  const bench = rows.filter((r) => selectable(r, opts) && !inXI.has(r.player.id)).sort(byChoice(opts));
   const unavailable = rows.filter((r) => !isAvailable(r));
   return { picks, bench, unavailable };
 }
 
 /**
- * "Pick for me": fill only the empty slots, from the fit players not already
- * on the pitch, own role first then a neighbouring one. A manual placement
- * is never overwritten.
+ * Fill only the empty slots, from the selectable players not already on the pitch: own role first, then
+ * anyone whose position is not set, then a neighbouring role. A manual placement is never overwritten.
  */
-export function fillEmpty(rows: SquadRow[], formation: Formation, current: (string | null)[]): (string | null)[] {
+export function fillEmpty(rows: SquadRow[], formation: Formation, current: (string | null)[], opts: PickOpts = {}): (string | null)[] {
   const next = formation.slots.map((_, i) => current[i] ?? null);
   const taken = new Set(next.filter(Boolean) as string[]);
-  const available = rows.filter((r) => isAvailable(r) && !taken.has(r.player.id)).sort(byForm);
+  const available = rows.filter((r) => selectable(r, opts) && !taken.has(r.player.id)).sort(byChoice(opts));
   const pool = new Map<Position, SquadRow[]>([["GK", []], ["DF", []], ["MF", []], ["FW", []]]);
-  for (const r of available) pool.get(r.player.position)!.push(r);
+  const flex: SquadRow[] = [];
+  for (const r of available) (positionKnown(r.player) ? pool.get(r.player.position)! : flex).push(r);
 
   // own-role pass first so a borrowed midfielder never displaces a real one
   formation.slots.forEach((slot, i) => {
     if (next[i]) return;
     const own = pool.get(slot.role)!.shift();
     if (own) next[i] = own.player.id;
+  });
+  // then the ones nobody has placed: any outfield slot, never the gloves. With no position to go on, goals a
+  // game is the hint: the scorers go up front and the rest sit behind them. Only a default, one swap undoes it.
+  const gaps = formation.slots.map((slot, i) => ({ slot, i })).filter((g) => !next[g.i] && g.slot.role !== "GK").sort((a, b) => a.slot.depth - b.slot.depth);
+  const chosen = flex.slice(0, gaps.length).sort((a, b) => goalRate(a) - goalRate(b));
+  gaps.forEach((g, j) => {
+    if (chosen[j]) next[g.i] = chosen[j].player.id;
   });
   formation.slots.forEach((slot, i) => {
     if (next[i]) return;

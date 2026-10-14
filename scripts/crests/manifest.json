@@ -1,0 +1,164 @@
+{
+  "Belstone": {
+    "file": "belstone.png",
+    "source": "club-site",
+    "url": "https://www.belstonefc.com/ (header logo, images.pitchero.com/club_logos/72555)",
+    "note": "Black line art on white in the source; turned into light line art on transparent so it reads on a dark screen."
+  },
+  "Brook House": {
+    "file": "brook-house.png",
+    "source": "club-site",
+    "url": "https://www.pitchero.com/clubs/brookhousefc/ (header logo, club_logos/1906)",
+    "note": "Native 180px; file is named AFC Hayes (former name), it is the crest the club site uses"
+  },
+  "PFC Victoria London": {
+    "file": "pfc-victoria-london.png",
+    "source": "wikipedia",
+    "url": "https://en.wikipedia.org/wiki/File:PFC_Victoria_London_Logo.jpg",
+    "note": "White disc on white in the source; cut to the disc."
+  },
+  "Westside": {
+    "file": "westside.png",
+    "source": "club-site",
+    "url": "https://www.westsidefc.org.uk/home (Google Sites header logo)",
+    "note": "White-on-transparent crest, shows on dark only"
+  },
+  "Langley": {
+    "file": "langley.png",
+    "source": "club-site",
+    "url": "https://langley-fc.com/ (site icon, cropped-Langley_1000.png)",
+    "note": ""
+  },
+  "Wembley": {
+    "file": "wembley.png",
+    "source": "wikipedia",
+    "url": "https://en.wikipedia.org/wiki/File:Wembley_F.C._logo.png",
+    "note": "Club site wembleyfc.com returns a WordPress error; Wikipedia source is only 150x194 so a touch soft"
+  },
+  "Colliers Wood United": {
+    "file": "colliers-wood-united.png",
+    "source": "wikipedia",
+    "url": "https://en.wikipedia.org/wiki/File:Colliers_Wood_United_F.C._logo.png",
+    "note": "Club site returns 403; Wikipedia source 257x255"
+  },
+  "Bovingdon": {
+    "file": "bovingdon.png",
+    "source": "club-site",
+    "url": "https://www.pitchero.com/clubs/bovingdonfc (header logo, club_logos/78984)",
+    "note": "white background removed by edge flood-fill"
+  },
+  "Holmer Green": {
+    "file": "holmer-green.png",
+    "source": "wikipedia",
+    "url": "https://en.wikipedia.org/wiki/File:Holmer_Green_F.C._logo.png",
+    "note": "Club site returns 403; Wikipedia source 316x316"
+  },
+  "London Samurai Rovers": {
+    "file": "london-samurai-rovers.png",
+    "source": "club-site",
+    "url": "https://footsamurai.com/ (site icon, cropped-logo-LondonSamuraiRovers.png)",
+    "note": ""
+  },
+  "Molesey": {
+    "file": "molesey.png",
+    "source": "wikipedia",
+    "url": "https://en.wikipedia.org/wiki/File:Molesey_FC_crest.svg (rendered 960px)",
+    "note": "Club site moleseyfootballclub.com returns 520"
+  },
+  "Berks County": {
+    "file": "berks-county.png",
+    "source": "club-site",
+    "url": "https://www.berkscountyfc.com/ (club_logos/37405)",
+    "note": "Pitchero file is named Women.png but is the club crest"
+  },
+  "Staines & Lammas (Middlesex)": {
+    "file": "staines-lammas-middlesex.png",
+    "source": "club-site",
+    "url": "https://www.pitchero.com/clubs/staineslammasfc/ (club_logos/1180)",
+    "note": "white background removed by edge flood-fill"
+  },
+  "Spelthorne Sports": {
+    "file": "spelthorne-sports.png",
+    "source": "club-site",
+    "url": "https://www.spelthornesportsfc.com/ (club_logos/37632)",
+    "note": ""
+  },
+  "Maidenhead Town": {
+    "file": "maidenhead-town.png",
+    "source": "club-site",
+    "url": "https://maidenheadtownfc.co.uk/apple-touch-icon.png",
+    "note": "Dark-on-white source; turned into light line art on transparent so it reads on a dark screen."
+  },
+  "Oxhey Jets": {
+    "file": "oxhey-jets.png",
+    "source": "club-site",
+    "url": "https://www.oxheyjets.com/wp-content/uploads/2018/08/cropped-jetsfavicon.jpg (site icon)",
+    "note": "Site icon, JPEG artefacts possible; white background removed by edge flood-fill"
+  },
+  "Edgware & Kingsbury": {
+    "file": "edgware-kingsbury.png",
+    "source": "wikipedia",
+    "url": "https://en.wikipedia.org/wiki/File:Edgware_Town_F.C._logo.png",
+    "note": "Wikipedia article logo is titled Edgware Town (club's earlier name); club site returns 403. Confirm it is still the current crest"
+  },
+  "Eagles Land Benfica": {
+    "file": "eagles-land-benfica.png",
+    "source": "club-site",
+    "url": "https://www.eagleslandfc.co.uk/ (Wix site icon)",
+    "note": "Black square background kept"
+  },
+  "Woodley United": {
+    "file": "woodley-united.png",
+    "source": "club-site",
+    "url": "https://www.woodleyunitedfc.co.uk/ (header logo, 150px)",
+    "note": "Native 150px"
+  },
+  "Spartans Youth": {
+    "file": "spartans-youth.png",
+    "source": "club-site",
+    "url": "https://www.pitchero.com/clubs/spartansyouthfootballclub2 (club_logos/84444)",
+    "note": ""
+  },
+  "FC Deportivo Galicia": {
+    "file": "fc-deportivo-galicia.png",
+    "source": "club-site",
+    "url": "https://www.fcdeportivogalicia.com/ (club_logos/64289)",
+    "note": "Native 240px JPEG; white background removed by edge flood-fill"
+  },
+  "Shepherd's Bush": {
+    "file": "shepherds-bush.png",
+    "source": "club-site",
+    "url": "https://www.shepherdsbushfc.co.uk/ (SBFC-Logo.svg rendered to 512px)",
+    "note": "SVG rasterised with qlmanage; white background removed by edge flood-fill"
+  },
+  "Enfield": {
+    "file": "enfield.png",
+    "source": "club-site",
+    "url": "https://www.enfieldfootballclub.co.uk/ (club_logos/87772)",
+    "note": "Enfield FC (1893 club)"
+  },
+  "Wivenhoe Town": {
+    "file": "wivenhoe-town.png",
+    "source": "club-site",
+    "url": "https://www.wivenhoetownfc.com/ (club_logos/1607)",
+    "note": "Gold on transparent"
+  },
+  "St Margaretsbury": {
+    "file": "st-margaretsbury.png",
+    "source": "wikipedia",
+    "url": "https://en.wikipedia.org/wiki/File:St._Margaretsbury_F.C._logo.png",
+    "note": "Club site not reachable"
+  },
+  "Baldock Town": {
+    "file": "baldock-town.png",
+    "source": "club-site",
+    "url": "http://www.pitchero.com/clubs/baldocktownfc/ (club_logos/1770)",
+    "note": ""
+  },
+  "Wisbech Town": {
+    "file": "wisbech-town.png",
+    "source": "club-site",
+    "url": "http://www.wisbechtownfc.co.uk/ (club_logos/75985)",
+    "note": "white background removed by edge flood-fill"
+  }
+}

@@ -1,4 +1,5 @@
 import { daysBetweenISO, getDashboard, getSquadBoard } from "@/lib/data";
+import { Crest } from "@/components/club/crest";
 import { getHomeSeason } from "@/lib/home/data";
 import Link from "next/link";
 
@@ -13,6 +14,8 @@ import { HubTiles, type Tile } from "@/components/home/hub-tiles";
 import { FirstWeek } from "@/components/home/first-week";
 import { firstWeek } from "@/lib/signup/actions";
 import { SeasonLine } from "@/components/home/season-line";
+import { CupsSection } from "@/components/home/cups";
+import { lastResult } from "@/lib/home/cups";
 import { FormVital, NextMatchVital, ScorersVital, WatchVital } from "@/components/home/vitals";
 import { StatReading } from "@/components/charts";
 import { longDate, shortDate } from "@/components/squad/format";
@@ -74,10 +77,13 @@ export default async function Home() {
     <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 py-7 sm:px-8 sm:py-9">
       <header className="flex flex-col gap-2">
         <p className="annot">{"// the hub"}</p>
-        <h1 className="display text-4xl sm:text-5xl">
-          {clubName}
-          <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
-        </h1>
+        <div className="flex items-center gap-4">
+          <Crest team={clubName} size={52} plain className="max-sm:!size-10" />
+          <h1 className="display text-4xl sm:text-5xl">
+            {clubName}
+            <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+          </h1>
+        </div>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-dim">
           <span>{division || club.league}</span>
           <span aria-hidden className="text-line-strong">/</span>
@@ -141,11 +147,13 @@ export default async function Home() {
 
       {/* secondary: the vitals */}
       <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2 xl:grid-cols-[1.1fr_1fr_1fr_1.2fr]">
-        <NextMatchVital next={next} daysUntil={daysUntil} fit={counts.fit} calls={season.calls} squadSize={dash.squadSize} />
+        <NextMatchVital next={next} daysUntil={daysUntil} fit={counts.fit} calls={season.calls} squadSize={dash.squadSize} last={lastResult(season.results)} />
         <FormVital ctx={ctx} results={season.results} />
         <ScorersVital feed={season.feedScorers} logged={dash.topScorers} feedAsOf={season.feedAsOf} />
         <WatchVital rows={dash.watchList} hasLoad={hasLoad} backSoon={dash.backSoon} />
       </div>
+
+      <CupsSection results={season.results} fixtures={season.fixtures} asOf={asOf} />
 
       {ctx.hasSeason ? (
         <div className="mt-10">

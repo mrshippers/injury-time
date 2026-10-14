@@ -1,5 +1,5 @@
 import { getLineupData } from "@/lib/data";
-import { getSavedLineup } from "@/lib/squad/data";
+import { getCallsByPlayer, getPreviousLineup, getSavedLineup } from "@/lib/squad/data";
 import type { AvailabilityStatus } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
 
@@ -21,7 +21,7 @@ export const metadata = {
 export default async function SquadPage() {
   const [{ club, asOf, nextFixture, rows: allRows }, viewer] = await Promise.all([getLineupData(), getViewer()]);
   const rows = allRows.filter((r) => !r.player.retired_on);
-  const saved = await getSavedLineup(club.id, nextFixture?.id ?? null);
+  const [saved, previous, calls] = await Promise.all([getSavedLineup(club.id, nextFixture?.id ?? null), getPreviousLineup(club.id, nextFixture?.id ?? null), getCallsByPlayer(nextFixture?.id ?? null)]);
 
   const counts: Record<AvailabilityStatus, number> = { fit: 0, doubt: 0, injured: 0, suspended: 0 };
   for (const row of rows) counts[row.availability?.status ?? "fit"] += 1;
@@ -46,7 +46,7 @@ export default async function SquadPage() {
         <SummaryChips counts={counts} />
       </header>
 
-      <SquadRoom rows={rows} nextFixture={nextFixture} saved={saved} canManage={viewer.can("manage_squad")} canPick={viewer.can("pick_side")} />
+      <SquadRoom rows={rows} nextFixture={nextFixture} saved={saved} previous={previous} calls={calls} clubId={club.id} canManage={viewer.can("manage_squad")} canPick={viewer.can("pick_side")} />
 
       <p className="annot mt-5 text-gold-dim">
         training is this week against his usual: steady · pushing it · undercooked · red zone&ensp;·&ensp;no reading until four weeks are logged&ensp;·&ensp;gold ring = playing out of position

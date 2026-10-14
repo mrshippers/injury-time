@@ -4,8 +4,9 @@
  * how the crowd and the calls have run over the season.
  */
 import { daysBetweenISO, todayISO } from "@/lib/data";
+import { usualAnswers } from "@/lib/team/format";
 import { createClient } from "@/lib/supabase/server";
-import type { Fixture, MatchCall, Notification, Player, Result } from "@/lib/types";
+import type { CallStatus, Fixture, MatchCall, Notification, Player, Result } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
 
 export type AttendancePoint = {
@@ -26,6 +27,8 @@ export type TeamPage = {
   daysUntil: number | null;
   players: Player[];
   calls: MatchCall[];
+  /** each player's answer last time he gave one: the suggestion, never a default that is saved */
+  usual: Record<string, CallStatus>;
   notices: Notification[];
   attendance: AttendancePoint[];
   /** the server clock at render, so "2 min ago" paints the same on both sides */
@@ -74,6 +77,7 @@ export async function getTeamPage(): Promise<TeamPage> {
   return {
     viewer,
     asOf,
+    usual: await usualFor(clubId, asOf),
     next,
     daysUntil: next ? daysBetweenISO(asOf, next.match_date) : null,
     players: (players ?? []) as Player[],
@@ -116,7 +120,8 @@ async function attendanceHistory(clubId: string, asOf: string): Promise<Attendan
       date: r.match_date,
       opponent: r.opponent,
       venue: r.venue,
-      calledIn: f ? (inCounts.get(f.id) ?? 0) : null,
+      // no call rows at all is "not tracked", not "nobody was in": a zero would pull the line to the floor
+      calledIn: f ? (inCounts.get(f.id) ?? null) : null,
       crowd: r.attendance,
     });
   }
@@ -124,8 +129,19 @@ async function attendanceHistory(clubId: string, asOf: string): Promise<Attendan
   for (const f of fixtures) {
     const key = `${f.match_date}|${f.opponent}`;
     if (seen.has(key)) continue;
-    points.push({ date: f.match_date, opponent: f.opponent, venue: f.venue, calledIn: inCounts.get(f.id) ?? 0, crowd: null });
+    points.push({ date: f.match_date, opponent: f.opponent, venue: f.venue, calledIn: inCounts.get(f.id) ?? null, crowd: null });
   }
   points.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
   return points;
+}
+
+/** Each player's most recent answer over the last few matches, so the board can suggest it. */
+async function usualFor(clubId: string, asOf: string): Promise<Record<string, CallStatus>> {
+  const supabase = await createClient();
+  const { data: past } = await supabase.from("fixtures").select("id, match_date").eq("club_id", clubId).lt("match_date", asOf).order("match_date", { ascending: false }).limit(6);
+  const fixtures = (past ?? []) as Pick<Fixture, "id" | "match_date">[];
+  if (fixtures.length === 0) return {};
+  const date = new Map(fixtures.map((f) => [f.id, f.match_date]));
+  const { data: calls } = await supabase.from("match_calls").select("fixture_id, player_id, status").in("fixture_id", fixtures.map((f) => f.id));
+  return usualAnswers(((calls ?? []) as Pick<MatchCall, "fixture_id" | "player_id" | "status">[]).map((c) => ({ player_id: c.player_id, status: c.status, match_date: date.get(c.fixture_id) ?? "" })));
 }

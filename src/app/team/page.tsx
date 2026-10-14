@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Crest } from "@/components/club/crest";
 import { AttendanceTrend } from "@/components/team/attendance-trend";
 import { CallBoard } from "@/components/team/call-board";
 import { CheckinsPanel } from "@/components/team/checkins-panel";
@@ -20,7 +21,7 @@ export const metadata = { title: "the team - injury time." };
  * in, what did the gaffer say. Everything on it moves in real time.
  */
 export default async function TeamPage() {
-  const { viewer, next, daysUntil, players, calls, notices, attendance, now, asOf } = await getTeamPage();
+  const { viewer, next, daysUntil, players, calls, usual, notices, attendance, now, asOf } = await getTeamPage();
   // RLS returns rows only to staff of a real club; a guest or a player gets none
   const staff = !viewer.guest && viewer.can("view_squad_health");
   let checkins: PlayerCheckin[] = [];
@@ -46,10 +47,13 @@ export default async function TeamPage() {
         <p className="annot">{`// the team · ${viewer.club.name.toLowerCase()}`}</p>
         {next ? (
           <>
-            <h1 className="display mt-2 text-4xl sm:text-5xl">
-              {next.venue === "H" ? `${next.opponent} at home` : `away at ${next.opponent}`}
-              <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
-            </h1>
+            <div className="mt-2 flex items-center gap-4">
+              <Crest team={next.opponent} size={52} className="max-sm:!size-10" />
+              <h1 className="display text-4xl sm:text-5xl">
+                {next.venue === "H" ? `${next.opponent} at home` : `away at ${next.opponent}`}
+                <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+              </h1>
+            </div>
             <p className="mt-3 text-[14px] text-ink-dim sm:text-[13.5px]">
               <span className="num text-ink">{longDate(next.match_date)}</span>
               {next.kickoff ? <span className="num"> · {next.kickoff}</span> : null}
@@ -88,6 +92,7 @@ export default async function TeamPage() {
               fixture={next}
               players={players}
               calls={calls}
+              usual={usual}
               role={viewer.role}
               ownPlayerId={viewer.role === "player" ? viewer.playerId : null}
             />

@@ -87,7 +87,7 @@ export type FormationTemplate = {
 };
 
 export const FORMATION_TEMPLATES: FormationTemplate[] = [
-  { name: "4-2-3-1", rows: [4, 2, 3, 1], roles: [["DF", "DF", "DF", "DF"], ["MF", "MF"], ["MF", "MF", "MF"], ["FW"]], note: "the default shape at every level now" },
+  { name: "4-2-3-1", rows: [4, 2, 3, 1], roles: [["DF", "DF", "DF", "DF"], ["MF", "MF"], ["MF", "MF", "MF"], ["FW"]], note: "the default at every level" },
   { name: "4-3-3", rows: [4, 3, 3], roles: [["DF", "DF", "DF", "DF"], ["MF", "MF", "MF"], ["FW", "FW", "FW"]], note: "wide forwards, one pivot" },
   { name: "4-4-2", rows: [4, 4, 2], roles: [["DF", "DF", "DF", "DF"], ["MF", "MF", "MF", "MF"], ["FW", "FW"]], note: "two up top, non-league's own" },
   { name: "3-5-2", rows: [3, 5, 2], roles: [["DF", "DF", "DF"], ["MF", "MF", "MF", "MF", "MF"], ["FW", "FW"]], note: "wing-backs, three at the back" },

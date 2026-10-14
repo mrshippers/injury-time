@@ -80,3 +80,16 @@ export function daysAwayWord(days: number): string {
   if (days < 0) return `${-days} days ago`;
   return `in ${days} days`;
 }
+
+/**
+ * The answer a player gives most often is not what we want; the one he gave last time is, because a
+ * lad who was away last week is more likely to be away this week. Latest answer per player, by fixture date.
+ */
+export function usualAnswers(rows: readonly { player_id: string; status: CallStatus; match_date: string }[]): Record<string, CallStatus> {
+  const latest = new Map<string, { status: CallStatus; match_date: string }>();
+  for (const r of rows) {
+    const cur = latest.get(r.player_id);
+    if (!cur || r.match_date > cur.match_date) latest.set(r.player_id, { status: r.status, match_date: r.match_date });
+  }
+  return Object.fromEntries([...latest].map(([id, v]) => [id, v.status]));
+}

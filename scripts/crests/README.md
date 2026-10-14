@@ -1,0 +1,3 @@
+Club-site crests (20 clubs) came from each club's own website: header logo, site icon or Pitchero club_logos original, fetched 14 Oct 2026. Wikipedia infobox logos (en.wikipedia.org File: pages) were used where the club site was blocked or unreachable (7 clubs); the Google favicon fallback was not needed. See manifest.json for the exact URL of each.
+Each image was resized to 192x192 PNG with ~8% padding; near-white backgrounds were cut out where that was clean, otherwise the source's own box was kept (noted per club in manifest.json). Nothing was redrawn or invented.
+Crests are the trademarks of their clubs and are shown only next to the club's own name (nominative use) to identify it; Injury Time claims no rights in them.

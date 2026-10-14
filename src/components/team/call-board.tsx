@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * The call board: every player, three square-cut answers. A tap writes the
- * call and the row lights for a beat; a change made in any other browser
+ * The call board: every player, one three-detent switch. A tap slides the
+ * thumb to the answer, writes the call and the row lights for a beat; a change made in any other browser
  * arrives over the socket and lights the same way. A player sees their own
  * row first and large, everyone else read-only.
  *
@@ -13,8 +13,8 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
-import { setCallAction } from "@/lib/team/actions";
-import { CALL_META, countCalls, countLine } from "@/lib/team/format";
+import { setCallAction, setCallsBulkAction } from "@/lib/team/actions";
+import { countCalls, countLine } from "@/lib/team/format";
 import { useTeamRealtime } from "@/lib/team/realtime";
 import { CALL_STATUSES, type CallStatus, type ClubRole, type Fixture, type MatchCall, type Player } from "@/lib/types";
 
@@ -26,13 +26,15 @@ export type CallBoardProps = {
   role: ClubRole;
   /** the signed-in player's own row, when the viewer is a player */
   ownPlayerId: string | null;
+  /** each player's answer last time: shown as a dashed marker, never saved until someone taps */
+  usual?: Record<string, CallStatus>;
 };
 
 type Row = { status: CallStatus | null; note: string | null; updatedAt: string | null };
 
 const FLASH_MS = 900;
 
-export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId }: CallBoardProps) {
+export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, usual = {} }: CallBoardProps) {
   const initial = useMemo(() => {
     const m = new Map<string, Row>();
     for (const c of calls) m.set(c.player_id, { status: c.status, note: c.note, updatedAt: c.updated_at });
@@ -121,6 +123,30 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId }
     [...rows.entries()].filter(([, r]) => r.status).map(([player_id, r]) => ({ player_id, status: r.status! })),
   );
 
+  // staff: one tap answers for everyone who has not, with what each of them said last time
+  const toFill = staff
+    ? players.filter((p) => !rows.get(p.id)?.status && usual[p.id]).map((p) => ({ playerId: p.id, status: usual[p.id] }))
+    : [];
+  const [filling, setFilling] = useState(false);
+  const fillTheRest = async () => {
+    if (toFill.length === 0 || filling) return;
+    const before = rows;
+    setFilling(true);
+    setError(null);
+    setRows((r) => {
+      const n = new Map(r);
+      for (const c of toFill) n.set(c.playerId, { status: c.status, note: null, updatedAt: new Date().toISOString() });
+      return n;
+    });
+    for (const c of toFill) light(c.playerId);
+    const res = await setCallsBulkAction({ fixtureId: fixture.id, calls: toFill });
+    if (!res.ok) {
+      setRows(before);
+      setError(res.error);
+    }
+    setFilling(false);
+  };
+
   const ordered = useMemo(() => {
     if (!ownPlayerId) return players;
     const me = players.find((p) => p.id === ownPlayerId);
@@ -134,6 +160,17 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId }
         <p className="num text-[13px] text-ink sm:text-[12.5px]" data-testid="count-line" aria-live="polite">
           {countLine(counts)}
         </p>
+        {toFill.length > 0 ? (
+          <button
+            type="button"
+            onClick={fillTheRest}
+            disabled={filling}
+            data-testid="fill-the-rest"
+            className="pressable num basis-full border-t border-line pt-2 text-left text-[12.5px] font-semibold text-mint hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint disabled:opacity-60 max-sm:min-h-11 max-sm:pt-3 sm:basis-auto sm:border-t-0 sm:pt-0"
+          >
+            {filling ? "filling" : `fill the other ${toFill.length} as last time`}
+          </button>
+        ) : null}
       </div>
       {error ? (
         <p role="alert" className="border-b border-line px-4 py-2 text-[12.5px] text-out sm:px-5">
@@ -153,7 +190,7 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId }
               data-testid="call-row"
               data-player={p.id}
               data-status={row.status ?? "none"}
-              className={`grid min-h-14 grid-cols-1 items-center gap-x-3 gap-y-2 px-4 transition-colors duration-[600ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none sm:grid-cols-[minmax(0,1fr)_auto] sm:px-5 ${
+              className={`call-row grid min-h-14 grid-cols-1 items-center gap-x-3 gap-y-2 border-l-[3px] border-transparent px-[13px] transition-colors duration-[600ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none sm:grid-cols-[minmax(0,1fr)_auto] sm:px-[17px] ${
                 mine ? "bg-panel-2 py-5" : "py-3 sm:py-2.5"
               } ${lit ? "bg-panel-2" : ""}`}
             >
@@ -162,6 +199,7 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId }
                   <p className={`line-clamp-2 min-w-0 ${mine ? "display text-[26px]" : "text-[14px] font-semibold sm:text-[13.5px]"} text-ink`}>
                     {p.squad_number !== null ? <span className="num mr-2 text-[12px] font-normal text-ink-dim">{p.squad_number}</span> : null}
                     {p.name}
+                    {knownPosition(p) ? <span className="num ml-2 text-[10.5px] font-normal tracking-[0.1em] text-ink-faint">{p.position}</span> : null}
                     {mine ? <span className="ml-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-mint">you</span> : null}
                   </p>
                   {row.status && editable && !noteEditing ? (
@@ -193,7 +231,7 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId }
                   />
                 ) : null}
               </div>
-              <CallChoice name={p.name} value={row.status} large={mine} disabled={!editable} onChoose={(s) => choose(p.id, s)} />
+              <CallSwitch name={p.name} value={row.status} usual={usual[p.id] ?? null} large={mine} disabled={!editable} onChoose={(s) => choose(p.id, s)} />
             </li>
           );
         })}
@@ -203,16 +241,37 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId }
   );
 }
 
-/** Three square-cut answers as a radio group. The word carries the meaning; colour only echoes it. */
-function CallChoice({
+/** a position is only shown when someone has said it: an unconfirmed MF placeholder is not a position */
+function knownPosition(p: Player): boolean {
+  const ext = p.external_stats as { position_confirmed?: boolean } | null;
+  return ext?.position_confirmed !== false;
+}
+
+const STOPS: { status: CallStatus; word: string; thumb: string }[] = [
+  // the thumb takes the look of the app's status marks: solid is in, half-filled is unsure, struck through is out
+  { status: "in", word: "in", thumb: "call-thumb-in" },
+  { status: "unsure", word: "unsure", thumb: "call-thumb-unsure" },
+  { status: "out", word: "out", thumb: "call-thumb-out" },
+];
+
+/**
+ * The answer as a three-detent switch plate: a hairline track with two notches and a
+ * square-cut thumb that slides to the chosen stop. The thumb carries the word and a
+ * shape (solid / half / struck), so the answer never rests on colour alone. Unanswered
+ * shows a dashed thumb where he went last time; tapping anywhere still answers.
+ * Still a radio group underneath, with arrow keys.
+ */
+export function CallSwitch({
   name,
   value,
+  usual,
   large,
   disabled,
   onChoose,
 }: {
   name: string;
   value: CallStatus | null;
+  usual: CallStatus | null;
   large: boolean;
   disabled: boolean;
   onChoose: (s: CallStatus) => void;
@@ -225,31 +284,60 @@ function CallChoice({
     if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (i - 1 + CALL_STATUSES.length) % CALL_STATUSES.length;
     if (next === null) return;
     e.preventDefault();
-    onChoose(CALL_STATUSES[next]);
-    const el = (e.currentTarget.children[next] as HTMLElement | undefined);
-    el?.focus();
+    onChoose(STOPS[next].status);
+    (e.currentTarget.querySelectorAll<HTMLElement>("[role=radio]")[next])?.focus();
   };
+  const at = value ? STOPS.findIndex((s) => s.status === value) : -1;
+  const ghost = !value && usual ? STOPS.findIndex((s) => s.status === usual) : -1;
+  const width = large ? "sm:w-[216px]" : "sm:w-[168px]";
   return (
-    <div role="radiogroup" aria-label={`${name}: call`} onKeyDown={onKey} className={`grid w-full grid-cols-3 gap-1.5 sm:flex sm:w-auto ${large ? "sm:gap-1.5" : "sm:gap-1"}`}>
-      {CALL_STATUSES.map((s) => {
-        const meta = CALL_META[s];
-        const on = value === s;
+    <div
+      role="radiogroup"
+      aria-label={`${name}: call`}
+      onKeyDown={onKey}
+      className={`call-switch relative grid h-11 w-full grid-cols-3 border border-line bg-pitch ${width} ${large ? "sm:h-11" : "sm:h-9"} ${disabled ? "opacity-70" : ""}`}
+    >
+      {/* the two notches between the stops */}
+      <span aria-hidden className="pointer-events-none absolute left-1/3 top-0 h-1.5 w-px bg-line-strong" />
+      <span aria-hidden className="pointer-events-none absolute left-2/3 top-0 h-1.5 w-px bg-line-strong" />
+      <span aria-hidden className="pointer-events-none absolute left-1/3 bottom-0 h-1.5 w-px bg-line-strong" />
+      <span aria-hidden className="pointer-events-none absolute left-2/3 bottom-0 h-1.5 w-px bg-line-strong" />
+      {/* last time, as a marker only */}
+      {ghost >= 0 ? (
+        <span
+          aria-hidden
+          className="call-thumb call-thumb-ghost pointer-events-none absolute inset-y-[3px] left-[3px] flex w-[calc((100%-6px)/3)] items-center justify-center"
+          style={{ transform: `translateX(${ghost * 100}%)` }}
+        >
+          <span className="num text-[10.5px] font-semibold uppercase tracking-[0.1em] text-ink-dim">{STOPS[ghost].word}?</span>
+        </span>
+      ) : null}
+      {/* the thumb: slides, never jumps */}
+      {at >= 0 ? (
+        <span
+          aria-hidden
+          className={`call-thumb ${STOPS[at].thumb} pointer-events-none absolute inset-y-[3px] left-[3px] z-[1] flex w-[calc((100%-6px)/3)] items-center justify-center`}
+          style={{ transform: `translateX(${at * 100}%)` }}
+        >
+          <span className={`num font-bold uppercase tracking-[0.1em] ${large ? "text-[13px]" : "text-[12px] sm:text-[10.5px]"}`}>{STOPS[at].word}</span>
+        </span>
+      ) : null}
+      {STOPS.map((s, i) => {
+        const on = value === s.status;
         return (
           <button
-            key={s}
+            key={s.status}
             type="button"
             role="radio"
             aria-checked={on}
             disabled={disabled}
-            tabIndex={on || (!value && s === "in") ? 0 : -1}
-            onClick={() => onChoose(s)}
-            className={`pressable h-11 rounded-[2px] border text-[12.5px] font-semibold uppercase tracking-[0.1em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint disabled:cursor-default ${
-              large ? "sm:h-11 sm:px-5 sm:text-[13px]" : "sm:h-8 sm:px-2.5 sm:text-[10.5px]"
-            } ${
-              on ? `${meta.fill} border-transparent text-mint-ink` : `bg-pitch ${disabled ? "border-line text-ink-faint" : `${meta.border} ${meta.text} hover:bg-panel-2`}`
+            tabIndex={on || (!value && s.status === "in") ? 0 : -1}
+            onClick={() => onChoose(s.status)}
+            className={`pressable relative z-[2] flex items-center justify-center text-[12px] uppercase tracking-[0.1em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint disabled:cursor-default ${
+              on ? "text-transparent" : ghost === i ? "text-transparent" : "num font-medium text-ink-dim hover:text-ink sm:text-[10.5px]"
             }`}
           >
-            {meta.label}
+            <span className={on || ghost === i ? "opacity-0" : undefined}>{s.word}</span>
           </button>
         );
       })}

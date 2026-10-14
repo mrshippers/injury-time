@@ -16,7 +16,7 @@ export function FormationSelect({ value, onChange }: { value: string; onChange: 
   const current = FORMATION_TEMPLATES.find((t) => t.name === value);
   return (
     <label htmlFor={id} className="flex items-center gap-2 max-sm:w-full">
-      <span className="annot">{"// shape"}</span>
+      <span className="annot">{"// formation"}</span>
       <span className="relative max-sm:flex-1">
         <select
           id={id}

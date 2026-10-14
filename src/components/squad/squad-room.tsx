@@ -9,13 +9,14 @@
  * onto a slot, drag a token between slots, or select a name and then a slot
  * (keyboard and touch). Nothing on the pitch is the only way to do anything.
  */
+import { Crest } from "@/components/club/crest";
 import dynamic from "next/dynamic";
 import { useEffect, useEffectEvent, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
 
 import type { SquadRow } from "@/lib/data";
-import { FORMATIONS, fillEmpty, formationByName, isAvailable, pickXI } from "@/lib/lineup";
+import { FORMATIONS, formationByName, isAvailable, pickXI } from "@/lib/lineup";
 import { saveLineupAction } from "@/lib/squad/actions";
-import type { Fixture, SavedLineup } from "@/lib/types";
+import type { CallStatus, Fixture, SavedLineup } from "@/lib/types";
 
 import { useIsPhone, useReducedMotion, useSceneTokens, useStoredValue } from "@/components/three/tokens";
 import type { DragSource } from "@/components/lineup/pitch-scene";
@@ -55,11 +56,16 @@ export type SquadRoomProps = {
   rows: SquadRow[];
   nextFixture: Fixture | null;
   saved: SavedLineup | null;
+  /** the side named for the last match: the default for this one */
+  previous: SavedLineup | null;
+  /** who has answered for this match; anyone who said out is left out */
+  calls: Record<string, CallStatus>;
+  clubId: string;
   canManage: boolean;
   canPick: boolean;
 };
 
-export function SquadRoom({ rows, nextFixture, saved, canManage, canPick }: SquadRoomProps) {
+export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, canManage, canPick }: SquadRoomProps) {
   const tokens = useSceneTokens();
   const reduced = useReducedMotion();
   const phone = useIsPhone();
@@ -79,13 +85,35 @@ export function SquadRoom({ rows, nextFixture, saved, canManage, canPick }: Squa
   /* ── the side ── */
   const [chosen, setChosen] = useState<string | null>(null);
   const formation = formationByName(chosen ?? saved?.formation ?? stored);
-  const auto = useMemo(() => pickXI(rows, formation).picks.map((p) => p.row?.player.id ?? null), [rows, formation]);
-  const [manual, setManual] = useState<{ formation: string; ids: (string | null)[] } | null>(
+  // the side fills itself: last match's eleven again, who said out swapped for the next best, who said in first
+  const prefer = useMemo(() => new Set((previous?.xi ?? []).filter(Boolean) as string[]), [previous]);
+  const callMap = useMemo(() => new Map(Object.entries(calls)), [calls]);
+  const auto = useMemo(() => pickXI(rows, formation, { prefer, calls: callMap }).picks.map((p) => p.row?.player.id ?? null), [rows, formation, prefer, callMap]);
+  const [manualState, setManual] = useState<{ formation: string; ids: (string | null)[] } | null>(
     saved ? { formation: saved.formation, ids: saved.xi } : null,
   );
+  // an unsaved draft survives a refresh: the lads should not have to rebuild a side because the page reloaded
+  const draftKey = `injury-time.draft.${clubId}.${nextFixture?.id ?? "none"}`;
+  const storedDraft = useStoredValue(draftKey);
+  const draft = useMemo(() => {
+    if (saved || !storedDraft) return null;
+    try {
+      const d = JSON.parse(storedDraft) as { formation: string; ids: (string | null)[] };
+      return typeof d?.formation === "string" && Array.isArray(d.ids) && d.ids.length === 11 ? d : null;
+    } catch {
+      return null;
+    }
+  }, [storedDraft, saved]);
+  const manual = manualState ?? draft;
+  useEffect(() => {
+    if (!manualState || saved) return;
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(manualState));
+    } catch {}
+  }, [manualState, saved, draftKey]);
   const xiIds = manual && manual.formation === formation.name ? manual.ids : auto;
   const setXiIds = (update: (ids: (string | null)[]) => (string | null)[]) => {
-      setManual((m) => ({ formation: formation.name, ids: update(m && m.formation === formation.name ? m.ids : auto) }));
+      setManual({ formation: formation.name, ids: update(manual && manual.formation === formation.name ? manual.ids : auto) });
     };
 
   const inXI = useMemo(() => new Set(xiIds.filter(Boolean) as string[]), [xiIds]);
@@ -128,7 +156,15 @@ export function SquadRoom({ rows, nextFixture, saved, canManage, canPick }: Squa
         return next;
       });
     };
-  const pickForMe = () => setXiIds((ids) => fillEmpty(rows, formation, ids));
+  const clearSide = () => setXiIds((ids) => ids.map(() => null));
+  // where the side on the pitch came from, said once and plainly
+  const carried = !manual || manual.formation !== formation.name ? xiIds.filter((id) => id && prefer.has(id)).length : 0;
+  const origin =
+    manual && manual.formation === formation.name
+      ? null
+      : prefer.size > 0
+        ? `filled from last match's eleven${carried < 11 ? `, ${11 - carried} change${11 - carried === 1 ? "" : "s"} for who is out` : ""}`
+        : "filled from who is in and who has played most";
 
   /* ── one tap from the list: in he goes, to the first slot that fits him ── */
   const [toggleNote, setToggleNote] = useState<string | null>(null);
@@ -351,11 +387,11 @@ export function SquadRoom({ rows, nextFixture, saved, canManage, canPick }: Squa
             <FormationSelect value={formation.name} onChange={chooseFormation} />
             <button
               type="button"
-              onClick={pickForMe}
-              disabled={filled === 11}
-              className="pressable h-8 border border-line bg-panel-2 px-3 text-[12px] font-semibold text-ink-dim hover:text-ink disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+              onClick={clearSide}
+              disabled={filled === 0}
+              className="pressable h-8 px-2 text-[12px] font-semibold text-ink-dim underline-offset-4 hover:text-ink hover:underline disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
             >
-              pick for me
+              clear
             </button>
             {canPick && nextFixture ? (
               <button
@@ -376,6 +412,7 @@ export function SquadRoom({ rows, nextFixture, saved, canManage, canPick }: Squa
             {status}
           </p>
         </div>
+        {origin ? <p className="mt-2 text-[12px] text-ink-dim">{origin}. Swap anyone, it saves when you do.</p> : null}
 
         <div
           ref={pitchBox}
@@ -405,10 +442,13 @@ export function SquadRoom({ rows, nextFixture, saved, canManage, canPick }: Squa
             />
           ) : null}
           {nextFixture ? (
-            <p className="pointer-events-none absolute left-3 top-3 text-[11.5px] text-ink-dim">
+            <p className="pointer-events-none absolute left-3 top-3 flex items-center gap-2 text-[11.5px] text-ink-dim">
               <span className="num text-gold">{shortDate(nextFixture.match_date).toUpperCase()}</span>
-              {" · "}
-              {nextFixture.opponent} ({nextFixture.venue})
+              <span aria-hidden>·</span>
+              <Crest team={nextFixture.opponent} size={16} plain />
+              <span>
+                {nextFixture.opponent} ({nextFixture.venue})
+              </span>
             </p>
           ) : null}
           <p className="pointer-events-none absolute bottom-3 left-3 text-[10.5px] tracking-[0.12em] uppercase text-ink-dim">

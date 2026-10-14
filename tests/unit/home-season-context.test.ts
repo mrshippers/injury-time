@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import snapshot from "../../scripts/belstone-2026-27.json";
+import snapshot from "../fixtures/belstone-2026-09-26.json";
 import { christmasFor, isLeague, ordinal, seasonContext, word } from "../../src/lib/home/season-context";
 import type { Fixture, Result, Standing } from "../../src/lib/types";
 

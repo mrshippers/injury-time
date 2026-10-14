@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { MATCHDAY_HANDOFF_KEY, type MatchdayHandoff } from "@/lib/matchday/minutes";
 import { logSessionAction } from "@/app/log/actions";
+import type { SessionSuggestion } from "@/lib/log/suggest";
 import type { Club, SessionKind } from "@/lib/types";
 import {
   defaultMinutesFor,
@@ -21,15 +22,18 @@ export function SessionForm({
   club,
   players,
   today,
+  suggestion = { kind: "training" },
 }: {
   club: Club;
   players: RosterPlayer[];
   today: string;
+  /** the session most likely to need logging: a match played in the last three days, else training */
+  suggestion?: SessionSuggestion;
 }) {
-  const [kind, setKind] = useState<SessionKind>("training");
-  const [sessionDate, setSessionDate] = useState(today);
-  const [opponent, setOpponent] = useState("");
-  const [def, setDef] = useState<SessionDefault>({ rpe: null, minutes: defaultMinutesFor("training") });
+  const [kind, setKind] = useState<SessionKind>(suggestion.kind);
+  const [sessionDate, setSessionDate] = useState(suggestion.kind === "match" ? suggestion.date : today);
+  const [opponent, setOpponent] = useState(suggestion.kind === "match" ? suggestion.opponent : "");
+  const [def, setDef] = useState<SessionDefault>({ rpe: null, minutes: defaultMinutesFor(suggestion.kind) });
   const [rows, setRows] = useState<Record<string, RowState>>(() =>
     Object.fromEntries(players.map((p) => [p.id, initialRowState()])),
   );
@@ -117,6 +121,11 @@ export function SessionForm({
 
   return (
     <div className="flex flex-1 flex-col pb-36 sm:pb-28">
+      {suggestion.kind === "match" && !fromMatchday ? (
+        <p role="status" className="annot mx-auto w-full max-w-[1240px] px-4 pt-5 text-gold sm:px-8">
+          {`// opened on the match v ${suggestion.opponent}, ${suggestion.date} · change the kind above if it is training`}
+        </p>
+      ) : null}
       {fromMatchday ? (
         <p role="status" className="annot mx-auto w-full max-w-[1240px] px-4 pt-5 text-gold sm:px-8">
           {`// minutes from the matchday screen v ${fromMatchday} · now give each player's rpe`}

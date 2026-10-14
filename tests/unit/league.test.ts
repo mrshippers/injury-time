@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import snapshot from "../../scripts/belstone-2026-27.json";
+import snapshot from "../fixtures/belstone-2026-09-26.json";
+import liveSnapshot from "../../scripts/belstone-2026-27.json";
 import { mapFixturesResults } from "../../src/lib/league/fwp";
 import {
   divisionLine,
@@ -51,6 +52,24 @@ describe("scorers", () => {
     const total = Object.values(goals).reduce((a, b) => a + b, 0);
     // 42 scored in every competition to 26 sep; the two at Enfield in the Vase have no names on the feed
     expect(total).toBe(40);
+  });
+});
+
+describe("scorer spellings", () => {
+  it("a case-only difference is one scorer, never two rows that overwrite each other", () => {
+    expect(goalsByScorer([{ scorers: ["Mcnally (2)"] }, { scorers: ["McNally (pen)"] }])).toEqual([{ name: "Mcnally", goals: 3 }]);
+  });
+});
+
+describe("the live snapshot", () => {
+  const live = fromSnapshot(liveSnapshot as Snapshot);
+  it("carries the cups, played and still to come", () => {
+    expect(live.results.filter((r) => !/Combined Counties/.test(r.competition)).map((r) => r.competition)).toEqual(["FA Vase 1Q", "FA Vase 2Q", "Herts Cup 1", "CCL Div One Challenge Cup 1", "FA Vase 1"]);
+    expect(live.fixtures.filter((f) => /Vase|Cup/.test(f.competition)).map((f) => f.opponent)).toEqual(["Wisbech Town", "Oxhey Jets"]);
+  });
+  it("is dated by its table, not by the day it was read", () => {
+    expect(live.asOf).toBe("2026-10-10");
+    expect(ourStanding(live.standings)?.played).toBe(15);
   });
 });
 

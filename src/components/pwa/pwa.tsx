@@ -68,7 +68,7 @@ export function InstallNudge() {
   }, []);
 
   if (standalone || dismissed || (!evt && !ios)) return null;
-  if (pathname.startsWith("/login") || pathname.startsWith("/auth") || pathname.startsWith("/checkin") || pathname.startsWith("/claim")) return null;
+  if (pathname.startsWith("/login") || pathname.startsWith("/auth") || pathname.startsWith("/checkin") || pathname.startsWith("/claim") || pathname.startsWith("/pilot")) return null;
   const dismiss = () => {
     try {
       localStorage.setItem(DISMISS_KEY, "1");

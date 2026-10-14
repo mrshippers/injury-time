@@ -19,9 +19,9 @@ test.describe("the side", () => {
     await expect(page).toHaveURL(/\/squad$/);
   });
 
-  test("the shape is a dropdown of real templates, most common first, and is remembered", async ({ page }) => {
+  test("the formation is a dropdown of real templates, most common first, and is remembered", async ({ page }) => {
     await open(page);
-    const shape = page.getByRole("combobox", { name: /shape/i });
+    const shape = page.getByRole("combobox", { name: /formation/i });
     const options = await shape.locator("option").allTextContents();
     expect(options[0]).toMatch(/^4-2-3-1/);
     expect(options).toHaveLength(12);
@@ -35,8 +35,8 @@ test.describe("the side", () => {
       await expect(page.getByRole("button", { name: "saved" })).toBeVisible({ timeout: 15_000 });
     }
     await page.reload();
-    await expect(page.getByRole("combobox", { name: /shape/i })).toHaveValue("3-5-2");
-    await page.getByRole("combobox", { name: /shape/i }).selectOption("4-2-3-1");
+    await expect(page.getByRole("combobox", { name: /formation/i })).toHaveValue("3-5-2");
+    await page.getByRole("combobox", { name: /formation/i }).selectOption("4-2-3-1");
     const saveBack = page.getByRole("button", { name: /save for/ });
     if ((await saveBack.count()) > 0) {
       await saveBack.click();
@@ -99,23 +99,22 @@ test.describe("the side", () => {
     await expect(filled).toContainText(spareName);
   });
 
-  test("take him out, then pick for me fills the gap without touching the rest", async ({ page }) => {
+  test("take him out leaves a gap and touches nobody else, and clear empties the side", async ({ page }) => {
     await open(page);
     const status = page.locator('p[aria-live="polite"].num');
     const texts = await xiItems(page).allTextContents();
     const filledIdx = texts.map((t, i) => (t.includes("empty") ? -1 : i)).filter((i) => i >= 0);
     const filledBefore = filledIdx.length;
     const third = xiItems(page).nth(filledIdx[2]);
-    const thirdName = (await third.getByRole("button").first().textContent()) ?? "";
     const fourth = xiItems(page).nth(filledIdx[3]);
     const fourthName = (await fourth.getByRole("button").first().textContent()) ?? "";
     await third.getByRole("button", { name: /take .* out of the eleven/ }).click();
     await expect(third).toContainText("empty");
     await expect(status).toContainText(`${filledBefore - 1} of 11`);
-    await page.getByRole("button", { name: "pick for me" }).click();
-    await expect(third).not.toContainText("empty");
-    await expect(third).not.toHaveText(thirdName);
     await expect(fourth.getByRole("button").first()).toHaveText(fourthName);
+    await page.getByRole("button", { name: "clear" }).click();
+    await expect(status).toContainText("0 of 11");
+    await expect(page.getByRole("button", { name: "clear" })).toBeDisabled();
   });
 
   test("the side saves for the next fixture and comes back saved", async ({ page }) => {

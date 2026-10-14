@@ -101,15 +101,19 @@ export function parseScorer(entry: string): { name: string; goals: number } | nu
 
 /** Sum goals by surname across a set of results. */
 export function goalsByScorer(results: readonly { scorers: string[] }[]): { name: string; goals: number }[] {
-  const tally = new Map<string, number>();
+  // the feed spells one man two ways ("Mcnally", "McNally"): tally case-blind, keep the first spelling
+  const tally = new Map<string, { name: string; goals: number }>();
   for (const r of results) {
     for (const entry of r.scorers) {
       const parsed = parseScorer(entry);
       if (!parsed) continue;
-      tally.set(parsed.name, (tally.get(parsed.name) ?? 0) + parsed.goals);
+      const key = parsed.name.toLowerCase();
+      const row = tally.get(key) ?? { name: parsed.name, goals: 0 };
+      row.goals += parsed.goals;
+      tally.set(key, row);
     }
   }
-  return [...tally.entries()].map(([name, goals]) => ({ name, goals })).sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
+  return [...tally.values()].sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
 }
 
 /**
