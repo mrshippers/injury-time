@@ -136,7 +136,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           </div>
           <figure className="lg:order-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/pilot/belstone-side.jpg" alt="The squad room for Belstone: the eleven on a floodlit pitch, 4-2-3-1, our own goal at the bottom" width={1200} height={700} className="w-full border border-line" loading="lazy" />
+            <img src="/pilot/belstone-side.jpg" alt="The squad room for Belstone: the eleven on a floodlit pitch, 4-2-3-1, our own goal at the bottom" width={756} height={521} className="h-auto w-full border border-line" loading="lazy" />
             <figcaption className="num mt-2 text-[11.5px] text-ink-dim">Belstone&apos;s squad, from the public appearances list. Positions aren&apos;t public, so until you set them the side is a first guess: most-played, scorers up front.</figcaption>
           </figure>
         </div>
@@ -177,7 +177,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           </div>
           <figure>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/pilot/belstone-review.jpg" alt="Belstone's season review: the league record, home against away, the table around the club" width={1200} height={760} className="w-full border border-line" loading="lazy" />
+            <img src="/pilot/belstone-review.jpg" alt="Belstone's season review: the league record, home against away, the table around the club" width={1100} height={712} className="h-auto w-full border border-line" loading="lazy" />
           </figure>
         </div>
       </section>
