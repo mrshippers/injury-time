@@ -13,10 +13,11 @@ import { READINESS_RANK } from "@/lib/readiness";
 import { positionKnown } from "@/lib/squad/position";
 import type { CallStatus, Position } from "@/lib/types";
 
-export type Slot = { role: Position; x: number; depth: number };
+/** `label` is the position in the dressing room's words (LB, DM, AM, ST), fixed when the formation is laid out. */
+export type Slot = { role: Position; x: number; depth: number; label: string };
 export type Formation = { name: string; note: string; slots: Slot[] };
 
-const GK: Slot = { role: "GK", x: 0, depth: 0.05 };
+const GK: Slot = { role: "GK", x: 0, depth: 0.05, label: "GK" };
 /** the back line and the front line, as a share of the pitch length */
 const DEPTH_BACK = 0.22;
 const DEPTH_FRONT = 0.8;
@@ -39,16 +40,45 @@ const SPREAD: Record<number, number[]> = {
 export function formationFromTemplate(t: FormationTemplate): Formation {
   const n = t.rows.length;
   const slots: Slot[] = [GK];
+  const rowsWith = (role: Position) => t.rows.map((_, i) => i).filter((i) => (t.roles[i] ?? []).some((r) => r === role));
+  const mfRows = rowsWith("MF");
+  const fwRows = rowsWith("FW");
   t.rows.forEach((count, i) => {
     const base = n === 1 ? DEPTH_FRONT : DEPTH_BACK + ((DEPTH_FRONT - DEPTH_BACK) * i) / (n - 1);
     const xs = SPREAD[count] ?? SPREAD[5];
     const arc = i < n / 2 ? 0.06 : -0.07;
     xs.forEach((x, j) => {
       const role = t.roles[i]?.[j] ?? "MF";
-      slots.push({ role, x, depth: Math.round((base + arc * Math.abs(x)) * 1000) / 1000 });
+      slots.push({ role, x, depth: Math.round((base + arc * Math.abs(x)) * 1000) / 1000, label: labelFor(role, x, i, count, mfRows, fwRows) });
     });
   });
   return { name: t.name, note: t.note, slots };
+}
+
+/**
+ * The position a slot asks for, in the words a dressing room uses. Read from the template's rows, not
+ * from depth alone: the lowest of two midfield lines is the holding line (DM), a top line of three is the
+ * line behind the striker (LW, AM, RW), a single line of four is LM, CM, CM, RM.
+ */
+function labelFor(role: Position, x: number, row: number, count: number, mfRows: number[], fwRows: number[]): string {
+  const side = x < 0 ? "L" : "R";
+  const wide = Math.abs(x);
+  if (role === "GK") return "GK";
+  if (role === "DF") return wide >= 0.7 ? `${side}B` : "CB";
+  if (role === "MF") {
+    const several = mfRows.length > 1;
+    if (several && row === Math.min(...mfRows)) return wide >= 0.7 ? `${side}M` : count >= 3 && wide >= 0.2 ? "CM" : "DM";
+    if (several && row === Math.max(...mfRows) && count <= 3) return wide >= 0.5 ? `${side}W` : "AM";
+    return wide >= 0.7 ? `${side}M` : "CM";
+  }
+  // FW: a forward line with another above it is the line behind the striker
+  if (fwRows.length > 1 && row !== Math.max(...fwRows)) return wide >= 0.5 ? `${side}W` : "AM";
+  return wide >= 0.5 ? `${side}W` : "ST";
+}
+
+/** The position a slot asks for (LB, DM, AM, ST...). */
+export function slotLabel(slot: Slot): string {
+  return slot.label;
 }
 
 export const FORMATIONS: Formation[] = FORMATION_TEMPLATES.map(formationFromTemplate);

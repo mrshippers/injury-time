@@ -142,5 +142,7 @@ export function netGeometry(): THREE.BufferGeometry {
 
 /** Slot coordinates (x -1..1, depth 0..1) to metres on the pitch. */
 export function slotToWorld(x: number, depth: number): [number, number] {
-  return [x * (HALF_W - 4), -HALF_L + depth * LENGTH];
+  // the camera stands behind our own goal looking up the pitch (+z), where screen-right is world -x:
+  // a left back (x < 0) has to land on the viewer's left
+  return [-x * (HALF_W - 4), -HALF_L + depth * LENGTH];
 }

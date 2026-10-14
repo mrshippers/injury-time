@@ -284,7 +284,7 @@ function SlotMark({ slot, t, over, empty, reduced }: { slot: Formation["slots"][
       {empty ? (
         <Html center position={[0, 0.2, 0]} zIndexRange={[10, 0]} style={{ pointerEvents: "none", userSelect: "none" }}>
           <span className="num text-[10.5px] font-semibold tracking-[0.1em]" style={{ color: over ? t.mint : t.out }}>
-            {slot.role}
+            {slot.label}
           </span>
         </Html>
       ) : null}
@@ -399,8 +399,8 @@ function Token({ row, slotIndex, slot, t, selected, hovered, dragging, reduced, 
           <meshBasicMaterial color={selected ? opaque(t.mint) : ring} toneMapped={false} />
         </mesh>
         <Html center position={[0, 0.85, 0]} zIndexRange={[10, 0]} style={{ pointerEvents: "none", userSelect: "none" }}>
-          <span className="num block text-[13px] font-bold leading-none" style={{ color: opaque(t.pitch) }}>
-            {row.player.squad_number ?? ""}
+          <span className={`num block font-bold leading-none ${row.player.squad_number === null ? "text-[10.5px] tracking-[0.04em]" : "text-[13px]"}`} style={{ color: opaque(t.pitch) }}>
+            {row.player.squad_number ?? slot.label}
           </span>
         </Html>
         <Html center position={[0, 0.3, -4.4]} zIndexRange={[10, 0]} style={{ pointerEvents: "none", userSelect: "none" }}>
@@ -418,7 +418,7 @@ function Token({ row, slotIndex, slot, t, selected, hovered, dragging, reduced, 
                 className="num mt-1 rounded-[2px] border px-1.5 py-[3px] text-[10px] font-semibold tracking-[0.08em]"
                 style={{ color: ring, borderColor: ring, background: opaque(t.panel) }}
               >
-                {outOfPosition ? `${row.player.position} · ` : ""}
+                {slot.label} · {outOfPosition ? `${row.player.position} · ` : ""}
                 {row.readiness.word.toUpperCase()}
               </span>
             ) : null}

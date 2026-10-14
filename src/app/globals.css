@@ -598,8 +598,9 @@ html {
 .call-thumb {
   border: 1px solid transparent;
   border-radius: 1px;
-  transition: transform 190ms var(--ease-out-strong), background-color 190ms var(--ease-out-strong);
+  transition: background-color 190ms var(--ease-out-strong);
 }
+.call-slide { transition: transform 190ms var(--ease-out-strong); }
 .call-thumb-in { background: var(--win); color: var(--mint-ink); }
 .call-thumb-unsure {
   border-color: var(--doubt);
@@ -612,7 +613,7 @@ html {
   background: repeating-linear-gradient(-45deg, color-mix(in oklab, var(--out) 26%, transparent) 0 2px, transparent 2px 6px);
 }
 .call-thumb-ghost { border: 1px dashed var(--line-strong); }
-@media (prefers-reduced-motion: reduce) { .call-thumb { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .call-thumb, .call-slide { transition: none; } }
 /* the row's left rule repeats the answer in a pattern: solid, dashed, dotted */
 .call-row[data-status="in"] { border-left-color: var(--win); }
 .call-row[data-status="unsure"] { border-left-color: var(--doubt); border-left-style: dashed; }

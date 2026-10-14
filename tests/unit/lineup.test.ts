@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FORMATIONS, pickXI } from "../../src/lib/lineup";
+import { FORMATIONS, pickXI, slotLabel } from "../../src/lib/lineup";
 import type { SquadRow } from "../../src/lib/data";
 import type { Position } from "../../src/lib/types";
 
@@ -116,5 +116,33 @@ describe("players nobody has placed", () => {
     const xi = pickXI(rows, f442);
     const front = xi.picks.filter((p) => p.slot.role === "FW").map((p) => p.row?.player.id).sort();
     expect(front).toEqual(["p2", "p3"]);
+  });
+});
+
+describe("slotLabel", () => {
+  const labels = (name: string) => FORMATIONS.find((f) => f.name === name)!.slots.map(slotLabel);
+  it("4-2-3-1 reads the way a dressing room says it", () => {
+    expect(labels("4-2-3-1")).toEqual(["GK", "LB", "CB", "CB", "RB", "DM", "DM", "LW", "AM", "RW", "ST"]);
+  });
+  it("4-4-2 has wide midfielders and two strikers", () => {
+    expect(labels("4-4-2")).toEqual(["GK", "LB", "CB", "CB", "RB", "LM", "CM", "CM", "RM", "ST", "ST"]);
+  });
+  it("4-3-1-2 holds with one, not three", () => {
+    expect(labels("4-3-1-2").slice(5)).toEqual(["CM", "DM", "CM", "AM", "ST", "ST"]);
+  });
+  it("4-1-4-1 is one holder behind a flat four", () => {
+    expect(labels("4-1-4-1").slice(5)).toEqual(["DM", "LM", "CM", "CM", "RM", "ST"]);
+  });
+  it("4-3-3 puts wingers up front", () => {
+    const l = labels("4-3-3");
+    expect(l.filter((x) => x === "LW" || x === "RW")).toHaveLength(2);
+    expect(l.at(-2)).toBe("ST");
+  });
+  it("every slot in every formation gets a label, and exactly one GK", () => {
+    for (const f of FORMATIONS) {
+      const l = f.slots.map(slotLabel);
+      expect(l.every((x) => /^(GK|[LR]B|CB|DM|CM|[LR]M|AM|[LR]W|ST)$/.test(x)), f.name).toBe(true);
+      expect(l.filter((x) => x === "GK")).toHaveLength(1);
+    }
   });
 });
