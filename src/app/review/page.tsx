@@ -275,8 +275,8 @@ export default async function ReviewPage() {
             <Tiles
               cols="grid-cols-2"
               items={[
-                [`won from behind (${swing.behindAtHt} games)`, `+${swing.wonFromBehind} pts`],
-                [`dropped from ahead (${swing.aheadAtHt} games)`, `−${swing.droppedFromAhead} pts`],
+                [`won from behind (${swing.behindAtHt} games)`, swing.wonFromBehind ? `+${swing.wonFromBehind} pts` : "none"],
+                [`dropped from ahead (${swing.aheadAtHt} games)`, swing.droppedFromAhead ? `−${swing.droppedFromAhead} pts` : "none dropped"],
               ]}
             />
             <p className="num mt-2 text-[11.5px] text-ink-dim">points the second half won or cost, from {swing.counted} games with a half-time score</p>

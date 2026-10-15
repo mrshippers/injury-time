@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Crest } from "@/components/club/crest";
+import { MatchWeatherLine } from "@/components/home/match-weather";
 import type { SquadRow } from "@/lib/data";
 import type { HomeSeason } from "@/lib/home/data";
 import type { SeasonContext } from "@/lib/home/season-context";
@@ -30,7 +31,7 @@ function Vital({ label, aside, children }: { label: string; aside?: React.ReactN
   );
 }
 
-export function NextMatchVital({ next, daysUntil, fit, calls, squadSize, last }: { next: Fixture | null; daysUntil: number | null; fit: number; calls: HomeSeason["calls"]; squadSize: number; last: Result | null }) {
+export function NextMatchVital({ next, daysUntil, fit, calls, squadSize, last, weather = null }: { next: Fixture | null; daysUntil: number | null; fit: number; calls: HomeSeason["calls"]; squadSize: number; last: Result | null; weather?: { line: string; ground: string } | null }) {
   const when = daysUntil === null ? "" : daysUntil === 0 ? "today" : daysUntil === 1 ? "tomorrow" : `in ${daysUntil} days`;
   return (
     <Vital label="next match" aside={next ? <span className="num text-[11.5px] text-ink-dim">{when}</span> : null}>
@@ -51,6 +52,7 @@ export function NextMatchVital({ next, daysUntil, fit, calls, squadSize, last }:
             {isLeague(next.competition) ? null : <span className="num mr-2 border border-gold-dim px-1.5 py-px text-[10px] font-semibold tracking-[0.12em] text-gold">CUP TIE</span>}
             {next.competition}
           </p>
+          <MatchWeatherLine weather={weather} />
           <p className="mt-1 text-[12.5px] text-ink-dim">
             <span className="num font-semibold text-ink">{fit}</span> available ·{" "}
             {calls.total === 0 ? (

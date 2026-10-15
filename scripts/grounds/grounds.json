@@ -1,0 +1,189 @@
+{
+  "_note": "Ground per club, keyed by the feed's club name. Source per row. null = not confirmed.",
+  "_null_reasons": {
+    "Eagles Land Benfica": "Sources conflict: Football Web Pages lists 'Prest park, School Lane, Amersham' (School Lane is Amersham Town's Spratleys Meadow address); Wikipedia says Preston Park, Harefield, but Preston Park is the home of the separate Eagles Land FC (Middlesex County League)."
+  },
+  "Belstone": {
+    "ground": "The Medburn Ground",
+    "town": "Radlett",
+    "lat": 51.6639,
+    "lon": -0.3083,
+    "source": "https://www.belstonefc.com/contact"
+  },
+  "Brook House": {
+    "ground": "Farm Park",
+    "town": "Hayes",
+    "lat": 51.533,
+    "lon": -0.4155,
+    "source": "https://www.pitchero.com/clubs/brookhousefc/contact"
+  },
+  "PFC Victoria London": {
+    "ground": "Bedfont Recreation Ground (Bedfont Sports Club)",
+    "town": "Bedfont",
+    "lat": 51.4603,
+    "lon": -0.4275,
+    "source": "https://www.footballwebpages.co.uk/pfc-victoria-london/club-information"
+  },
+  "Westside": {
+    "ground": "Wibbandune Sports Ground",
+    "town": "West Wimbledon",
+    "lat": 51.4217,
+    "lon": -0.2519,
+    "source": "https://www.westsidefc.org.uk/home"
+  },
+  "Langley": {
+    "ground": "Arbour Park",
+    "town": "Slough",
+    "lat": 51.5198,
+    "lon": -0.5884,
+    "source": "https://www.footballwebpages.co.uk/langley/club-information"
+  },
+  "Wembley": {
+    "ground": "Vale Farm",
+    "town": "Wembley",
+    "lat": 51.5576,
+    "lon": -0.3158,
+    "source": "https://en.wikipedia.org/wiki/Wembley_F.C."
+  },
+  "Colliers Wood United": {
+    "ground": "Wibbandune Sports Ground",
+    "town": "West Wimbledon",
+    "lat": 51.4217,
+    "lon": -0.2519,
+    "source": "https://en.wikipedia.org/wiki/Colliers_Wood_United_F.C."
+  },
+  "Bovingdon": {
+    "ground": "Green Lane",
+    "town": "Bovingdon",
+    "lat": 51.7171,
+    "lon": -0.5338,
+    "source": "https://www.pitchero.com/clubs/bovingdonfc/contact"
+  },
+  "Holmer Green": {
+    "ground": "Watchet Lane",
+    "town": "Holmer Green",
+    "lat": 51.6681,
+    "lon": -0.7033,
+    "source": "https://en.wikipedia.org/wiki/Holmer_Green_F.C."
+  },
+  "London Samurai Rovers": {
+    "ground": "Rectory Meadow",
+    "town": "Hanworth",
+    "lat": 51.4334,
+    "lon": -0.3961,
+    "source": "https://footsamurai.com/"
+  },
+  "Molesey": {
+    "ground": "Walton Road Stadium",
+    "town": "West Molesey",
+    "lat": 51.4014,
+    "lon": -0.3681,
+    "source": "https://en.wikipedia.org/wiki/Molesey_F.C."
+  },
+  "Berks County": {
+    "ground": "Racecourse Ground",
+    "town": "Ascot",
+    "lat": 51.4151,
+    "lon": -0.6635,
+    "source": "https://www.berkscountyfc.com/contact"
+  },
+  "Staines & Lammas (Middlesex)": {
+    "ground": "Spelthorne Sports Club",
+    "town": "Ashford",
+    "lat": 51.4212,
+    "lon": -0.4364,
+    "source": "https://www.footballwebpages.co.uk/staines-and-lammas-middlesex/club-information"
+  },
+  "Spelthorne Sports": {
+    "ground": "Spelthorne Sports Club",
+    "town": "Ashford",
+    "lat": 51.4212,
+    "lon": -0.4364,
+    "source": "https://www.spelthornesportsfc.com/contact"
+  },
+  "Maidenhead Town": {
+    "ground": "The 1878 Stadium (Burnham FC)",
+    "town": "Burnham",
+    "lat": 51.5378,
+    "lon": -0.6669,
+    "source": "https://maidenheadtownfc.co.uk/"
+  },
+  "Oxhey Jets": {
+    "ground": "The Boundary Stadium",
+    "town": "South Oxhey",
+    "lat": 51.6181,
+    "lon": -0.3819,
+    "source": "https://www.oxheyjets.com/"
+  },
+  "Edgware & Kingsbury": {
+    "ground": "Silver Jubilee Park",
+    "town": "Kingsbury",
+    "lat": 51.5765,
+    "lon": -0.2539,
+    "source": "https://en.wikipedia.org/wiki/Edgware_%26_Kingsbury_F.C."
+  },
+  "Eagles Land Benfica": null,
+  "Woodley United": {
+    "ground": "The Rivermoor Stadium",
+    "town": "Tilehurst, Reading",
+    "lat": 51.4657,
+    "lon": -1.0119,
+    "source": "https://www.woodleyunitedfc.co.uk/"
+  },
+  "Spartans Youth": {
+    "ground": "The Orchard (Bedfont FC)",
+    "town": "Bedfont",
+    "lat": 51.4616,
+    "lon": -0.426,
+    "source": "https://www.footballwebpages.co.uk/spartans-youth/club-information"
+  },
+  "FC Deportivo Galicia": {
+    "ground": "Bedfont Recreation Ground",
+    "town": "Bedfont",
+    "lat": 51.4603,
+    "lon": -0.4275,
+    "source": "https://www.fcdeportivogalicia.com/contact"
+  },
+  "Shepherd's Bush": {
+    "ground": "Northwood Park",
+    "town": "Northwood",
+    "lat": 51.6008,
+    "lon": -0.4157,
+    "source": "https://www.footballwebpages.co.uk/shepherds-bush/club-information"
+  },
+  "Enfield": {
+    "ground": "Lantern Community Stadium",
+    "town": "Potters Bar",
+    "lat": 51.6961,
+    "lon": -0.1788,
+    "source": "https://www.pitchero.com/clubs/enfieldfc3/contact"
+  },
+  "Wivenhoe Town": {
+    "ground": "Broad Lane Sports Ground",
+    "town": "Wivenhoe",
+    "lat": 51.8744,
+    "lon": 0.9693,
+    "source": "https://www.wivenhoetownfc.com/contact"
+  },
+  "St Margaretsbury": {
+    "ground": "Recreation Ground, Station Road",
+    "town": "Stanstead Abbotts",
+    "lat": 51.7849,
+    "lon": -0.0026,
+    "source": "https://en.wikipedia.org/wiki/St_Margaretsbury_F.C."
+  },
+  "Baldock Town": {
+    "ground": "New Lamb Meadow (Arlesey Town FC)",
+    "town": "Arlesey",
+    "lat": 52.0013,
+    "lon": -0.2655,
+    "source": "https://www.pitchero.com/clubs/baldocktownfc/contact"
+  },
+  "Wisbech Town": {
+    "ground": "Fountain Fresh Park (Fenland Stadium)",
+    "town": "Wisbech",
+    "lat": 52.6781,
+    "lon": 0.1801,
+    "source": "http://www.wisbechtownfc.co.uk/contact"
+  }
+}
