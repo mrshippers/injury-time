@@ -203,6 +203,8 @@ export type Fixture = {
   opponent: string
   venue: Venue
   competition: string
+  /** when answers close for this match; null is no deadline */
+  calls_close_at?: TimestampString | null
   created_at: TimestampString
 }
 
@@ -630,6 +632,8 @@ export type SavedLineup = {
   formation: string
   xi: (string | null)[]
   bench: string[]
+  /** the captain for this side; picked in the squad room, never a club-wide setting */
+  captain: string | null
   updated_at: TimestampString
 }
 

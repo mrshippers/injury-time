@@ -19,6 +19,8 @@ export function XiStrip({
   onHover,
   onSelectSlot,
   onRemove,
+  captainId,
+  onCaptain,
 }: {
   formation: Formation;
   xiIds: (string | null)[];
@@ -29,6 +31,9 @@ export function XiStrip({
   onHover: (i: number | null) => void;
   onSelectSlot: (i: number) => void;
   onRemove: (i: number) => void;
+  captainId?: string | null;
+  /** absent for anyone who can't pick the side */
+  onCaptain?: (playerId: string) => void;
 }) {
   return (
     <section aria-labelledby="xi-heading" className="mt-3 border border-line bg-panel">
@@ -66,6 +71,21 @@ export function XiStrip({
                   </span>
                 ) : null}
               </button>
+              {row && (onCaptain || captainId === row.player.id) ? (
+                <button
+                  type="button"
+                  aria-pressed={captainId === row.player.id}
+                  aria-label={captainId === row.player.id ? `${row.player.name} is captain` : `make ${row.player.name} captain`}
+                  title={captainId === row.player.id ? "captain" : "make captain"}
+                  disabled={!onCaptain}
+                  onClick={() => onCaptain?.(row.player.id)}
+                  className={`pressable num shrink-0 border-l border-line px-2.5 text-[11px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
+                    captainId === row.player.id ? "text-gold" : "text-ink-faint hover:text-ink"
+                  }`}
+                >
+                  <span className={`inline-flex size-[18px] items-center justify-center ${captainId === row.player.id ? "border border-gold bg-gold/15" : "border border-dashed border-line opacity-60"}`}>C</span>
+                </button>
+              ) : null}
               {row ? (
                 <button
                   type="button"

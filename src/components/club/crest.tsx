@@ -23,3 +23,14 @@ export function Crest({ team, size = 22, className = "", plain = false }: { team
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={src} alt="" aria-hidden width={size} height={size} loading="lazy" decoding="async" className={`inline-block shrink-0 object-contain opacity-80 ${className}`} style={{ width: size, height: size }} />;
 }
+
+/**
+ * The full stop after a club's name in a heading is the club's own crest, sized to the type. A club with
+ * no crest on file keeps the mint square, so the heading still lands.
+ */
+export function ClubStop({ team }: { team: string }) {
+  const src = crestFor(team);
+  if (!src) return <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={src} alt="" aria-hidden decoding="async" className="ml-[0.16em] inline-block h-[0.82em] w-auto align-[-0.06em] object-contain opacity-80" />;
+}

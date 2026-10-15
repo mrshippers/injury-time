@@ -54,7 +54,7 @@ export function verifyCallToken(token: unknown, secret: string, nowSeconds: numb
 
 export type CallStore = {
   player(id: string): Promise<{ club_id: string; retired_on: string | null } | null>;
-  fixture(id: string): Promise<{ club_id: string; match_date: string; opponent: string } | null>;
+  fixture(id: string): Promise<{ club_id: string; match_date: string; opponent: string; calls_close_at?: string | null } | null>;
   club(id: string): Promise<{ is_demo: boolean; demo_writable: boolean } | null>;
   upsertCall(row: { club_id: string; fixture_id: string; player_id: string; status: CallStatus; via: "push"; updated_at: string }): Promise<void>;
 };
@@ -78,6 +78,7 @@ export async function answerCall(
   const club = await deps.store.club(player.club_id);
   if (!club || (club.is_demo && !club.demo_writable)) return { ok: false, code: 404, reason: "this club does not take calls" };
   if (fixture.match_date < deps.today) return { ok: false, code: 409, reason: "that match has been played" };
+  if (fixture.calls_close_at && Date.parse(fixture.calls_close_at) <= deps.nowSeconds * 1000) return { ok: false, code: 409, reason: "answers for this match have closed; tell the gaffer" };
   const status = input.status as CallStatus;
   await deps.store.upsertCall({
     club_id: player.club_id,

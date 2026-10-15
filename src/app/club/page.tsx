@@ -1,3 +1,4 @@
+import { ClubStop } from "@/components/club/crest";
 import { FeedKeyForm, ResultForm, type Awaiting } from "@/components/club/club-forms";
 import { FeedSquad } from "@/components/club/feed-squad";
 import { StaffInvites, type InviteRow } from "@/components/club/staff-invites";
@@ -75,7 +76,7 @@ export default async function ClubPage() {
         <p className="annot">{"// the club"}</p>
         <h1 className="display mt-2 text-4xl sm:text-5xl">
           {club.name}
-          <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+          <ClubStop team={club.name} />
         </h1>
         <p className="mt-3 max-w-[60ch] text-[14px] leading-relaxed text-ink-dim">{source.long}</p>
         <a href="/review" className="mt-4 inline-block text-[13px] text-ink underline decoration-gold-dim underline-offset-4 hover:text-gold">

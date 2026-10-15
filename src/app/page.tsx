@@ -1,5 +1,5 @@
 import { daysBetweenISO, getDashboard, getSquadBoard } from "@/lib/data";
-import { Crest } from "@/components/club/crest";
+import { ClubStop } from "@/components/club/crest";
 import { getHomeSeason } from "@/lib/home/data";
 import Link from "next/link";
 
@@ -78,10 +78,9 @@ export default async function Home() {
       <header className="flex flex-col gap-2">
         <p className="annot">{"// the hub"}</p>
         <div className="flex items-center gap-4">
-          <Crest team={clubName} size={52} plain className="max-sm:!size-10" />
           <h1 className="display text-4xl sm:text-5xl">
             {clubName}
-            <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+            <ClubStop team={clubName} />
           </h1>
         </div>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-dim">

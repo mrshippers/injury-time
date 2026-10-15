@@ -176,3 +176,21 @@ export function reviewSentences(input: { split: { home: Record3; away: Record3 }
   if (input.leaguePlayed > 0) out.push(`${input.cleanSheets === 0 ? "No clean sheets" : `${w(input.cleanSheets)} clean sheet${input.cleanSheets === 1 ? "" : "s"}`} in ${w(input.leaguePlayed)} league games.`);
   return out.map((x) => x.charAt(0).toUpperCase() + x.slice(1));
 }
+
+/**
+ * What happened after half time, over games with a half-time score: points won from behind, points thrown
+ * away from in front. The one number a manager actually argues about at the bar, counted, not felt.
+ */
+export function halfTimeSwings(games: readonly ReviewGame[]): { counted: number; wonFromBehind: number; behindAtHt: number; droppedFromAhead: number; aheadAtHt: number } {
+  const have = games.filter((g) => g.ht_for !== null && g.ht_against !== null);
+  const pts = (g: ReviewGame) => (g.goals_for > g.goals_against ? 3 : g.goals_for === g.goals_against ? 1 : 0);
+  const behind = have.filter((g) => g.ht_for! < g.ht_against!);
+  const ahead = have.filter((g) => g.ht_for! > g.ht_against!);
+  return {
+    counted: have.length,
+    behindAtHt: behind.length,
+    wonFromBehind: behind.reduce((n, g) => n + pts(g), 0),
+    aheadAtHt: ahead.length,
+    droppedFromAhead: ahead.reduce((n, g) => n + (3 - pts(g)), 0),
+  };
+}

@@ -144,7 +144,7 @@ export async function retirePlayerAction(input: { id: string }): Promise<ActionR
   }
 }
 
-export async function saveLineupAction(input: { fixtureId: string; formation: string; xi: (string | null)[]; bench: string[] }): Promise<ActionResult> {
+export async function saveLineupAction(input: { fixtureId: string; formation: string; xi: (string | null)[]; bench: string[]; captain?: string | null }): Promise<ActionResult> {
   try {
     const viewer = await getViewer();
     if (!viewer.can("pick_side")) throw new Error("only a manager or coach can save a side");
@@ -152,6 +152,8 @@ export async function saveLineupAction(input: { fixtureId: string; formation: st
     if (!Array.isArray(input.xi) || input.xi.length !== 11) throw new Error("a side is eleven slots");
     const xi = input.xi.map((id) => (id === null ? null : uuid(id, "player")));
     const bench = (Array.isArray(input.bench) ? input.bench : []).map((id) => uuid(id, "player"));
+    const captain = input.captain ? uuid(input.captain, "player") : null;
+    if (captain && !xi.includes(captain)) throw new Error("the captain has to be in the eleven");
     const supabase = await createClient();
     const { error } = await supabase.from("lineups").upsert(
       {
@@ -160,6 +162,7 @@ export async function saveLineupAction(input: { fixtureId: string; formation: st
         formation: input.formation,
         xi,
         bench,
+        captain,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "club_id,fixture_id" },

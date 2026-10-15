@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       return data;
     },
     async fixture(id) {
-      const { data } = await db.from("fixtures").select("club_id, match_date, opponent").eq("id", id).maybeSingle();
+      const { data } = await db.from("fixtures").select("club_id, match_date, opponent, calls_close_at").eq("id", id).maybeSingle();
       return data;
     },
     async club(id) {

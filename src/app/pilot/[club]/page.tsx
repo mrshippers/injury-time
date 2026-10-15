@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { Crest } from "@/components/club/crest";
+import { ClubStop } from "@/components/club/crest";
 import { CupsSection } from "@/components/home/cups";
 import { SeasonLine } from "@/components/home/season-line";
 import { TrySwitch } from "@/components/pilot/try-switch";
@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { club } = await params;
   const c = PILOT_CLUBS[club];
   if (!c) return {};
-  const title = `Injury Time for ${c.name}: £40 a month`;
-  const description = "The team sheet that runs itself. In, out or unsure from the boys' phones, the side picks itself, the cups sit in the season. First four weeks free.";
+  const title = `Injury Time for ${c.name}`;
+  const description = "A management platform for non-league clubs. In, out or unsure from the boys' phones, the eleven fills itself, the season and the cups in one place.";
   return {
     metadataBase: new URL(pilotBaseUrl()),
     title,
@@ -66,28 +66,23 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
         <p className="annot">{`// a pilot for ${cfg.name.toLowerCase()}`}</p>
       </header>
 
-      {/* ── the price, from the jump, and the one-line idea ── */}
+      {/* ── the letter, then the film ── */}
       <section className="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
         <div>
-          <p className="annot">{"// the price, up front"}</p>
-          <p className="display mt-3 text-[clamp(84px,17vw,168px)] leading-[0.9] text-ink">
-            £40
-            <span className="ml-4 align-baseline text-[clamp(22px,3.6vw,34px)] tracking-normal text-ink-dim [word-spacing:0.18em]">a month</span>
-          </p>
-          <p className="mt-3 max-w-[40ch] text-[17px] leading-snug text-ink">
-            The whole club, players and staff. First four weeks free, no card, bin it any time.
-          </p>
-          <h1 className="display mt-9 text-[clamp(34px,5vw,54px)] leading-[1.02] text-ink">
-            The team sheet that runs itself
-            <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+          <p className="annot">{`// for ${cfg.name.toLowerCase()}`}</p>
+          <h1 className="display mt-3 text-[clamp(40px,6vw,64px)] leading-[1.02] text-ink">
+            Injury Time
+            <ClubStop team={cfg.name} />
           </h1>
-          <div className="mt-6 flex flex-col gap-4">
+          <p className="mt-3 max-w-[40ch] text-[17px] leading-snug text-ink">A management platform for clubs at our level.</p>
+          <div className="mt-8 flex flex-col gap-4">
             <p className={P}>Hey gaffer,</p>
+            <p className={P}>Jamal here, Belstone alumni.</p>
             <p className={P}>
-              Jamal here. Belstone alumni, so this one&apos;s personal. Injury Time is where the boys say in, out or unsure from their phones, the side picks itself on a pitch from who&apos;s in, and the season sits
-              in one place, cups included. No more chasing on WhatsApp on a Friday night.
+              I&apos;ve built something for running a non-league side. The boys say in, out or unsure from their phones, the eleven fills itself from who&apos;s available, and the season sits in one place with
+              the cups in it.
             </p>
-            <p className={P}>Belstone&apos;s already in it, built from your public results. Everything below is real, scroll down.</p>
+            <p className={P}>I&apos;ve set it up with Belstone&apos;s squad and results from the league pages, so what&apos;s below is your actual season.</p>
             <p className="text-[20px] font-extrabold tracking-[-0.01em] text-ink">Jamal</p>
           </div>
         </div>
@@ -116,8 +111,8 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           <div>
             <h2 className={H2}>Who&apos;s in on Saturday</h2>
             <p className={`${P} mt-4`}>
-              Every player gets one switch: in, out or unsure. It lands on every phone the second it&apos;s tapped, so you see it building through the week. Whoever has gone quiet, you answer for them, or fill
-              the rest with what they said last time in one tap.
+              Every player gets one switch: in, out or unsure. It shows on everyone&apos;s phone as soon as it&apos;s tapped. Set a time answers close, and anyone who&apos;s gone quiet you
+              answer for, or fill the rest with what they said last time in one tap.
             </p>
           </div>
           <div>
@@ -131,7 +126,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
             <h2 className={H2}>The side picks itself</h2>
             <p className={`${P} mt-4`}>
               Open the squad room and the eleven is already there: last match&apos;s side, with anyone who&apos;s out swapped for the next best. Anyone who said out stays off the pitch. Choose a formation (4-2-3-1,
-              4-4-2, 3-5-2 and the rest), drag or tap to swap, save it for the match.
+              4-4-2, 3-5-2 and the rest), drag or tap to swap, pick the captain, save it for the match.
             </p>
           </div>
           <figure className="lg:order-1">
@@ -172,7 +167,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
             <h2 className={H2}>The pack for the committee</h2>
             <p className={`${P} mt-4`}>
               At the end of the season, one page: home against away, goals by half, the scorers, the crowds, the cups, where you finished. Every number is counted from the results, and where something can&apos;t be
-              counted it says so. Print it.
+              counted it says so. There&apos;s a print button.
             </p>
           </div>
           <figure>
@@ -215,8 +210,9 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
       {/* ── what's next ── */}
       <section className="mt-16 border-t border-line pt-8" aria-labelledby="next-h">
         <p className="annot" id="next-h">{"// where it's going"}</p>
-        <div className="mt-6 grid gap-5 lg:grid-cols-3">
-          <article className="border border-line bg-panel p-5">
+        <p className="num mt-2 text-[11.5px] text-ink-dim">swipe for more →</p>
+        <div className="swipe-row -mx-4 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-4 pb-4 sm:-mx-8 sm:px-8">
+          <article className="w-[84%] max-w-[360px] shrink-0 snap-start border border-line bg-panel p-5 sm:w-[340px]">
             <h3 className="display text-[22px] text-ink">Veo, connected</h3>
             <div className="mt-4 flex flex-col gap-3 text-[14px] leading-snug text-ink-dim">
               <p>
@@ -231,7 +227,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               </p>
             </div>
           </article>
-          <article className="border border-line bg-panel p-5">
+          <article className="w-[84%] max-w-[360px] shrink-0 snap-start border border-line bg-panel p-5 sm:w-[340px]">
             <h3 className="display text-[22px] text-ink">Player health</h3>
             <div className="mt-4 flex flex-col gap-3 text-[14px] leading-snug text-ink-dim">
               <p>
@@ -242,18 +238,37 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               <p>
                 <Lamp on={false} word="next" />
                 <br />
-                A load flag that speaks up once four weeks of sessions are logged, so a hamstring isn&apos;t a surprise.
+                A load flag once four weeks of sessions are logged.
               </p>
             </div>
           </article>
-          <article className="border border-line bg-panel p-5">
+          <article className="w-[84%] max-w-[360px] shrink-0 snap-start border border-line bg-panel p-5 sm:w-[340px]">
             <h3 className="display text-[22px] text-ink">Pre-match, for every player</h3>
             <div className="mt-4 flex flex-col gap-3 text-[14px] leading-snug text-ink-dim">
               <p>
                 <Lamp on={false} word="next" />
                 <br />
-                Before every game each player gets his own sheet: who you&apos;re playing and how they&apos;re doing, what the formation asks of him, his job on set pieces. The gaffer edits it, the boys read it on the
-                bus.
+                Before every game each player gets his own sheet: who you&apos;re playing and how they&apos;re doing, what the formation asks of him, his job on set pieces. The gaffer edits it before it goes out.
+              </p>
+            </div>
+          </article>
+          <article className="w-[84%] max-w-[360px] shrink-0 snap-start border border-line bg-panel p-5 sm:w-[340px]">
+            <h3 className="display text-[22px] text-ink">Answers by a deadline</h3>
+            <div className="mt-4 flex flex-col gap-3 text-[14px] leading-snug text-ink-dim">
+              <p>
+                <Lamp on word="live" />
+                <br />
+                Set when answers close, Thursday 9pm say. The boys see the clock, and whoever hasn&apos;t answered by then shows up in one list.
+              </p>
+            </div>
+          </article>
+          <article className="w-[84%] max-w-[360px] shrink-0 snap-start border border-line bg-panel p-5 sm:w-[340px]">
+            <h3 className="display text-[22px] text-ink">Matchday weather</h3>
+            <div className="mt-4 flex flex-col gap-3 text-[14px] leading-snug text-ink-dim">
+              <p>
+                <Lamp on word="live" />
+                <br />
+                The forecast for kick-off at the ground, home or away, from the week before: rain, wind, temperature. Moulds or studs, sorted.
               </p>
             </div>
           </article>
@@ -280,16 +295,14 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
 
       {/* ── close ── */}
       <section className="mt-16 border-t border-line pt-10">
-        <div className="flex items-center gap-4">
-          <Crest team={cfg.name} size={44} plain />
-          <h2 className="display text-[clamp(30px,4.4vw,46px)] text-ink">
-            Fancy it
-            <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
-          </h2>
-        </div>
-        <p className={`${P} mt-4`}>Say yes and I&apos;ll load the squad: a 20-minute call and you&apos;re in. Reply on here, or jamal@strydeos.com.</p>
-        <p className="num mt-8 text-[11.5px] text-ink-dim">
-          {cfg.name}&apos;s pages here are built from the public league results to {cfg.dataNote}. Nothing private is in it.
+        <h2 className="display text-[clamp(30px,4.4vw,46px)] text-ink">
+          Fancy it?
+        </h2>
+        <p className={`${P} mt-4`}>
+          Let&apos;s talk.{" "}
+          <a href="mailto:jamal@strydeos.com" className="text-ink underline decoration-line-strong underline-offset-4 hover:decoration-ink">
+            jamal@strydeos.com
+          </a>
         </p>
       </section>
     </main>

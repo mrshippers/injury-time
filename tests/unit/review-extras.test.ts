@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import snapshot from "../fixtures/belstone-2026-09-26.json";
 import liveSnapshot from "../../scripts/belstone-2026-27.json";
 import { fromSnapshot, type Snapshot } from "../../src/lib/league/normalise";
-import { reviewSentences, cleanSheets, cupsOnly, extremes, halves, homeCrowds, leagueOnly, monthly, recordOf, runsOf, scorerRows, venueSplit, type ReviewGame } from "../../src/lib/review/extras";
+import { halfTimeSwings, reviewSentences, cleanSheets, cupsOnly, extremes, halves, homeCrowds, leagueOnly, monthly, recordOf, runsOf, scorerRows, venueSplit, type ReviewGame } from "../../src/lib/review/extras";
 
 const g = (match_date: string, competition: string, venue: "H" | "A", gf: number, ga: number, extra: Partial<ReviewGame> = {}): ReviewGame => ({
   match_date, competition, opponent: "X", venue, goals_for: gf, goals_against: ga, ht_for: null, ht_against: null, attendance: null, scorers: [], ...extra,
@@ -101,5 +101,19 @@ describe("reviewSentences", () => {
   });
   it("drops what it cannot say", () => {
     expect(reviewSentences({ split: { home: rec(0, 0, 0), away: rec(0, 0, 0) }, cups: rec(0, 0, 0), cupsStillIn: [], cleanSheets: 0, leaguePlayed: 0 })).toEqual([]);
+  });
+});
+
+describe("halfTimeSwings", () => {
+  it("counts points won from behind and dropped from ahead, over games with a half-time score only", () => {
+    const s = halfTimeSwings([
+      g("1", "L", "H", 2, 1, { ht_for: 0, ht_against: 1 }), // behind, won: +3
+      g("2", "L", "H", 1, 1, { ht_for: 0, ht_against: 1 }), // behind, drew: +1
+      g("3", "L", "H", 1, 1, { ht_for: 1, ht_against: 0 }), // ahead, drew: -2
+      g("4", "L", "H", 1, 2, { ht_for: 1, ht_against: 0 }), // ahead, lost: -3
+      g("5", "L", "H", 3, 0, { ht_for: 2, ht_against: 0 }), // ahead, won: 0
+      g("6", "L", "H", 0, 4), // no half-time score
+    ]);
+    expect(s).toEqual({ counted: 5, behindAtHt: 2, wonFromBehind: 4, aheadAtHt: 3, droppedFromAhead: 5 });
   });
 });

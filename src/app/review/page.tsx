@@ -1,5 +1,5 @@
 import { RungBars } from "@/components/charts";
-import { Crest } from "@/components/club/crest";
+import { ClubStop, Crest } from "@/components/club/crest";
 import { CupsSection } from "@/components/home/cups";
 import { REGION_LABEL } from "@/components/player/labels";
 import { PrintButton } from "@/components/review/print-button";
@@ -13,6 +13,7 @@ import {
   cleanSheets,
   cupsOnly,
   extremes,
+  halfTimeSwings,
   halves,
   homeCrowds,
   leagueOnly,
@@ -106,6 +107,7 @@ export default async function ReviewPage() {
   const split = venueSplit(league);
   const sheets = cleanSheets(league);
   const half = halves(all);
+  const swing = halfTimeSwings(all);
   const ext = extremes(all);
   const crowds = homeCrowds(all);
   const months = monthly(league);
@@ -153,7 +155,7 @@ export default async function ReviewPage() {
           <p className="annot">{`// season review · ${club.season ?? ""}`}</p>
           <h1 className="display mt-2 text-4xl sm:text-5xl">
             {club.name}
-            <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+            <ClubStop team={club.name} />
           </h1>
           <p className="num mt-2 text-[12px] text-ink-dim">
             {longDate(win.from)} to {longDate(asOf < win.to ? asOf : win.to)} · {sourceLine(club).short}
@@ -265,6 +267,19 @@ export default async function ReviewPage() {
               />
             </div>
             <p className="num text-[11.5px] text-ink-dim sm:col-span-2">from {half.counted} of {all.length} games that have a half-time score</p>
+          </div>
+        ) : null}
+        {swing.counted > 0 ? (
+          <div className="mt-6 border-t border-line pt-4">
+            <p className={KEY}>after half time</p>
+            <Tiles
+              cols="grid-cols-2"
+              items={[
+                [`won from behind (${swing.behindAtHt} games)`, `+${swing.wonFromBehind} pts`],
+                [`dropped from ahead (${swing.aheadAtHt} games)`, `−${swing.droppedFromAhead} pts`],
+              ]}
+            />
+            <p className="num mt-2 text-[11.5px] text-ink-dim">points the second half won or cost, from {swing.counted} games with a half-time score</p>
           </div>
         ) : null}
         <ul className="mt-6 flex flex-col gap-1 text-[14px] text-ink">

@@ -13,7 +13,8 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
-import { setCallAction, setCallsBulkAction } from "@/lib/team/actions";
+import { setCallAction, setCallDeadlineAction, setCallsBulkAction } from "@/lib/team/actions";
+import { closeLabel, isClosed, presets, timeLeft } from "@/lib/team/deadline";
 import { countCalls, countLine } from "@/lib/team/format";
 import { useTeamRealtime } from "@/lib/team/realtime";
 import { CALL_STATUSES, type CallStatus, type ClubRole, type Fixture, type MatchCall, type Player } from "@/lib/types";
@@ -82,7 +83,25 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, 
   });
 
   const staff = role !== "player";
-  const canSet = (playerId: string) => staff || playerId === ownPlayerId;
+  // the deadline: a minute clock is enough for "in 40 min"; after it only staff can change an answer
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const [closesAt, setClosesAt] = useState<string | null>(fixture.calls_close_at ?? null);
+  const closed = isClosed(closesAt, now);
+  const setDeadline = async (iso: string | null) => {
+    const before = closesAt;
+    setClosesAt(iso);
+    setError(null);
+    const res = await setCallDeadlineAction({ fixtureId: fixture.id, closesAt: iso });
+    if (!res.ok) {
+      setClosesAt(before);
+      setError(res.error);
+    }
+  };
+  const canSet = (playerId: string) => staff || (playerId === ownPlayerId && !closed);
 
   const choose = async (playerId: string, status: CallStatus) => {
     const before = rows.get(playerId) ?? { status: null, note: null, updatedAt: null };
@@ -172,6 +191,14 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, 
           </button>
         ) : null}
       </div>
+      <DeadlineLine
+        closesAt={closesAt}
+        closed={closed}
+        now={now}
+        silent={players.filter((p) => !rows.get(p.id)?.status).map((p) => p.name)}
+        options={staff ? presets(fixture.match_date, now) : []}
+        onSet={staff ? setDeadline : undefined}
+      />
       {error ? (
         <p role="alert" className="border-b border-line px-4 py-2 text-[12.5px] text-out sm:px-5">
           {error}
@@ -336,6 +363,58 @@ export function CallSwitch({
           </button>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * The deadline under the count. Open: when answers close and how long is left. Closed: who never answered,
+ * by name, so the gaffer chases a list, not a feeling. Staff get one-tap presets and a clear.
+ */
+function DeadlineLine({
+  closesAt,
+  closed,
+  now,
+  silent,
+  options,
+  onSet,
+}: {
+  closesAt: string | null;
+  closed: boolean;
+  now: number;
+  silent: string[];
+  options: { label: string; iso: string }[];
+  onSet?: (iso: string | null) => void;
+}) {
+  if (!closesAt && !onSet) return null;
+  const btn = "pressable num border border-line px-2 py-1 text-[11.5px] text-ink hover:border-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint max-sm:min-h-10";
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line px-4 py-2.5 sm:px-5" data-testid="deadline">
+      {closesAt ? (
+        <p className="num text-[12px] text-ink" suppressHydrationWarning>
+          <span aria-hidden className={`mr-2 inline-block size-2 align-[1px] ${closed ? "bg-ink" : "border border-ink"}`} />
+          {closed ? `answers closed ${closeLabel(closesAt)}` : `answers close ${closeLabel(closesAt)} · ${timeLeft(closesAt, now)}`}
+          {closed && silent.length > 0 ? <span className="text-ink-dim">{` · ${silent.length} didn't answer: ${silent.join(", ")}`}</span> : null}
+        </p>
+      ) : (
+        <p className="num text-[12px] text-ink-dim">no deadline set</p>
+      )}
+      {onSet ? (
+        <span className="flex flex-wrap items-center gap-1.5">
+          {options
+            .filter((o) => !closesAt || Date.parse(o.iso) !== Date.parse(closesAt))
+            .map((o) => (
+              <button key={o.iso} type="button" className={btn} onClick={() => onSet(o.iso)}>
+                {closesAt ? `move to ${o.label}` : `close ${o.label}`}
+              </button>
+            ))}
+          {closesAt ? (
+            <button type="button" className={`${btn} text-ink-dim`} onClick={() => onSet(null)}>
+              clear
+            </button>
+          ) : null}
+        </span>
+      ) : null}
     </div>
   );
 }
