@@ -77,12 +77,11 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           <p className="mt-3 max-w-[40ch] text-[17px] leading-snug text-ink">A management platform for clubs at our level.</p>
           <div className="mt-8 flex flex-col gap-4">
             <p className={P}>Hey gaffer,</p>
-            <p className={P}>Jamal here, Belstone alumni.</p>
+            <p className={P}>Jamal here, ex-Belstone.</p>
             <p className={P}>
-              I&apos;ve built something for running a non-league side. The boys say in, out or unsure from their phones, the eleven fills itself from who&apos;s available, and the season sits in one place with
-              the cups in it.
+              I&apos;ve been building an app for running a non-league side. The boys say in or out from their phones and the team sheet sorts itself from who&apos;s available. League and cups in one place.
             </p>
-            <p className={P}>I&apos;ve set it up with Belstone&apos;s squad and results from the league pages, so what&apos;s below is your actual season.</p>
+            <p className={P}>I&apos;ve loaded it with Belstone&apos;s squad and results, so have a scroll.</p>
             <p className="text-[20px] font-extrabold tracking-[-0.01em] text-ink">Jamal</p>
           </div>
         </div>
