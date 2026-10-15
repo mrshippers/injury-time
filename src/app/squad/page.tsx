@@ -1,3 +1,4 @@
+import { ClubStop } from "@/components/club/crest";
 import { getLineupData } from "@/lib/data";
 import { getCallsByPlayer, getPreviousLineup, getSavedLineup } from "@/lib/squad/data";
 import type { AvailabilityStatus } from "@/lib/types";
@@ -33,7 +34,7 @@ export default async function SquadPage() {
           <p className="annot">{"// the squad room"}</p>
           <h1 className="display mt-2.5 text-4xl sm:text-5xl">
             {club.name}
-            <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+            <ClubStop team={club.name} />
           </h1>
           <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-dim">
             <span>{club.league}{club.division ? ` · ${club.division}` : ""}</span>

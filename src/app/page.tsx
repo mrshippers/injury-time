@@ -1,5 +1,6 @@
 import { daysBetweenISO, getDashboard, getSquadBoard } from "@/lib/data";
-import { Crest } from "@/components/club/crest";
+import { ClubStop } from "@/components/club/crest";
+import { matchWeather } from "@/lib/weather/grounds";
 import { getHomeSeason } from "@/lib/home/data";
 import Link from "next/link";
 
@@ -45,6 +46,7 @@ export default async function Home() {
   const hasLoad = board.rows.some((r) => r.readiness.key !== "unknown");
   const sinceLast = lastSession ? daysBetweenISO(lastSession.date, asOf) : null;
   const clubName = viewer.club.name || club.name;
+  const weather = next ? await matchWeather(clubName, next, asOf) : null;
   const division = divisionLine(viewer.club.league, viewer.club.division);
   const congestion = findCongestion(
     fixtures,
@@ -78,10 +80,9 @@ export default async function Home() {
       <header className="flex flex-col gap-2">
         <p className="annot">{"// the hub"}</p>
         <div className="flex items-center gap-4">
-          <Crest team={clubName} size={52} plain className="max-sm:!size-10" />
           <h1 className="display text-4xl sm:text-5xl">
             {clubName}
-            <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+            <ClubStop team={clubName} />
           </h1>
         </div>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-dim">
@@ -147,7 +148,7 @@ export default async function Home() {
 
       {/* secondary: the vitals */}
       <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2 xl:grid-cols-[1.1fr_1fr_1fr_1.2fr]">
-        <NextMatchVital next={next} daysUntil={daysUntil} fit={counts.fit} calls={season.calls} squadSize={dash.squadSize} last={lastResult(season.results)} />
+        <NextMatchVital next={next} daysUntil={daysUntil} fit={counts.fit} calls={season.calls} squadSize={dash.squadSize} last={lastResult(season.results)} weather={weather} />
         <FormVital ctx={ctx} results={season.results} />
         <ScorersVital feed={season.feedScorers} logged={dash.topScorers} feedAsOf={season.feedAsOf} />
         <WatchVital rows={dash.watchList} hasLoad={hasLoad} backSoon={dash.backSoon} />

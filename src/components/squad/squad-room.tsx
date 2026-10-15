@@ -135,10 +135,16 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
   const bench = useMemo(() => rows.filter((r) => isAvailable(r) && !inXI.has(r.player.id)), [rows, inXI]);
   const filled = xiIds.filter(Boolean).length;
 
-  const [savedState, setSavedState] = useState<{ formation: string; xi: (string | null)[] } | null>(
-    saved ? { formation: saved.formation, xi: saved.xi } : null,
+  // the captain: picked here, saved with the side; last match's captain carries over while he's in the eleven
+  const [captainState, setCaptainState] = useState<string | null | undefined>(undefined);
+  const captainPick = captainState !== undefined ? captainState : (saved?.captain ?? previous?.captain ?? null);
+  const captain = captainPick && xiIds.includes(captainPick) ? captainPick : null;
+  const toggleCaptain = (id: string) => setCaptainState(captain === id ? null : id);
+
+  const [savedState, setSavedState] = useState<{ formation: string; xi: (string | null)[]; captain: string | null } | null>(
+    saved ? { formation: saved.formation, xi: saved.xi, captain: saved.captain ?? null } : null,
   );
-  const dirty = !savedState || savedState.formation !== formation.name || savedState.xi.join("|") !== xiIds.join("|");
+  const dirty = !savedState || savedState.formation !== formation.name || savedState.xi.join("|") !== xiIds.join("|") || savedState.captain !== captain;
   const [saving, startSave] = useTransition();
   const [saveNote, setSaveNote] = useState<string | null>(null);
 
@@ -206,9 +212,9 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
     if (!nextFixture) return;
     const benchIds = bench.map((r) => r.player.id);
     startSave(async () => {
-      const res = await saveLineupAction({ fixtureId: nextFixture.id, formation: formation.name, xi: xiIds, bench: benchIds });
+      const res = await saveLineupAction({ fixtureId: nextFixture.id, formation: formation.name, xi: xiIds, bench: benchIds, captain });
       if (res.ok) {
-        setSavedState({ formation: formation.name, xi: xiIds });
+        setSavedState({ formation: formation.name, xi: xiIds, captain });
         setSaveNote("saved");
       } else {
         setSaveNote(res.error);
@@ -444,6 +450,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
               formation={formation}
               xiIds={xiIds}
               byId={byId}
+              captainId={captain}
               tokens={tokens}
               reduced={reduced}
               compact={phone}
@@ -484,6 +491,8 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
           onHover={setHovered}
           onSelectSlot={onSelectSlot}
           onRemove={remove}
+          captainId={captain}
+          onCaptain={canPick ? toggleCaptain : undefined}
         />
       </section>
 

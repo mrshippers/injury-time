@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { Crest } from "@/components/club/crest";
+import { MatchWeatherLine } from "@/components/home/match-weather";
+import { matchWeather } from "@/lib/weather/grounds";
 import { AttendanceTrend } from "@/components/team/attendance-trend";
 import { CallBoard } from "@/components/team/call-board";
 import { CheckinsPanel } from "@/components/team/checkins-panel";
@@ -22,6 +24,7 @@ export const metadata = { title: "the team - injury time." };
  */
 export default async function TeamPage() {
   const { viewer, next, daysUntil, players, calls, usual, notices, attendance, now, asOf } = await getTeamPage();
+  const weather = next ? await matchWeather(viewer.club.name, next, asOf) : null;
   // RLS returns rows only to staff of a real club; a guest or a player gets none
   const staff = !viewer.guest && viewer.can("view_squad_health");
   let checkins: PlayerCheckin[] = [];
@@ -61,6 +64,7 @@ export default async function TeamPage() {
               {next.competition}
               {daysUntil !== null ? <span className="num text-gold"> · {daysAwayWord(daysUntil)}</span> : null}
             </p>
+            <MatchWeatherLine weather={weather} className="mt-2" />
             <Link
               href="/matchday"
               className="pressable mt-4 inline-flex h-10 items-center rounded-[2px] border border-line-strong bg-pitch px-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-panel-2"

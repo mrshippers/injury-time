@@ -47,6 +47,10 @@ export async function setCallAction(input: SetCallInput): Promise<{ ok: true } |
     if (!staff && viewer.playerId !== playerId) throw new Error("you can only call for yourself");
 
     const supabase = await createClient();
+    if (!staff) {
+      const { data: fx } = await supabase.from("fixtures").select("calls_close_at").eq("id", fixtureId).maybeSingle();
+      if (fx?.calls_close_at && Date.parse(fx.calls_close_at as string) <= Date.now()) throw new Error("answers for this match have closed; tell the gaffer");
+    }
     const { error } = await supabase.from("match_calls").upsert(
       {
         club_id: viewer.club.id,
@@ -142,5 +146,27 @@ export async function postNoticeAction(input: PostNoticeInput): Promise<{ ok: tr
     return { ok: true, id: data.id };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "could not post the notice" };
+  }
+}
+
+/** The gaffer sets (or clears) when answers close for a match. After it, only staff can change an answer. */
+export async function setCallDeadlineAction(input: { fixtureId: string; closesAt: string | null }): Promise<{ ok: true } | Fail> {
+  try {
+    const viewer = await getViewer();
+    if (!viewer.can("pick_side")) throw new Error("only a manager or coach can set the deadline");
+    const fixtureId = text(input?.fixtureId, "fixtureId", 64, true)!;
+    let closesAt: string | null = null;
+    if (input?.closesAt) {
+      const ms = Date.parse(input.closesAt);
+      if (!Number.isFinite(ms)) throw new Error("that is not a time");
+      closesAt = new Date(ms).toISOString();
+    }
+    const supabase = await createClient();
+    const { error } = await supabase.from("fixtures").update({ calls_close_at: closesAt }).eq("id", fixtureId).eq("club_id", viewer.club.id);
+    if (error) throw error;
+    revalidatePath("/team");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "could not set the deadline" };
   }
 }

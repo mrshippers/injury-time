@@ -33,6 +33,7 @@ export type PitchSceneProps = {
   formation: Formation;
   xiIds: (string | null)[];
   byId: Map<string, SquadRow>;
+  captainId?: string | null;
   tokens: SceneTokens;
   reduced: boolean;
   selected: number | null;
@@ -299,6 +300,7 @@ type TokenProps = {
   t: SceneTokens;
   selected: boolean;
   hovered: boolean;
+  captain: boolean;
   dragging: boolean;
   reduced: boolean;
   pointer: React.MutableRefObject<{ x: number; y: number }>;
@@ -308,7 +310,7 @@ type TokenProps = {
   compact?: boolean;
 };
 
-function Token({ row, slotIndex, slot, t, selected, hovered, dragging, reduced, pointer, onHover, onSelect, onDragStart, compact = false }: TokenProps) {
+function Token({ row, slotIndex, slot, t, selected, hovered, captain, dragging, reduced, pointer, onHover, onSelect, onDragStart, compact = false }: TokenProps) {
   const group = useRef<THREE.Group>(null);
   const { camera, gl } = useThree();
   const probe = useMemo(() => ({ ray: new THREE.Raycaster(), plane: new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), ndc: new THREE.Vector2(), hit: new THREE.Vector3() }), []);
@@ -403,6 +405,13 @@ function Token({ row, slotIndex, slot, t, selected, hovered, dragging, reduced, 
             {row.player.squad_number ?? slot.label}
           </span>
         </Html>
+        {captain ? (
+          <Html center position={[2.3, 0.9, -1.4]} zIndexRange={[11, 0]} style={{ pointerEvents: "none", userSelect: "none" }}>
+            <span aria-label="captain" className="num flex size-[15px] items-center justify-center text-[9.5px] font-extrabold leading-none" style={{ background: t.gold, color: opaque(t.pitch) }}>
+              C
+            </span>
+          </Html>
+        ) : null}
         <Html center position={[0, 0.3, -4.4]} zIndexRange={[10, 0]} style={{ pointerEvents: "none", userSelect: "none" }}>
           <div className="flex flex-col items-center whitespace-nowrap">
             {!compact || selected || hovered ? (
@@ -470,6 +479,7 @@ export default function PitchScene(props: PitchSceneProps) {
           t={t}
           selected={selected === index}
           hovered={hovered === index}
+          captain={props.captainId === row.player.id}
           compact={compact}
           dragging={drag?.kind === "slot" && drag.index === index}
           reduced={reduced}
