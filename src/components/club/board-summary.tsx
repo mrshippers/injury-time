@@ -29,7 +29,7 @@ export async function BoardSummary({ clubId, asOf }: { clubId: string; asOf: str
         {items.map(([k, v]) => (
           <div key={k} className="min-w-0">
             <dt className={KEY}>{k}</dt>
-            <dd className="num mt-1 truncate text-[17px] font-semibold text-ink">{v}</dd>
+            <dd className="num mt-1 text-[17px] font-semibold leading-snug text-ink">{v}</dd>
           </div>
         ))}
       </dl>

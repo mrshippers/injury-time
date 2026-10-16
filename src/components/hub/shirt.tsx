@@ -34,15 +34,15 @@ export function Shirt({ name, number, colours, captain = false }: { name: string
         <defs>
           {/* light from the top left, a fold down the middle, the sides falling into shadow */}
           <linearGradient id={`${id}-light`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#ffffff" stopOpacity="0.22" />
+            <stop offset="0" stopColor="#ffffff" stopOpacity="0.16" />
             <stop offset="0.45" stopColor="#ffffff" stopOpacity="0.04" />
-            <stop offset="1" stopColor="#000000" stopOpacity="0.32" />
+            <stop offset="1" stopColor="#000000" stopOpacity="0.16" />
           </linearGradient>
           <linearGradient id={`${id}-sides`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#000" stopOpacity="0.28" />
+            <stop offset="0" stopColor="#000" stopOpacity="0.16" />
             <stop offset="0.18" stopColor="#000" stopOpacity="0" />
             <stop offset="0.82" stopColor="#000" stopOpacity="0" />
-            <stop offset="1" stopColor="#000" stopOpacity="0.3" />
+            <stop offset="1" stopColor="#000" stopOpacity="0.18" />
           </linearGradient>
           <clipPath id={`${id}-clip`}>
             <path d={body} />
