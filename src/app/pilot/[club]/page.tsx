@@ -120,7 +120,6 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           </div>
           <div>
             <TrySwitch />
-            <p className="num mt-2 text-[11.5px] text-ink-dim">Try it. It&apos;s the real switch, on a row that isn&apos;t a real player.</p>
           </div>
         </div>
 
@@ -146,7 +145,6 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               aria-label="The squad room for Belstone: the eleven on a floodlit pitch, 4-2-3-1, our own goal at the bottom, the camera drifting slowly"
               className="h-auto w-full border border-line bg-panel"
             />
-            <figcaption className="num mt-2 text-[11.5px] text-ink-dim">Belstone&apos;s squad, from the public appearances list. Positions aren&apos;t public, so until you set them the side is a first guess: most-played, scorers up front.</figcaption>
           </figure>
         </div>
 
@@ -172,7 +170,6 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               aria-label="A player's 3D body turning a full circle, with a hamstring injury lit on the back of the right leg"
               className="h-auto w-full border border-line bg-panel"
             />
-            <figcaption className="num mt-2 text-[11.5px] text-ink-dim">A demo player on our made-up club. Belstone has no health data in here.</figcaption>
           </figure>
         </div>
 

@@ -25,7 +25,7 @@ export function TrySwitch() {
         data-status={value ?? "none"}
       >
         <p className="display text-[24px] text-ink">
-          you<span className="num ml-2 text-[11px] font-normal tracking-[0.12em] text-ink-faint">a try-out row</span>
+          you
         </p>
         <CallSwitch name="you" value={value} usual="in" large disabled={false} onChoose={setValue} />
       </div>

@@ -71,7 +71,7 @@ export function NextMatchVital({ next, daysUntil, fit, calls, squadSize, last, w
             )}
           </p>
           <Link href="/squad" className="pressable mt-1 self-start text-[12.5px] font-semibold text-mint">
-            pick the side
+            pick the starting XI
           </Link>
           {last ? <LastTimeOut r={last} /> : null}
         </div>

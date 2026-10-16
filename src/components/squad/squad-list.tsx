@@ -480,7 +480,7 @@ function SquadListRow({
               {player.name}
             </Link>
             {onPitch ? (
-              <span aria-label="in the eleven" className="num shrink-0 text-[9.5px] font-bold tracking-[0.1em] text-mint">
+              <span aria-label="in the starting XI" className="num shrink-0 text-[9.5px] font-bold tracking-[0.1em] text-mint">
                 XI
               </span>
             ) : null}
@@ -504,7 +504,7 @@ function SquadListRow({
               <button
                 type="button"
                 aria-pressed={onPitch}
-                aria-label={onPitch ? `take ${player.name} out of the side` : `put ${player.name} in the side`}
+                aria-label={onPitch ? `take ${player.name} out of the starting XI` : `put ${player.name} in the starting XI`}
                 onClick={onToggleIn}
                 className={`pressable inline-flex h-10 w-10 items-center justify-center rounded-[2px] border text-[12px] font-bold tracking-[0.06em] transition-colors duration-[190ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:hidden ${
                   onPitch ? "border-mint bg-mint text-mint-ink" : "border-line-strong bg-panel-2 text-ink-dim"
@@ -588,7 +588,7 @@ function SquadCard({
               {player.name}
             </Link>
             {onPitch ? (
-              <span aria-label="in the eleven" className="num shrink-0 rounded-full bg-mint/15 px-1.5 text-[10px] font-bold tracking-[0.1em] text-mint">
+              <span aria-label="in the starting XI" className="num shrink-0 rounded-full bg-mint/15 px-1.5 text-[10px] font-bold tracking-[0.1em] text-mint">
                 XI
               </span>
             ) : null}
@@ -611,7 +611,7 @@ function SquadCard({
             <button
               type="button"
               aria-pressed={onPitch}
-              aria-label={onPitch ? `take ${player.name} out of the side` : `put ${player.name} in the side`}
+              aria-label={onPitch ? `take ${player.name} out of the starting XI` : `put ${player.name} in the starting XI`}
               onClick={onToggleIn}
               className={`pressable toggle-in ${onPitch ? "is-on" : ""}`}
             >

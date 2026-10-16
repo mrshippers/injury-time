@@ -59,13 +59,13 @@ export default async function ClubPage() {
   const source = sourceLine(club);
   const feedAllowed = feedAllowedFor(viewer);
   const feedReason = club.is_demo
-    ? "This is a public demo club. A real club's manager, signed in, connects the club's own key here."
+    ? "The club's manager connects the league feed."
     : viewer.role !== "manager"
       ? "Only the club's manager connects the league feed."
       : null;
   const resultAllowed = viewer.guest ? !viewer.readOnly && club.season_source === "manual" : viewer.role === "manager" || viewer.role === "coach";
   const resultReason = viewer.guest && club.season_source !== "manual"
-    ? `${club.name} is a real club shown from its public data, so results are not typed in here.`
+    ? "Results come from the league feed."
     : !resultAllowed
       ? "The manager or a coach enters results."
       : null;
@@ -128,7 +128,7 @@ export default async function ClubPage() {
         </p>
         <StaffInvites
           allowed={feedAllowed}
-          reason={club.is_demo ? "This is a public demo club. A real club's manager invites its own staff." : viewer.role !== "manager" ? "Only the manager invites staff." : null}
+          reason={club.is_demo || viewer.role !== "manager" ? "The manager invites staff." : null}
           invites={invites}
           clubName={club.name}
         />

@@ -74,7 +74,7 @@ export function NextMatchPanel({
               <span className="num font-semibold text-ink">{fitCount}</span> available today
             </p>
             <Link href="/lineup" className="pressable text-[12.5px] font-semibold text-mint">
-              pick the side →
+              pick the starting XI →
             </Link>
           </div>
           {fixtures.length > 1 ? (

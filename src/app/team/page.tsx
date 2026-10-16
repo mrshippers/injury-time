@@ -16,7 +16,7 @@ import { daysAwayWord, weekdayWord } from "@/lib/team/format";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "the team - injury time." };
+export const metadata = { title: "who's in - injury time." };
 
 /**
  * The squad's page. A player opens it on the bus: who are we playing, am I
@@ -47,7 +47,7 @@ export default async function TeamPage() {
         )}
       </div>
       <header className="mb-6">
-        <p className="annot">{`// the team · ${viewer.club.name.toLowerCase()}`}</p>
+        <p className="annot">{`// who's in · ${viewer.club.name.toLowerCase()}`}</p>
         {next ? (
           <>
             <div className="mt-2 flex items-center gap-4">
@@ -81,9 +81,7 @@ export default async function TeamPage() {
             <p className="mt-3 text-[13.5px] text-ink-dim">Add the next fixture and the squad can start calling in.</p>
           </>
         )}
-        {viewer.guest ? (
-          <p className="annot mt-3 text-gold-dim">{"// guest view · you can call for anyone, a signed-in player calls only for themselves"}</p>
-        ) : (
+        {viewer.guest ? null : (
           <p className="annot mt-3 text-gold-dim">{`// signed in as ${viewer.role}`}</p>
         )}
       </header>

@@ -87,7 +87,9 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
   const [chosen, setChosen] = useState<string | null>(null);
   const formation = formationByName(chosen ?? saved?.formation ?? stored);
   // the side fills itself: last match's eleven again, who said out swapped for the next best, who said in first
-  const prefer = useMemo(() => new Set((previous?.xi ?? []).filter(Boolean) as string[]), [previous]);
+  // the club captain (set on the player, e.g. Belstone's) is always the first name on the sheet
+  const clubCaptain = useMemo(() => rows.find((r) => (r.player.external_stats as { captain?: boolean } | null)?.captain && isAvailable(r))?.player.id ?? null, [rows]);
+  const prefer = useMemo(() => new Set([...((previous?.xi ?? []).filter(Boolean) as string[]), ...(clubCaptain ? [clubCaptain] : [])]), [previous, clubCaptain]);
   const callMap = useMemo(() => new Map(Object.entries(calls)), [calls]);
   const auto = useMemo(() => pickXI(rows, formation, { prefer, calls: callMap }).picks.map((p) => p.row?.player.id ?? null), [rows, formation, prefer, callMap]);
   const [manualState, setManual] = useState<{ formation: string; ids: (string | null)[] } | null>(
@@ -137,7 +139,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
 
   // the captain: picked here, saved with the side; last match's captain carries over while he's in the eleven
   const [captainState, setCaptainState] = useState<string | null | undefined>(undefined);
-  const captainPick = captainState !== undefined ? captainState : (saved?.captain ?? previous?.captain ?? null);
+  const captainPick = captainState !== undefined ? captainState : (saved?.captain ?? previous?.captain ?? clubCaptain);
   const captain = captainPick && xiIds.includes(captainPick) ? captainPick : null;
   const toggleCaptain = (id: string) => setCaptainState(captain === id ? null : id);
 
@@ -201,7 +203,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
     const fits = empties.find((i) => formation.slots[i].role === row.player.position);
     const slot = fits ?? empties[0];
     if (slot === undefined) {
-      setToggleNote("the side is full, take someone out first");
+      setToggleNote("the starting XI is full, take someone out first");
       return;
     }
     place(playerId, slot);
@@ -375,7 +377,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
                 on ? "border-mint bg-mint text-mint-ink" : "border-line bg-panel text-ink-dim"
               } ${v === "squad" ? "rounded-l-[2px]" : "rounded-r-[2px] border-l-0"}`}
             >
-              {v === "squad" ? `squad · ${rows.length}` : `the side · ${filled}/11`}
+              {v === "squad" ? `squad · ${rows.length}` : `starting XI · ${filled}/11`}
             </button>
           );
         })}
@@ -477,7 +479,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
             </p>
           ) : null}
           <p className="pointer-events-none absolute bottom-3 left-3 text-[10.5px] tracking-[0.12em] uppercase text-ink-dim">
-            {phone ? "attacking ↑ · tap a shirt · drag to orbit" : "own goal ↓ · attacking ↑ · drag to orbit, scroll to zoom"}
+            {phone ? "attacking ↑ · tap a shirt · drag to orbit" : "own goal ↓ · attacking ↑ · drag to orbit"}
           </p>
         </div>
 

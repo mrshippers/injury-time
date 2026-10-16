@@ -635,3 +635,34 @@ body:has([data-pilot]) nav[aria-label="modules"] { display: none; }
     [data-reveal] { animation: reveal-up linear both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
   }
 }
+
+/* ── plates: the house shape instead of boxes. A slanted strip, the way a broadcast scoreboard sits on
+   screen. --slant sets the lean; a plate is a fill, never an outline box. ── */
+.plate {
+  --slant: 7px;
+  clip-path: polygon(var(--slant) 0, 100% 0, calc(100% - var(--slant)) 100%, 0 100%);
+  padding-inline: calc(var(--slant) + 0.45em);
+}
+.plate-sm { --slant: 5px; }
+
+/* the sliding plate under a row of tabs */
+.plate-tabs { position: relative; display: inline-flex; isolation: isolate; }
+.plate-tabs > [data-indicator] {
+  position: absolute; z-index: -1; top: 0; bottom: 0; left: 0;
+  background: var(--panel-2);
+  box-shadow: inset 0 -2px 0 var(--mint);
+  transition: transform 260ms var(--ease-out-strong), width 260ms var(--ease-out-strong);
+}
+@media (prefers-reduced-motion: reduce) { .plate-tabs > [data-indicator] { transition: none; } }
+
+/* a pager page eases its contents in when it becomes the one on screen */
+[data-page] [data-stagger] > * { transition: opacity 360ms var(--ease-out-strong), transform 360ms var(--ease-out-strong); }
+[data-page][data-active="false"] [data-stagger] > * { opacity: 0; transform: translateX(14px); }
+[data-page][data-active="true"] [data-stagger] > *:nth-child(2) { transition-delay: 50ms; }
+[data-page][data-active="true"] [data-stagger] > *:nth-child(3) { transition-delay: 100ms; }
+[data-page][data-active="true"] [data-stagger] > *:nth-child(4) { transition-delay: 150ms; }
+[data-page][data-active="true"] [data-stagger] > *:nth-child(n + 5) { transition-delay: 200ms; }
+@media (prefers-reduced-motion: reduce) { [data-page] [data-stagger] > * { transition: none; opacity: 1 !important; transform: none !important; } }
+
+.pager-track { scrollbar-width: none; }
+.pager-track::-webkit-scrollbar { display: none; }

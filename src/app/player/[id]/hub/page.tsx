@@ -246,9 +246,7 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
           </>
         ) : (
           <p className="max-w-[60ch] text-[14px] text-ink-dim">
-            {hub.readOnly
-              ? `${first} hasn't filled this in. ${club.name} is a real club shown from its public league figures, so this page is ${first}'s to write once the club links them.`
-              : `nothing here yet. the nickname, the shirt, the walk-out song, the clubs before this one: it's ${first}'s page to fill.`}
+            {`nothing here yet. the nickname, the shirt, the walk-out song, the clubs before this one: it's ${first}'s page to fill.`}
           </p>
         )}
         {hub.canEdit ? (
@@ -276,7 +274,7 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
           ) : (
             <p className="max-w-[62ch] text-[14px] text-ink-dim">
               <span aria-hidden className="mr-3 inline-block h-2.5 w-2.5 border border-ink-dim align-middle" />
-              {`on a real club the manager hands this page over with a link: ${first} signs in with an email, says it's them, and it's theirs. the demo can't, its players are made up.`}
+              {`the manager hands this page over with a link: ${first} signs in with an email, says it's them, and it's theirs.`}
             </p>
           )}
         </Section>
