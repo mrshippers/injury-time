@@ -32,5 +32,5 @@ export function ClubStop({ team }: { team: string }) {
   const src = crestFor(team);
   if (!src) return <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />;
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt="" aria-hidden decoding="async" className="ml-[0.16em] inline-block h-[0.82em] w-auto align-[-0.06em] object-contain opacity-80" />;
+  return <img src={src} alt="" aria-hidden decoding="async" className="ml-[0.04em] inline-block h-[0.76em] w-auto align-baseline object-contain opacity-80" />;
 }
