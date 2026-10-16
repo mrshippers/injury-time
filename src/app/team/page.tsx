@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { Crest } from "@/components/club/crest";
-import { MatchWeatherLine } from "@/components/home/match-weather";
+import { MatchWeatherCard } from "@/components/home/match-weather";
 import { matchWeather } from "@/lib/weather/grounds";
 import { AttendanceTrend } from "@/components/team/attendance-trend";
 import { CallBoard } from "@/components/team/call-board";
@@ -64,7 +64,7 @@ export default async function TeamPage() {
               {next.competition}
               {daysUntil !== null ? <span className="num text-gold"> · {daysAwayWord(daysUntil)}</span> : null}
             </p>
-            <MatchWeatherLine weather={weather} className="mt-2" />
+            <MatchWeatherCard weather={weather} className="mt-3 max-w-[360px]" />
             <Link
               href="/matchday"
               className="pressable mt-4 inline-flex h-10 items-center rounded-[2px] border border-line-strong bg-pitch px-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-panel-2"

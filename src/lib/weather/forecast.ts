@@ -3,8 +3,9 @@
  * nothing rather than a guess. The read covers kick-off to the final whistle: the worst sky, the highest
  * chance of rain, the strongest wind, the temperature at kick-off.
  */
-export type Hourly = { time: string[]; temperature_2m: number[]; precipitation_probability: (number | null)[]; wind_speed_10m: number[]; weather_code: number[] };
-export type KickoffWeather = { tempC: number; rainChance: number | null; windMph: number; sky: string };
+export type Hourly = { time: string[]; temperature_2m: number[]; precipitation_probability: (number | null)[]; wind_speed_10m: number[]; weather_code: number[]; wind_direction_10m?: number[] };
+/** windFromDeg: where the wind blows FROM at kick-off, degrees from north (null when the feed has none) */
+export type KickoffWeather = { tempC: number; rainChance: number | null; windMph: number; sky: string; windFromDeg?: number | null };
 
 /** WMO weather codes in a dressing room's words, worst last so "worst of the afternoon" is a max. */
 const SKY: [number, string][] = [
@@ -32,6 +33,7 @@ export function kickoffWeather(h: Hourly, date: string, kickoff: string | null):
     rainChance: rain.length ? Math.max(...rain) : null,
     windMph: Math.round(Math.max(...idx.map((i) => h.wind_speed_10m[i]))),
     sky: skyWord(Math.max(...idx.map((i) => h.weather_code[i]))),
+    windFromDeg: h.wind_direction_10m ? Math.round(h.wind_direction_10m[idx[0]]) : null,
   };
 }
 
@@ -47,7 +49,7 @@ export async function fetchKickoffWeather(lat: number, lon: number, date: string
   if (ahead < 0 || ahead > 15) return null;
   const url =
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-    `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon&start_date=${date}&end_date=${date}`;
+    `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon&start_date=${date}&end_date=${date}`;
   try {
     const res = await fetch(url, { next: { revalidate: 3600 } });
     if (!res.ok) return null;

@@ -1,6 +1,7 @@
 import { daysBetweenISO, getDashboard, getSquadBoard } from "@/lib/data";
 import { ClubStop } from "@/components/club/crest";
 import { matchWeather } from "@/lib/weather/grounds";
+import { LeagueTable } from "@/components/home/league-table";
 import { getHomeSeason } from "@/lib/home/data";
 import Link from "next/link";
 
@@ -155,6 +156,7 @@ export default async function Home() {
       </div>
 
       <CupsSection results={season.results} fixtures={season.fixtures} asOf={asOf} />
+      <LeagueTable standings={season.standings} asOf={season.standingsAsOf} />
 
       {ctx.hasSeason ? (
         <div className="mt-10">
