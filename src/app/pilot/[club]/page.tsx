@@ -166,7 +166,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               playsInline
               preload="metadata"
               width={424}
-              height={496}
+              height={480}
               aria-label="A player's 3D body turning a full circle, with a hamstring injury lit on the back of the right leg"
               className="h-auto w-full border border-line bg-panel"
             />
