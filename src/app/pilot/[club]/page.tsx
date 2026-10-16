@@ -77,11 +77,13 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           <p className="mt-3 max-w-[40ch] text-[17px] leading-snug text-ink">A management platform for clubs at our level.</p>
           <div className="mt-8 flex flex-col gap-4">
             <p className={P}>Hey gaffer,</p>
-            <p className={P}>Jamal here, ex-Belstone.</p>
+            <p className={P}>Had an idea I wanted to show you. I&apos;ve been building a management platform for clubs like ours.</p>
             <p className={P}>
-              I&apos;ve been building an app for running a non-league side. The boys say in or out from their phones and the team sheet sorts itself from who&apos;s available. League and cups in one place.
+              The boys say in or out from their phones and the team sheet picks itself from who&apos;s available. Each player has a fitness page with a 3D body that shows where the knocks are. Results and cups
+              are all in there, plus the forecast for the ground on matchday.
             </p>
-            <p className={P}>I&apos;ve loaded it with Belstone&apos;s squad and results, so have a scroll.</p>
+            <p className={P}>I&apos;ve loaded Belstone&apos;s squad and results, have a scroll.</p>
+            <p className={P}>What d&apos;you reckon, gaff? Anything useful you&apos;d want for matchday?</p>
             <p className="text-[20px] font-extrabold tracking-[-0.01em] text-ink">Jamal</p>
           </div>
         </div>
@@ -106,7 +108,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
       <section className="mt-24" aria-labelledby="does-h">
         <p className="annot" id="does-h">{"// what it does"}</p>
 
-        <div className="mt-8 grid items-center gap-8 lg:grid-cols-2">
+        <div data-reveal className="mt-8 grid items-center gap-8 lg:grid-cols-2">
           <div>
             <h2 className={H2}>Who&apos;s in on Saturday</h2>
             <p className={`${P} mt-4`}>
@@ -120,7 +122,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           </div>
         </div>
 
-        <div className="mt-20 grid items-center gap-8 lg:grid-cols-2">
+        <div data-reveal className="mt-20 grid items-center gap-8 lg:grid-cols-2">
           <div className="lg:order-2">
             <h2 className={H2}>The side picks itself</h2>
             <p className={`${P} mt-4`}>
@@ -129,13 +131,50 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
             </p>
           </div>
           <figure className="lg:order-1">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/pilot/belstone-side.jpg" alt="The squad room for Belstone: the eleven on a floodlit pitch, 4-2-3-1, our own goal at the bottom" width={756} height={521} className="h-auto w-full border border-line" loading="lazy" />
+            <video
+              src="/pilot/belstone-side.mp4"
+              poster="/pilot/belstone-side.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              width={756}
+              height={520}
+              aria-label="The squad room for Belstone: the eleven on a floodlit pitch, 4-2-3-1, our own goal at the bottom, the camera drifting slowly"
+              className="h-auto w-full border border-line bg-panel"
+            />
             <figcaption className="num mt-2 text-[11.5px] text-ink-dim">Belstone&apos;s squad, from the public appearances list. Positions aren&apos;t public, so until you set them the side is a first guess: most-played, scorers up front.</figcaption>
           </figure>
         </div>
 
-        <div className="mt-20">
+        <div data-reveal className="mt-20 grid items-center gap-8 lg:grid-cols-2">
+          <div>
+            <h2 className={H2}>Every player&apos;s fitness</h2>
+            <p className={`${P} mt-4`}>
+              Each player has his own page: a 3D body you can turn round that lights up where the knocks are, fit, doubt or out in plain English, and a return-to-play ladder for anyone coming back.
+              Check-ins go by private link and only once the player has said yes.
+            </p>
+          </div>
+          <figure className="mx-auto w-full max-w-[424px]">
+            <video
+              src="/pilot/body-turn.mp4"
+              poster="/pilot/body-turn.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              width={424}
+              height={496}
+              aria-label="A player's 3D body turning a full circle, with a hamstring injury lit on the back of the right leg"
+              className="h-auto w-full border border-line bg-panel"
+            />
+            <figcaption className="num mt-2 text-[11.5px] text-ink-dim">A demo player on our made-up club. Belstone has no health data in here.</figcaption>
+          </figure>
+        </div>
+
+        <div data-reveal className="mt-20">
           <h2 className={H2}>The whole season, cups included</h2>
           <p className={`${P} mt-4`}>
             Not just the league. The FA Vase, the Herts Cup and the CCL Challenge Cup sit in the same diary and the same season page. Every dot on the line is a game: hover it, or tap it, and it tells you the
@@ -161,7 +200,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           {season ? <CupsSection results={season.results} fixtures={season.fixtures} asOf={asOf} /> : null}
         </div>
 
-        <div className="mt-20 grid items-center gap-8 lg:grid-cols-2">
+        <div data-reveal className="mt-20 grid items-center gap-8 lg:grid-cols-2">
           <div>
             <h2 className={H2}>The pack for the committee</h2>
             <p className={`${P} mt-4`}>
@@ -177,7 +216,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
       </section>
 
       {/* ── less clicking ── */}
-      <section className="mt-24 border-t border-line pt-8" aria-labelledby="clicks-h">
+      <section className="mt-24 border-t border-line pt-8" data-reveal aria-labelledby="clicks-h">
         <p className="annot" id="clicks-h">{"// fewer clicks, because it's football"}</p>
         <ul className="mt-5 grid gap-x-10 gap-y-3 sm:grid-cols-2">
           {[
@@ -197,7 +236,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
       </section>
 
       {/* ── web or app ── */}
-      <section className="mt-16 border-t border-line pt-8" aria-labelledby="web-h">
+      <section className="mt-16 border-t border-line pt-8" data-reveal aria-labelledby="web-h">
         <p className="annot" id="web-h">{"// on the web and on the phone"}</p>
         <h2 className={`${H2} mt-4`}>No app store, nothing to download</h2>
         <p className={`${P} mt-4`}>
@@ -207,7 +246,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
       </section>
 
       {/* ── what's next ── */}
-      <section className="mt-16 border-t border-line pt-8" aria-labelledby="next-h">
+      <section className="mt-16 border-t border-line pt-8" data-reveal aria-labelledby="next-h">
         <p className="annot" id="next-h">{"// where it's going"}</p>
         <p className="num mt-2 text-[11.5px] text-ink-dim">swipe for more →</p>
         <div className="swipe-row -mx-4 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-4 pb-4 sm:-mx-8 sm:px-8">
@@ -275,7 +314,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
       </section>
 
       {/* ── the terms ── */}
-      <section className="mt-16 border-t border-line pt-8" aria-labelledby="terms-h">
+      <section className="mt-16 border-t border-line pt-8" data-reveal aria-labelledby="terms-h">
         <p className="annot" id="terms-h">{"// the small print, in plain words"}</p>
         <ul className="mt-5 grid gap-x-10 gap-y-3 sm:grid-cols-2">
           {[
