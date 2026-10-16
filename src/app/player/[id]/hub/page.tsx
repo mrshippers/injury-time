@@ -10,6 +10,7 @@ import { clock } from "@/lib/film/urls";
 import { getViewer } from "@/lib/viewer";
 import { ConsentForm } from "@/components/health/consent-form";
 import { Crest } from "@/components/club/crest";
+import { crestFor } from "@/lib/crests";
 import AvailabilityTimeline from "@/components/player/availability-timeline";
 import BodyMap from "@/components/player/body-map";
 import InjuryTable from "@/components/player/injury-table";
@@ -123,7 +124,7 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
           </p>
           {profile?.bio ? <blockquote className="mt-6 max-w-[56ch] border-l-2 border-gold pl-4 text-[17px] leading-relaxed text-ink">{profile.bio}</blockquote> : null}
         </div>
-        <Shirt name={profile?.shirt_name ?? surname.toUpperCase()} number={player.squad_number} colours={club.colours} captain={isCaptain} />
+        <Shirt name={profile?.shirt_name ?? surname.toUpperCase()} number={player.squad_number} colours={club.colours} captain={isCaptain} crest={crestFor(club.name)} />
       </header>
 
       {/* the season in numbers */}
