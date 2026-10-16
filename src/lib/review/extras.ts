@@ -5,6 +5,7 @@
  * how many games it could count, never a guess. Pure functions, no I/O.
  */
 import { isLeague } from "@/lib/league";
+import { splitCompetition } from "@/lib/home/cups";
 import { parseScorer } from "@/lib/league/normalise";
 
 export type ReviewGame = {
@@ -193,4 +194,23 @@ export function halfTimeSwings(games: readonly ReviewGame[]): { counted: number;
     aheadAtHt: ahead.length,
     droppedFromAhead: ahead.reduce((n, g) => n + (3 - pts(g)), 0),
   };
+}
+
+/** The competition a game belongs to, as a manager names it: "league", or the cup without its round ("FA Vase"). */
+export function competitionOf(g: Pick<ReviewGame, "competition">): string {
+  return isLeague(g.competition) ? "league" : splitCompetition(g.competition).name;
+}
+
+/** One row per competition, league first, then cups by games played: the season at a glance. */
+export function byCompetition(games: readonly ReviewGame[]): (Record3 & { competition: string })[] {
+  const by = new Map<string, ReviewGame[]>();
+  for (const g of games) by.set(competitionOf(g), [...(by.get(competitionOf(g)) ?? []), g]);
+  return [...by.entries()]
+    .map(([competition, gs]) => ({ competition, ...recordOf(gs) }))
+    .sort((a, b) => (a.competition === "league" ? -1 : b.competition === "league" ? 1 : b.played - a.played || a.competition.localeCompare(b.competition)));
+}
+
+/** The filters on the stats page: a competition ("all", "league", a cup name) and a venue. */
+export function filterGames(games: readonly ReviewGame[], f: { competition?: string; venue?: "H" | "A" | "all" }): ReviewGame[] {
+  return games.filter((g) => (!f.competition || f.competition === "all" || competitionOf(g) === f.competition) && (!f.venue || f.venue === "all" || g.venue === f.venue));
 }

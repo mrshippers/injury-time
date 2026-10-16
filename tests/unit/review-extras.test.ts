@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import snapshot from "../fixtures/belstone-2026-09-26.json";
 import liveSnapshot from "../../scripts/belstone-2026-27.json";
 import { fromSnapshot, type Snapshot } from "../../src/lib/league/normalise";
-import { halfTimeSwings, reviewSentences, cleanSheets, cupsOnly, extremes, halves, homeCrowds, leagueOnly, monthly, recordOf, runsOf, scorerRows, venueSplit, type ReviewGame } from "../../src/lib/review/extras";
+import { byCompetition, competitionOf, filterGames, halfTimeSwings, reviewSentences, cleanSheets, cupsOnly, extremes, halves, homeCrowds, leagueOnly, monthly, recordOf, runsOf, scorerRows, venueSplit, type ReviewGame } from "../../src/lib/review/extras";
 
 const g = (match_date: string, competition: string, venue: "H" | "A", gf: number, ga: number, extra: Partial<ReviewGame> = {}): ReviewGame => ({
   match_date, competition, opponent: "X", venue, goals_for: gf, goals_against: ga, ht_for: null, ht_against: null, attendance: null, scorers: [], ...extra,
@@ -115,5 +115,22 @@ describe("halfTimeSwings", () => {
       g("6", "L", "H", 0, 4), // no half-time score
     ]);
     expect(s).toEqual({ counted: 5, behindAtHt: 2, wonFromBehind: 4, aheadAtHt: 3, droppedFromAhead: 5 });
+  });
+});
+
+describe("competitions", () => {
+  const games = [g("2026-08-01", "Combined Counties Div 1", "H", 2, 0), g("2026-08-08", "FA Vase 1Q", "A", 2, 0), g("2026-09-12", "FA Vase 2Q", "H", 3, 1), g("2026-10-06", "CCL Div One Challenge Cup 1", "H", 6, 1), g("2026-08-15", "Combined Counties Div 1", "A", 0, 1)];
+  it("names a game's competition the way a manager does", () => {
+    expect(competitionOf(games[0])).toBe("league");
+    expect(competitionOf(games[1])).toBe("FA Vase");
+    expect(competitionOf(games[3])).toBe("CCL Div One Challenge Cup");
+  });
+  it("breaks the season down by competition, league first", () => {
+    expect(byCompetition(games).map((r) => `${r.competition}:${r.played}:${r.won}`)).toEqual(["league:2:1", "FA Vase:2:2", "CCL Div One Challenge Cup:1:1"]);
+  });
+  it("filters by competition and venue", () => {
+    expect(filterGames(games, { competition: "FA Vase" })).toHaveLength(2);
+    expect(filterGames(games, { competition: "league", venue: "A" })).toHaveLength(1);
+    expect(filterGames(games, { competition: "all", venue: "all" })).toHaveLength(5);
   });
 });

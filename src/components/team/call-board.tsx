@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent }
 
 import { setCallAction, setCallDeadlineAction, setCallsBulkAction } from "@/lib/team/actions";
 import { closeLabel, isClosed, presets, timeLeft } from "@/lib/team/deadline";
+import { useStoredValue } from "@/components/three/tokens";
 import { countCalls, countLine } from "@/lib/team/format";
 import { useTeamRealtime } from "@/lib/team/realtime";
 import { CALL_STATUSES, type CallStatus, type ClubRole, type Fixture, type MatchCall, type Player } from "@/lib/types";
@@ -29,19 +30,44 @@ export type CallBoardProps = {
   ownPlayerId: string | null;
   /** each player's answer last time: shown as a dashed marker, never saved until someone taps */
   usual?: Record<string, CallStatus>;
+  /** a club nobody here can write to: taps move the switch on screen and save nothing */
+  readOnly?: boolean;
 };
 
 type Row = { status: CallStatus | null; note: string | null; updatedAt: string | null };
 
 const FLASH_MS = 900;
 
-export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, usual = {} }: CallBoardProps) {
+export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, usual = {}, readOnly = false }: CallBoardProps) {
   const initial = useMemo(() => {
     const m = new Map<string, Row>();
     for (const c of calls) m.set(c.player_id, { status: c.status, note: c.note, updatedAt: c.updated_at });
     return m;
   }, [calls]);
-  const [rows, setRows] = useState<Map<string, Row>>(initial);
+  const [rowsState, setRows] = useState<Map<string, Row>>(initial);
+  // a read-only club keeps your answers in this browser, per match, so they're still there next time
+  const localKey = `injury-time.calls.${fixture.id}`;
+  const stored = useStoredValue(localKey);
+  const rows = useMemo(() => {
+    if (!readOnly || !stored) return rowsState;
+    try {
+      const saved = JSON.parse(stored) as Record<string, CallStatus>;
+      const n = new Map(rowsState);
+      for (const [id, status] of Object.entries(saved)) n.set(id, { status, note: n.get(id)?.note ?? null, updatedAt: n.get(id)?.updatedAt ?? null });
+      return n;
+    } catch {
+      return rowsState;
+    }
+  }, [readOnly, stored, rowsState]);
+  const keepLocal = useCallback(
+    (patch: Record<string, CallStatus>) => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(localKey) ?? "{}") as Record<string, CallStatus>;
+        localStorage.setItem(localKey, JSON.stringify({ ...saved, ...patch }));
+      } catch {}
+    },
+    [localKey],
+  );
   const [flash, setFlash] = useState<Map<string, number>>(new Map());
   const [noteOpen, setNoteOpen] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +121,7 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, 
     const before = closesAt;
     setClosesAt(iso);
     setError(null);
+    if (readOnly) return;
     const res = await setCallDeadlineAction({ fixtureId: fixture.id, closesAt: iso });
     if (!res.ok) {
       setClosesAt(before);
@@ -108,6 +135,10 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, 
     setRows((r) => new Map(r).set(playerId, { ...before, status, updatedAt: new Date().toISOString() }));
     light(playerId);
     setError(null);
+    if (readOnly) {
+      keepLocal({ [playerId]: status });
+      return;
+    }
     const res = await setCallAction({ fixtureId: fixture.id, playerId, status, note: before.note ?? undefined });
     if (!res.ok) {
       setRows((r) => new Map(r).set(playerId, before));
@@ -126,6 +157,7 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, 
     });
     if ((cur.note ?? "") === trimmed) return;
     setRows((r) => new Map(r).set(playerId, { ...cur, note: trimmed || null }));
+    if (readOnly) return;
     const res = await setCallAction({ fixtureId: fixture.id, playerId, status: cur.status, note: trimmed });
     if (!res.ok) setError(res.error);
   };
@@ -158,6 +190,11 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, 
       return n;
     });
     for (const c of toFill) light(c.playerId);
+    if (readOnly) {
+      keepLocal(Object.fromEntries(toFill.map((c) => [c.playerId, c.status])));
+      setFilling(false);
+      return;
+    }
     const res = await setCallsBulkAction({ fixtureId: fixture.id, calls: toFill });
     if (!res.ok) {
       setRows(before);
@@ -274,19 +311,42 @@ function knownPosition(p: Player): boolean {
   return ext?.position_confirmed !== false;
 }
 
-const STOPS: { status: CallStatus; word: string; thumb: string }[] = [
-  // the thumb takes the look of the app's status marks: solid is in, half-filled is unsure, struck through is out
-  { status: "in", word: "in", thumb: "call-thumb-in" },
-  { status: "unsure", word: "unsure", thumb: "call-thumb-unsure" },
-  { status: "out", word: "out", thumb: "call-thumb-out" },
+const STOPS: { status: CallStatus; word: string }[] = [
+  { status: "in", word: "in" },
+  { status: "unsure", word: "unsure" },
+  { status: "out", word: "out" },
 ];
 
+/** The three answers as icons in a circle: a tick for in, a question mark for unsure, a cross for out. Shape first, colour second. */
+export function CallIcon({ status, size = 28, faint = false }: { status: CallStatus | null; size?: number; faint?: boolean }) {
+  const r = size / 2;
+  if (!status)
+    return (
+      <svg aria-hidden width={size} height={size} viewBox="0 0 28 28">
+        <circle cx="14" cy="14" r="12.5" fill="none" stroke="var(--line-strong)" strokeWidth="1.5" strokeDasharray="3 3" />
+      </svg>
+    );
+  const fill = status === "in" ? "var(--win)" : status === "out" ? "var(--out)" : "var(--ink-dim)";
+  const mark = status === "in" ? "#06120d" : status === "out" ? "#fff" : "#0b0e0c";
+  return (
+    <svg aria-hidden width={size} height={size} viewBox="0 0 28 28" style={{ opacity: faint ? 0.32 : 1 }} data-r={r}>
+      {faint ? <circle cx="14" cy="14" r="12.5" fill="none" stroke={fill} strokeWidth="1.5" /> : <circle cx="14" cy="14" r="13" fill={fill} />}
+      {status === "in" ? <path d="M8.2 14.4l3.8 3.8 7.8-8.2" fill="none" stroke={faint ? fill : mark} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /> : null}
+      {status === "out" ? <path d="M9.4 9.4l9.2 9.2M18.6 9.4l-9.2 9.2" fill="none" stroke={faint ? fill : mark} strokeWidth="2.6" strokeLinecap="round" /> : null}
+      {status === "unsure" ? (
+        <text x="14" y="19.4" textAnchor="middle" fontSize="16" fontWeight="800" fill={faint ? fill : mark} style={{ fontFamily: "var(--font-display, inherit)" }}>
+          ?
+        </text>
+      ) : null}
+    </svg>
+  );
+}
+
 /**
- * The answer as a switch on a hairline: one line through three notched stops, the words
- * underneath, and a square-cut plate that slides along the line to the chosen stop. The thumb carries the word and a
- * shape (solid / half / struck), so the answer never rests on colour alone. Unanswered
- * shows a dashed thumb where he went last time; tapping anywhere still answers.
- * Still a radio group underneath, with arrow keys.
+ * The answer as a thumb you drag along a track: a tick in a green circle for in, a question mark in grey for
+ * unsure, a cross in red for out. Drag it, let go, it springs to the nearest answer. A tap on a stop still
+ * answers, and underneath it is a radio group with arrow keys. Unanswered is an empty dashed ring in the
+ * middle with last time's answer shown faint at its stop.
  */
 export function CallSwitch({
   name,
@@ -303,6 +363,14 @@ export function CallSwitch({
   disabled: boolean;
   onChoose: (s: CallStatus) => void;
 }) {
+  const box = useRef<HTMLDivElement>(null);
+  const press = useRef<{ x0: number; moved: boolean; id: number } | null>(null);
+  const suppressClick = useRef(false);
+  // while dragging: where the thumb is and which answer it is over, both worked out in the handler
+  const [drag, setDrag] = useState<{ x: number; i: number } | null>(null);
+  const dragX = drag?.x ?? null;
+  const size = large ? 36 : 30;
+
   const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
     if (disabled) return;
     const i = value ? CALL_STATUSES.indexOf(value) : -1;
@@ -314,55 +382,100 @@ export function CallSwitch({
     onChoose(STOPS[next].status);
     (e.currentTarget.querySelectorAll<HTMLElement>("[role=radio]")[next])?.focus();
   };
+
+  // the stops sit at the centre of each third of the track
+  const local = (clientX: number) => {
+    const r = box.current!.getBoundingClientRect();
+    return Math.min(r.width, Math.max(0, clientX - r.left));
+  };
+  const nearest = (x: number) => {
+    const w = box.current!.getBoundingClientRect().width;
+    return Math.min(2, Math.max(0, Math.floor((x / w) * 3)));
+  };
+
   const at = value ? STOPS.findIndex((s) => s.status === value) : -1;
   const ghost = !value && usual ? STOPS.findIndex((s) => s.status === usual) : -1;
-  const width = large ? "sm:w-[240px]" : "sm:w-[196px]";
-  const plate = large ? "h-[28px] text-[13px]" : "h-[24px] text-[11px]";
+  const restPct = at >= 0 ? ((at + 0.5) / 3) * 100 : 50;
+  const shown: CallStatus | null = drag ? STOPS[drag.i].status : value;
+
   return (
     <div
+      ref={box}
       role="radiogroup"
       aria-label={`${name}: call`}
       onKeyDown={onKey}
-      className={`call-switch relative grid h-[54px] w-full grid-cols-3 ${width} ${large ? "sm:h-[58px]" : "sm:h-[50px]"} ${disabled ? "opacity-70" : ""}`}
+      onPointerDown={(e) => {
+        if (disabled || e.button !== 0) return;
+        press.current = { x0: e.clientX, moved: false, id: e.pointerId };
+      }}
+      onPointerMove={(e) => {
+        const p = press.current;
+        if (!p || p.id !== e.pointerId) return;
+        if (!p.moved && Math.abs(e.clientX - p.x0) < 5) return;
+        if (!p.moved) {
+          p.moved = true;
+          box.current?.setPointerCapture(e.pointerId);
+        }
+        const x = local(e.clientX);
+        setDrag({ x, i: nearest(x) });
+      }}
+      onPointerUp={(e) => {
+        const p = press.current;
+        press.current = null;
+        if (!p || !p.moved) return;
+        const i = nearest(local(e.clientX));
+        setDrag(null);
+        suppressClick.current = true;
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate?.(8);
+        if (STOPS[i].status !== value) onChoose(STOPS[i].status);
+      }}
+      onPointerCancel={() => {
+        press.current = null;
+        setDrag(null);
+      }}
+      className={`call-switch relative h-[52px] w-full touch-pan-y select-none ${large ? "sm:w-[250px]" : "sm:w-[204px]"} ${disabled ? "opacity-70" : "cursor-grab active:cursor-grabbing"}`}
     >
-      {/* one hairline through the three stops, a notch at each: the fourth official's board, not three boxes */}
-      <span aria-hidden className="pointer-events-none absolute left-[16.667%] right-[16.667%] top-[16px] h-px bg-line-strong" />
-      {[16.667, 50, 83.333].map((l) => (
-        <span key={l} aria-hidden className="pointer-events-none absolute top-[12px] h-[9px] w-px -translate-x-1/2 bg-line-strong" style={{ left: `${l}%` }} />
+      {/* the track: one hairline, a faint icon at each stop showing where you can land */}
+      <span aria-hidden className="pointer-events-none absolute left-[16.667%] right-[16.667%] top-1/2 h-px -translate-y-1/2 bg-line-strong" />
+      {STOPS.map((s, i) => (
+        <span key={s.status} aria-hidden className="pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: `${((i + 0.5) / 3) * 100}%` }}>
+          <CallIcon status={s.status} size={large ? 22 : 18} faint />
+          {ghost === i ? <span className="absolute -inset-1 rounded-full border border-dashed border-ink-dim" /> : null}
+        </span>
       ))}
-      {/* last time, as a marker only */}
-      {ghost >= 0 ? (
-        <span aria-hidden className="pointer-events-none absolute left-0 top-[4px] w-1/3 px-[6px]" style={{ transform: `translateX(${ghost * 100}%)` }}>
-          <span className={`call-thumb call-thumb-ghost flex items-center justify-center ${plate}`}>
-            <span className="num font-semibold uppercase tracking-[0.1em] text-ink-dim">{STOPS[ghost].word}?</span>
-          </span>
-        </span>
-      ) : null}
-      {/* the plate: slides along the line to the answer, never jumps */}
-      {at >= 0 ? (
-        <span aria-hidden className="call-slide pointer-events-none absolute left-0 top-[4px] z-[1] w-1/3 px-[6px]" style={{ transform: `translateX(${at * 100}%)` }}>
-          <span className={`call-thumb ${STOPS[at].thumb} flex items-center justify-center ${plate}`}>
-            <span className="num font-bold uppercase tracking-[0.1em]">{STOPS[at].word}</span>
-          </span>
-        </span>
-      ) : null}
-      {STOPS.map((s, i) => {
-        const on = value === s.status;
-        return (
-          <button
-            key={s.status}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            disabled={disabled}
-            tabIndex={on || (!value && s.status === "in") ? 0 : -1}
-            onClick={() => onChoose(s.status)}
-            className="pressable relative z-[2] flex flex-col items-center justify-end pb-[5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint disabled:cursor-default"
-          >
-            <span className={`num text-[10.5px] uppercase tracking-[0.12em] ${on ? "text-transparent" : ghost === i ? "text-ink-dim" : "text-ink-dim hover:text-ink"}`}>{s.word}</span>
-          </button>
-        );
-      })}
+      {/* the thumb: follows the finger while dragging, springs to the answer on release */}
+      <span
+        aria-hidden
+        className={`call-knob pointer-events-none absolute top-1/2 z-[1] -translate-x-1/2 -translate-y-1/2 ${dragX === null ? "is-resting" : "scale-110"}`}
+        style={{ left: dragX !== null ? `${dragX}px` : `${restPct}%` }}
+      >
+        <CallIcon status={shown} size={size} />
+      </span>
+      {/* the radios: invisible over each stop, so a tap and a screen reader both still answer */}
+      <div className="absolute inset-0 z-[2] grid grid-cols-3">
+        {STOPS.map((s) => {
+          const on = value === s.status;
+          return (
+            <button
+              key={s.status}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              aria-label={s.word}
+              disabled={disabled}
+              tabIndex={on || (!value && s.status === "in") ? 0 : -1}
+              onClick={() => {
+                if (suppressClick.current) {
+                  suppressClick.current = false;
+                  return;
+                }
+                onChoose(s.status);
+              }}
+              className="h-full w-full opacity-0 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint disabled:cursor-default"
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

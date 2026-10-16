@@ -48,7 +48,7 @@ export default async function PlayerPage(props: PageProps<"/player/[id]">) {
         </div>
 
         <div className="mt-6">
-          <PlayerHeader player={profile.player} availability={profile.availability} />
+          <PlayerHeader player={profile.player} availability={profile.availability} clubName={profile.club.name} />
         </div>
 
         <div className="mt-8">
