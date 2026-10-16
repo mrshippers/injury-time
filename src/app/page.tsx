@@ -78,7 +78,7 @@ export default async function Home() {
             <QuickLinks
               links={[
                 { href: "/squad", label: "starting XI", detail: `${counts.fit} of ${dash.squadSize} available` },
-                { href: "/team", label: "who's in", detail: season.calls.total === 0 ? "nobody has answered" : `${season.calls.in} in · ${season.calls.out} out` },
+                { href: "/team", label: "matchday", detail: season.calls.total === 0 ? "nobody has answered" : `${season.calls.in} in · ${season.calls.out} out` },
                 { href: "/log", label: "log a session", detail: sinceLast === null ? "nothing logged yet" : sinceLast === 0 ? "last: today" : `last: ${sinceLast} days ago` },
               ]}
             />

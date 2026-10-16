@@ -16,7 +16,7 @@ import { daysAwayWord, weekdayWord } from "@/lib/team/format";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "who's in - injury time." };
+export const metadata = { title: "matchday - injury time." };
 
 /**
  * The squad's page. A player opens it on the bus: who are we playing, am I
@@ -39,7 +39,7 @@ export default async function TeamPage() {
         {viewer.guest ? null : <NotifyToggle />}
       </div>
       <header className="mb-6">
-        <p className="annot">{`// who's in · ${viewer.club.name.toLowerCase()}`}</p>
+        <p className="annot">{`// matchday · ${viewer.club.name.toLowerCase()}`}</p>
         {next ? (
           <>
             <div className="mt-2 flex items-center gap-4">
@@ -57,12 +57,20 @@ export default async function TeamPage() {
               {daysUntil !== null ? <span className="num text-gold"> · {daysAwayWord(daysUntil)}</span> : null}
             </p>
             <MatchWeatherCard weather={weather} className="mt-3 max-w-[360px]" />
-            <Link
-              href="/matchday"
-              className="pressable mt-4 inline-flex h-10 items-center rounded-[2px] plate plate-sm bg-panel-2 px-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-panel-2"
-            >
-              matchday screen
-            </Link>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link
+                href="/matchday"
+                className="pressable plate inline-flex h-10 items-center bg-panel-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink transition-transform duration-200 hover:translate-x-0.5"
+              >
+                dugout screen
+              </Link>
+              <Link
+                href="/log"
+                className="pressable plate inline-flex h-10 items-center bg-panel text-[12px] font-semibold uppercase tracking-[0.1em] text-ink-dim transition-transform duration-200 hover:translate-x-0.5 hover:text-ink"
+              >
+                log the session
+              </Link>
+            </div>
           </>
         ) : (
           <>
@@ -89,6 +97,7 @@ export default async function TeamPage() {
               usual={usual}
               role={viewer.role}
               ownPlayerId={viewer.role === "player" ? viewer.playerId : null}
+              readOnly={viewer.readOnly}
             />
           ) : null}
           {staff || viewer.club.is_demo ? (

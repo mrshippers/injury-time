@@ -1,4 +1,6 @@
+import { BoardSummary } from "@/components/club/board-summary";
 import { ClubStop } from "@/components/club/crest";
+import { todayISO } from "@/lib/data";
 import { FeedKeyForm, ResultForm, type Awaiting } from "@/components/club/club-forms";
 import { FeedSquad } from "@/components/club/feed-squad";
 import { StaffInvites, type InviteRow } from "@/components/club/staff-invites";
@@ -9,7 +11,7 @@ import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "the club - injury time." };
+export const metadata = { title: "the board - injury time." };
 
 /**
  * Where the club's season comes from, and the two ways it gets in: the club's
@@ -71,14 +73,12 @@ export default async function ClubPage() {
   return (
     <main className="mx-auto w-full max-w-[1000px] flex-1 px-4 py-7 sm:px-8 sm:py-9">
       <header>
-        <p className="annot">{"// the club"}</p>
+        <p className="annot">{"// the board"}</p>
         <h1 className="display mt-2 text-4xl sm:text-5xl">
           {club.name}
           <ClubStop team={club.name} />
         </h1>
-        <a href="/review" className="mt-4 inline-block text-[13px] text-ink underline decoration-gold-dim underline-offset-4 hover:text-gold">
-          the season review, for the committee
-        </a>
+        <BoardSummary clubId={club.id} asOf={todayISO()} />
       </header>
 
       <section aria-labelledby="feed-h" className="mt-10 border-t border-line pt-6">

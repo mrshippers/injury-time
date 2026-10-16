@@ -19,10 +19,10 @@ import { switchClub } from "./actions";
 const MODULES: { href: string; label: string; icon: string; match: (p: string) => boolean }[] = [
   { href: "/", label: "hub", icon: "hub", match: (p) => p === "/" },
   { href: "/squad", label: "squad", icon: "squad", match: (p) => p.startsWith("/squad") || p.startsWith("/player") || p.startsWith("/lineup") },
-  { href: "/team", label: "who's in", icon: "team", match: (p) => p.startsWith("/team") },
-  { href: "/film", label: "film", icon: "film", match: (p) => p.startsWith("/film") },
-  { href: "/log", label: "log", icon: "log", match: (p) => p.startsWith("/log") },
-  { href: "/club", label: "club", icon: "club", match: (p) => p.startsWith("/club") },
+  { href: "/team", label: "matchday", icon: "team", match: (p) => p.startsWith("/team") || p.startsWith("/matchday") || p.startsWith("/log") },
+  { href: "/stats", label: "stats", icon: "stats", match: (p) => p.startsWith("/stats") || p.startsWith("/film") },
+  { href: "/review", label: "review", icon: "review", match: (p) => p.startsWith("/review") },
+  { href: "/club", label: "board", icon: "club", match: (p) => p.startsWith("/club") },
 ];
 
 export type NavClub = { id: string; name: string; slug: string | null };
@@ -160,6 +160,8 @@ function TabIcon({ name }: { name: string }) {
     team: "M5 6.5h14M5 12h14M5 17.5h9",
     film: "M4.5 7.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-9Zm11 3.5 4-2.5v7l-4-2.5",
     log: "M12 7v5l3 2M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z",
+    stats: "M5 19V11M10 19V6M15 19v-5M20 19V9M3.5 19.5h17",
+    review: "M7 4.5h7l4 4V19.5H7Zm7 0V9h4M9.5 13h6M9.5 16h4",
     club: "M12 4c2.5 1.6 5 2.2 7 2.2 0 6.3-2.6 10.6-7 13.3-4.4-2.7-7-7-7-13.3 2 0 4.5-.6 7-2.2Z",
   };
   return (

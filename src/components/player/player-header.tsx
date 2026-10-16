@@ -1,3 +1,4 @@
+import { Crest } from "@/components/club/crest";
 import type { CurrentAvailability, Player } from "@/lib/types";
 import { STATUS_META, formatDate } from "./labels";
 
@@ -11,15 +12,20 @@ const POSITION_LABEL: Record<string, string> = {
 export default function PlayerHeader({
   player,
   availability,
+  clubName,
 }: {
   player: Player;
   availability: CurrentAvailability | null;
+  clubName?: string;
 }) {
   const status = availability ? STATUS_META[availability.status] : null;
 
   return (
     <header className="border-b border-line-strong pb-8">
-      <p className="annot">{"// player profile"}</p>
+      <p className="annot flex items-center gap-2">
+        {clubName ? <Crest team={clubName} size={20} plain /> : null}
+        {`// ${clubName ? clubName.toLowerCase() : "player profile"}`}
+      </p>
       <div className="mt-4 flex flex-wrap items-end gap-x-8 gap-y-4">
         <h1 className="display text-5xl sm:text-6xl lg:text-7xl">
           {player.name}
