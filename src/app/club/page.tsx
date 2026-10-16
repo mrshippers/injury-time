@@ -3,7 +3,6 @@ import { FeedKeyForm, ResultForm, type Awaiting } from "@/components/club/club-f
 import { FeedSquad } from "@/components/club/feed-squad";
 import { StaffInvites, type InviteRow } from "@/components/club/staff-invites";
 import { longDate } from "@/components/squad/format";
-import { sourceLine } from "@/lib/club/source";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getViewer } from "@/lib/viewer";
@@ -56,16 +55,15 @@ export default async function ClubPage() {
     invites = (data ?? []) as InviteRow[];
   }
 
-  const source = sourceLine(club);
   const feedAllowed = feedAllowedFor(viewer);
   const feedReason = club.is_demo
-    ? "This is a public demo club. A real club's manager, signed in, connects the club's own key here."
+    ? "The club's manager connects the league feed."
     : viewer.role !== "manager"
       ? "Only the club's manager connects the league feed."
       : null;
   const resultAllowed = viewer.guest ? !viewer.readOnly && club.season_source === "manual" : viewer.role === "manager" || viewer.role === "coach";
   const resultReason = viewer.guest && club.season_source !== "manual"
-    ? `${club.name} is a real club shown from its public data, so results are not typed in here.`
+    ? "Results come from the league feed."
     : !resultAllowed
       ? "The manager or a coach enters results."
       : null;
@@ -78,7 +76,6 @@ export default async function ClubPage() {
           {club.name}
           <ClubStop team={club.name} />
         </h1>
-        <p className="mt-3 max-w-[60ch] text-[14px] leading-relaxed text-ink-dim">{source.long}</p>
         <a href="/review" className="mt-4 inline-block text-[13px] text-ink underline decoration-gold-dim underline-offset-4 hover:text-gold">
           the season review, for the committee
         </a>
@@ -128,7 +125,7 @@ export default async function ClubPage() {
         </p>
         <StaffInvites
           allowed={feedAllowed}
-          reason={club.is_demo ? "This is a public demo club. A real club's manager invites its own staff." : viewer.role !== "manager" ? "Only the manager invites staff." : null}
+          reason={club.is_demo || viewer.role !== "manager" ? "The manager invites staff." : null}
           invites={invites}
           clubName={club.name}
         />

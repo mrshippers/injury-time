@@ -60,7 +60,7 @@ export function HubEditor({ playerId, profile, moments, startOpen }: { playerId:
   return (
     <form
       aria-label="edit my page"
-      className="border border-line-strong bg-panel/60 p-4 sm:p-6"
+      className=" bg-panel/60 p-4 sm:p-6"
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => setState(await saveHubAction(playerId, v)));
@@ -170,7 +170,7 @@ export function HubCall({ fixtureId, playerId, initial }: { fixtureId: string; p
                   } else setError(null);
                 })
               }
-              className={`pressable flex h-12 items-center justify-center gap-2 rounded-[2px] border text-[13px] font-bold uppercase tracking-[0.12em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint ${
+              className={`pressable flex h-12 items-center justify-center gap-2 rounded-[2px] plate plate-sm text-[13px] font-bold uppercase tracking-[0.12em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint ${
                 on ? "border-ink bg-ink text-pitch" : "border-line-strong text-ink-dim hover:text-ink"
               }`}
             >

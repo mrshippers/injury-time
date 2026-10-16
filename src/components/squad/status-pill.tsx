@@ -8,10 +8,10 @@ import { STATUS_LABEL, shortDate } from "./format";
  * the tint only reinforces it.
  */
 const TONE: Record<AvailabilityStatus, string> = {
-  fit: "text-fit border-fit/35",
-  doubt: "text-doubt border-doubt/35",
-  injured: "text-out border-out/40",
-  suspended: "text-susp border-susp/35",
+  fit: "text-fit bg-fit/12",
+  doubt: "text-doubt bg-doubt/14",
+  injured: "text-out bg-out/15",
+  suspended: "text-susp bg-susp/14",
 };
 
 export function StatusPill({
@@ -24,7 +24,7 @@ export function StatusPill({
   return (
     <span className="flex items-center gap-2 min-w-0">
       <span
-        className={`num inline-flex shrink-0 items-center rounded-[2px] border bg-pitch px-1.5 py-[3px] text-[10.5px] font-semibold tracking-[0.09em] ${TONE[status]}`}
+        className={`plate plate-sm num inline-flex shrink-0 items-center py-[3px] text-[10.5px] font-semibold tracking-[0.09em] transition-colors duration-200 ${TONE[status]}`}
       >
         {STATUS_LABEL[status]}
       </span>

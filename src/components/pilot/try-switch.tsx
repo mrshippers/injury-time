@@ -13,7 +13,7 @@ import type { CallStatus } from "@/lib/types";
 export function TrySwitch() {
   const [value, setValue] = useState<CallStatus | null>(null);
   return (
-    <div className="border border-line bg-panel">
+    <div className=" bg-panel">
       <div className="flex items-baseline justify-between gap-3 border-b border-line px-4 py-3">
         <p className="annot">{"// who's in"}</p>
         <p className="num text-[12.5px] text-ink" aria-live="polite">
@@ -25,7 +25,7 @@ export function TrySwitch() {
         data-status={value ?? "none"}
       >
         <p className="display text-[24px] text-ink">
-          you<span className="num ml-2 text-[11px] font-normal tracking-[0.12em] text-ink-faint">a try-out row</span>
+          you
         </p>
         <CallSwitch name="you" value={value} usual="in" large disabled={false} onChoose={setValue} />
       </div>

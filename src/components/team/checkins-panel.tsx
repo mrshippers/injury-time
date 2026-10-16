@@ -32,7 +32,7 @@ export function CheckinsPanel({ players, today, isDemo, canSend }: { players: P[
     });
 
   return (
-    <section aria-labelledby="checkins-h" className="bg-panel border border-line px-4 py-4 sm:px-5">
+    <section aria-labelledby="checkins-h" className="bg-panel/60 px-4 py-4 sm:px-5">
       <p className="annot" id="checkins-h">{"// check-ins today"}</p>
       {isDemo ? (
         <p className="mt-2 text-[13.5px] leading-snug text-ink-dim">
@@ -58,7 +58,7 @@ export function CheckinsPanel({ players, today, isDemo, canSend }: { players: P[
                     <span className="num text-[12px] text-ink-faint">no answer</span>
                   )}
                   {canSend ? (
-                    <button type="button" disabled={pending} onClick={() => copy(p.id)} className="pressable h-9 rounded-[2px] border border-line-strong px-2 text-[11px] uppercase tracking-[0.1em] text-ink-dim hover:text-ink disabled:opacity-50">
+                    <button type="button" disabled={pending} onClick={() => copy(p.id)} className="pressable plate plate-sm h-9 bg-panel-2 text-[11px] uppercase tracking-[0.1em] text-ink-dim hover:text-ink disabled:opacity-50">
                       {copied === p.id ? "copied" : "copy link"}
                     </button>
                   ) : null}

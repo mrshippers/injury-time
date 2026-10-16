@@ -173,7 +173,7 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, 
   }, [players, ownPlayerId]);
 
   return (
-    <section aria-labelledby="calls-heading" className="border border-line bg-panel">
+    <section aria-labelledby="calls-heading" className="bg-panel/60">
       <div className="z-10 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-line bg-panel px-4 py-3 max-sm:sticky max-sm:top-12 sm:px-5">
         <p className="annot" id="calls-heading">{"// who's in"}</p>
         <p className="num text-[13px] text-ink sm:text-[12.5px]" data-testid="count-line" aria-live="polite">
@@ -254,7 +254,7 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, 
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === "Escape") (e.target as HTMLInputElement).blur();
                     }}
-                    className="mt-2 h-11 w-full border border-line bg-pitch px-3 text-[14px] text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none sm:mt-1 sm:h-9 sm:max-w-[360px] sm:text-[13px]"
+                    className="mt-2 h-11 w-full border-0 border-b border-line-strong bg-transparent px-3 text-[14px] text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none sm:mt-1 sm:h-9 sm:max-w-[360px] sm:text-[13px]"
                   />
                 ) : null}
               </div>
@@ -387,7 +387,7 @@ function DeadlineLine({
   onSet?: (iso: string | null) => void;
 }) {
   if (!closesAt && !onSet) return null;
-  const btn = "pressable num border border-line px-2 py-1 text-[11.5px] text-ink hover:border-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint max-sm:min-h-10";
+  const btn = "pressable plate plate-sm num bg-panel-2 py-1 text-[11.5px] text-ink transition-transform duration-200 hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint max-sm:min-h-10";
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line px-4 py-2.5 sm:px-5" data-testid="deadline">
       {closesAt ? (

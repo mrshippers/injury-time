@@ -39,7 +39,7 @@ export function SeasonCardShare({ playerId, fileName, firstName }: { playerId: s
         type="button"
         onClick={share}
         disabled={state === "working"}
-        className="pressable inline-flex min-h-11 items-center gap-2 border border-mint/60 px-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-mint hover:border-mint disabled:opacity-50 sm:min-h-9"
+        className="pressable inline-flex min-h-11 items-center gap-2 plate plate-sm border-mint/60 px-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-mint hover:border-mint disabled:opacity-50 sm:min-h-9"
       >
         {state === "working" ? "making the card" : "share the season card"}
       </button>

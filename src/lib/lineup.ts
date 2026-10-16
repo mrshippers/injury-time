@@ -187,6 +187,13 @@ export function fillEmpty(rows: SquadRow[], formation: Formation, current: (stri
   const flex: SquadRow[] = [];
   for (const r of available) (positionKnown(r.player) ? pool.get(r.player.position)! : flex).push(r);
 
+  // a player with a named slot (a centre back is "CB", not just a defender) gets that slot before anyone else
+  formation.slots.forEach((slot, i) => {
+    if (next[i]) return;
+    const list = pool.get(slot.role)!;
+    const at = list.findIndex((r) => (r.player.external_stats as { slot?: string } | null)?.slot === slot.label);
+    if (at >= 0) next[i] = list.splice(at, 1)[0].player.id;
+  });
   // own-role pass first so a borrowed midfielder never displaces a real one
   formation.slots.forEach((slot, i) => {
     if (next[i]) return;

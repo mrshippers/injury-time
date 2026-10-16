@@ -15,7 +15,7 @@ export function FirstWeek({ check }: { check: { squad_in: boolean; staff_joined:
   const done = items.filter((i) => i[0]).length;
   if (done === items.length) return null;
   return (
-    <section aria-labelledby="first-week-h" className="mt-8 border border-line bg-panel p-5">
+    <section aria-labelledby="first-week-h" className="mb-6 bg-panel/70 p-5">
       <p className="annot" id="first-week-h">{`// your first week · ${done} of ${items.length}`}</p>
       <ul className="mt-3 flex flex-col gap-2 text-[14px]">
         {items.map(([ok, label, href, how]) => (

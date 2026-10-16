@@ -69,7 +69,7 @@ export function NoteForm({ playerId, injuryId }: { playerId: string; injuryId: s
         rows={3}
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        className="border border-line-strong bg-panel p-2 text-[14px] text-ink focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-mint"
+        className="border-0 border-b border-line-strong bg-transparent p-2 text-[14px] text-ink focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-mint"
       />
       <div className="flex items-center gap-3">
         <button type="submit" className={PRIMARY} disabled={pending || !body.trim()}>
@@ -105,7 +105,7 @@ export function EraseButton({ playerId, firstName }: { playerId: string; firstNa
       </div>
     );
   return (
-    <div className="border border-out/60 p-3">
+    <div className=" border-out/60 p-3 bg-panel/50">
       <p className="text-[13.5px] text-ink">{`Only when ${firstName} has asked. Every injury, note, check-in and load about ${firstName} is deleted for good, and consent is withdrawn.`}</p>
       <div className="mt-3 flex gap-3">
         <button

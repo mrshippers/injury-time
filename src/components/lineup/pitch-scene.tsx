@@ -198,7 +198,8 @@ function Rig({ reduced, busy, compact }: { reduced: boolean; busy: boolean; comp
       minAzimuthAngle={Math.PI - 0.55}
       maxAzimuthAngle={Math.PI + 0.55}
       rotateSpeed={0.5}
-      zoomSpeed={0.6}
+      // the wheel belongs to the page: scrolling past the pitch must never zoom it or trap the scroll
+      enableZoom={false}
       enabled={!busy}
       makeDefault
     />
@@ -424,7 +425,7 @@ function Token({ row, slotIndex, slot, t, selected, hovered, captain, dragging, 
             ) : null}
             {hovered && !dragging ? (
               <span
-                className="num mt-1 rounded-[2px] border px-1.5 py-[3px] text-[10px] font-semibold tracking-[0.08em]"
+                className="num mt-1 rounded-[2px] plate plate-sm px-1.5 py-[3px] text-[10px] font-semibold tracking-[0.08em]"
                 style={{ color: ring, borderColor: ring, background: opaque(t.panel) }}
               >
                 {slot.label} · {outOfPosition ? `${row.player.position} · ` : ""}

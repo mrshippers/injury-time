@@ -23,7 +23,7 @@ function Panel({
 }) {
   const id = `panel-${label.replace(/[^a-z]+/gi, "-")}`;
   return (
-    <section aria-labelledby={id} className="flex min-h-[172px] flex-col border border-line bg-panel px-5 py-4">
+    <section aria-labelledby={id} className="flex min-h-[172px] flex-col bg-panel/70 px-5 py-4">
       <div className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
         <p className="annot" id={id}>{`// ${label}`}</p>
         {aside}
@@ -74,7 +74,7 @@ export function NextMatchPanel({
               <span className="num font-semibold text-ink">{fitCount}</span> available today
             </p>
             <Link href="/lineup" className="pressable text-[12.5px] font-semibold text-mint">
-              pick the side →
+              pick the starting XI →
             </Link>
           </div>
           {fixtures.length > 1 ? (

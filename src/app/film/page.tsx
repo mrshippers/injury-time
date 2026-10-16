@@ -1,3 +1,4 @@
+import { ClubStop } from "@/components/club/crest";
 import { AddFilmForm } from "@/components/film/add-film-form";
 import { ClipList } from "@/components/film/clip-list";
 import { analysisConfigured } from "@/lib/film/analyse";
@@ -26,7 +27,7 @@ export default async function FilmPage() {
           <p className="annot">{"// the film room"}</p>
           <h1 className="display mt-2 text-4xl sm:text-5xl">
             {viewer.club.name}
-            <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
+            <ClubStop team={viewer.club.name} />
           </h1>
           <p className="mt-2 max-w-[52ch] text-[13px] text-ink-dim">
             Paste a Veo or YouTube link, tag what happened, and the analyst turns it into Saturday&apos;s plan and Tuesday&apos;s session.
@@ -43,13 +44,11 @@ export default async function FilmPage() {
           {viewer.can("manage_film") ? (
             <AddFilmForm fixtures={games.fixtures} results={games.results} />
           ) : (
-            <p className="border border-line bg-panel px-5 py-4 text-[13px] text-ink-dim">Staff add film. Ask the gaffer.</p>
+            <p className=" bg-panel/60 px-5 py-4 text-[13px] text-ink-dim">Staff add film. Ask the gaffer.</p>
           )}
-          <p className="annot mt-4 text-gold-dim">
-            {analysisConfigured() ? "analyst ready" : "no analysis key on this server"}
-            {" · "}
-            {veoConfigured() ? "veo connected" : "veo links kept as links until the partner api is wired"}
-          </p>
+          {analysisConfigured() || veoConfigured() ? (
+            <p className="annot mt-4 text-gold-dim">{[analysisConfigured() ? "analyst ready" : null, veoConfigured() ? "veo connected" : null].filter(Boolean).join(" · ")}</p>
+          ) : null}
         </aside>
       </div>
     </main>

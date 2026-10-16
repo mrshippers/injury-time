@@ -87,7 +87,9 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
   const [chosen, setChosen] = useState<string | null>(null);
   const formation = formationByName(chosen ?? saved?.formation ?? stored);
   // the side fills itself: last match's eleven again, who said out swapped for the next best, who said in first
-  const prefer = useMemo(() => new Set((previous?.xi ?? []).filter(Boolean) as string[]), [previous]);
+  // the club captain (set on the player, e.g. Belstone's) is always the first name on the sheet
+  const clubCaptain = useMemo(() => rows.find((r) => (r.player.external_stats as { captain?: boolean } | null)?.captain && isAvailable(r))?.player.id ?? null, [rows]);
+  const prefer = useMemo(() => new Set([...((previous?.xi ?? []).filter(Boolean) as string[]), ...(clubCaptain ? [clubCaptain] : [])]), [previous, clubCaptain]);
   const callMap = useMemo(() => new Map(Object.entries(calls)), [calls]);
   const auto = useMemo(() => pickXI(rows, formation, { prefer, calls: callMap }).picks.map((p) => p.row?.player.id ?? null), [rows, formation, prefer, callMap]);
   const [manualState, setManual] = useState<{ formation: string; ids: (string | null)[] } | null>(
@@ -137,7 +139,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
 
   // the captain: picked here, saved with the side; last match's captain carries over while he's in the eleven
   const [captainState, setCaptainState] = useState<string | null | undefined>(undefined);
-  const captainPick = captainState !== undefined ? captainState : (saved?.captain ?? previous?.captain ?? null);
+  const captainPick = captainState !== undefined ? captainState : (saved?.captain ?? previous?.captain ?? clubCaptain);
   const captain = captainPick && xiIds.includes(captainPick) ? captainPick : null;
   const toggleCaptain = (id: string) => setCaptainState(captain === id ? null : id);
 
@@ -201,7 +203,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
     const fits = empties.find((i) => formation.slots[i].role === row.player.position);
     const slot = fits ?? empties[0];
     if (slot === undefined) {
-      setToggleNote("the side is full, take someone out first");
+      setToggleNote("the starting XI is full, take someone out first");
       return;
     }
     place(playerId, slot);
@@ -371,11 +373,11 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
               role="tab"
               aria-selected={on}
               onClick={() => chooseView(v)}
-              className={`pressable h-11 border text-[13px] font-semibold tracking-[0.06em] transition-colors duration-[190ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
-                on ? "border-mint bg-mint text-mint-ink" : "border-line bg-panel text-ink-dim"
-              } ${v === "squad" ? "rounded-l-[2px]" : "rounded-r-[2px] border-l-0"}`}
+              className={`pressable plate num h-9 text-[11.5px] font-semibold uppercase tracking-[0.1em] transition-colors duration-[190ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
+                on ? "bg-panel-2 text-ink shadow-[inset_0_-2px_0_var(--mint)]" : "text-ink-dim"
+              }`}
             >
-              {v === "squad" ? `squad · ${rows.length}` : `the side · ${filled}/11`}
+              {v === "squad" ? `squad · ${rows.length}` : `starting XI · ${filled}/11`}
             </button>
           );
         })}
@@ -423,8 +425,8 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
                 onClick={save}
                 disabled={!dirty || saving}
                 aria-live="polite"
-                className={`pressable h-8 px-3 text-[12px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint disabled:opacity-60 ${
-                  dirty ? "bg-mint text-mint-ink" : "border border-line bg-panel-2 text-ink-dim"
+                className={`pressable plate h-8 text-[12px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint disabled:opacity-60 ${
+                  dirty ? "bg-mint text-mint-ink" : "bg-panel-2 text-ink-dim"
                 }`}
               >
                 {saving ? "saving" : dirty ? `save for ${shortDate(nextFixture.match_date)}` : "saved"}
@@ -440,7 +442,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
 
         <div
           ref={pitchBox}
-          className="relative mt-3 aspect-[4/5] w-full overflow-hidden border border-line bg-panel sm:aspect-[16/11]"
+          className="relative mt-3 aspect-[4/5] w-full overflow-hidden bg-panel sm:aspect-[16/11]"
           data-testid="pitch"
           data-drag={drag ? drag.kind : undefined}
         >
@@ -477,7 +479,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
             </p>
           ) : null}
           <p className="pointer-events-none absolute bottom-3 left-3 text-[10.5px] tracking-[0.12em] uppercase text-ink-dim">
-            {phone ? "attacking ↑ · tap a shirt · drag to orbit" : "own goal ↓ · attacking ↑ · drag to orbit, scroll to zoom"}
+            {phone ? "attacking ↑ · tap a shirt · drag to orbit" : "own goal ↓ · attacking ↑ · drag to orbit"}
           </p>
         </div>
 
@@ -503,7 +505,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
         className="pointer-events-none fixed left-0 top-0 z-50 will-change-transform"
         style={{ display: drag?.kind === "list" && ghostRow ? "block" : "none" }}
       >
-        <span className="num -translate-x-1/2 -translate-y-[130%] whitespace-nowrap border border-mint bg-panel px-2.5 py-1.5 text-[12px] font-bold text-ink shadow-[0_8px_24px_rgba(0,0,0,0.55)]">
+        <span className="num -translate-x-1/2 -translate-y-[130%] whitespace-nowrap plate plate-sm border-mint bg-panel px-2.5 py-1.5 text-[12px] font-bold text-ink shadow-[0_8px_24px_rgba(0,0,0,0.55)]">
           {ghostRow?.player.squad_number ?? ""} {ghostRow?.player.name.split(" ").at(-1)}
         </span>
       </div>
@@ -519,7 +521,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
  */
 function DepthLine({ depth, formation }: { depth: { need: Record<Position, number>; have: Record<Position, number>; unset: number }; formation: string }) {
   return (
-    <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 border border-line bg-panel px-3 py-2" aria-label={`depth for ${formation}`}>
+    <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-b border-line py-2" aria-label={`depth for ${formation}`}>
       <span className="annot text-[10.5px]">{`// depth for ${formation}`}</span>
       {(["GK", "DF", "MF", "FW"] as const).map((p) => {
         const short = depth.have[p] < depth.need[p];

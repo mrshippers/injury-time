@@ -118,7 +118,7 @@ function Drawing({ f, points, className }: { f: Frame; points: AttendancePoint[]
 
 function Frame({ children }: { children: React.ReactNode }) {
   return (
-    <section aria-labelledby="attendance-heading" className="border border-line bg-panel">
+    <section aria-labelledby="attendance-heading" className=" bg-panel">
       <div className="border-b border-line px-4 py-3 sm:px-5">
         <p className="annot" id="attendance-heading">{"// turning up"}</p>
       </div>

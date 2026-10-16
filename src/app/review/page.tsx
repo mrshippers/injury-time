@@ -5,7 +5,6 @@ import { CupsSection } from "@/components/home/cups";
 import { REGION_LABEL } from "@/components/player/labels";
 import { PrintButton } from "@/components/review/print-button";
 import { longDate, shortDate } from "@/components/squad/format";
-import { sourceLine } from "@/lib/club/source";
 import { loadEntriesByPlayer, todayISO } from "@/lib/data";
 import { cupRuns } from "@/lib/home/cups";
 import { matchPlayer } from "@/lib/league";
@@ -159,7 +158,7 @@ export default async function ReviewPage() {
             <ClubStop team={club.name} />
           </h1>
           <p className="num mt-2 text-[12px] text-ink-dim">
-            {longDate(win.from)} to {longDate(asOf < win.to ? asOf : win.to)} · {sourceLine(club).short}
+            {longDate(win.from)} to {longDate(asOf < win.to ? asOf : win.to)}
           </p>
         </div>
         <PrintButton />

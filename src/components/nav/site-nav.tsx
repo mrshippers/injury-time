@@ -16,13 +16,13 @@ import { switchClub } from "./actions";
  * in the same mint so "where am I" and "what is this" share one colour.
  * A guest can swap between the public clubs; a member sees their own.
  */
-const MODULES: { href: string; label: string; match: (p: string) => boolean }[] = [
-  { href: "/", label: "hub", match: (p) => p === "/" },
-  { href: "/squad", label: "squad", match: (p) => p.startsWith("/squad") || p.startsWith("/player") || p.startsWith("/lineup") },
-  { href: "/team", label: "team", match: (p) => p.startsWith("/team") },
-  { href: "/film", label: "film", match: (p) => p.startsWith("/film") },
-  { href: "/log", label: "log", match: (p) => p.startsWith("/log") },
-  { href: "/club", label: "club", match: (p) => p.startsWith("/club") },
+const MODULES: { href: string; label: string; icon: string; match: (p: string) => boolean }[] = [
+  { href: "/", label: "hub", icon: "hub", match: (p) => p === "/" },
+  { href: "/squad", label: "squad", icon: "squad", match: (p) => p.startsWith("/squad") || p.startsWith("/player") || p.startsWith("/lineup") },
+  { href: "/team", label: "who's in", icon: "team", match: (p) => p.startsWith("/team") },
+  { href: "/film", label: "film", icon: "film", match: (p) => p.startsWith("/film") },
+  { href: "/log", label: "log", icon: "log", match: (p) => p.startsWith("/log") },
+  { href: "/club", label: "club", icon: "club", match: (p) => p.startsWith("/club") },
 ];
 
 export type NavClub = { id: string; name: string; slug: string | null };
@@ -70,7 +70,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
                     router.refresh();
                   });
                 }}
-                className="num max-w-[11rem] truncate rounded-[2px] border border-line bg-panel px-2 py-[3px] text-[12px] tracking-[0.04em] text-ink-dim outline-none transition-colors duration-[190ms] hover:text-ink focus-visible:ring-2 focus-visible:ring-mint sm:max-w-none sm:min-h-0 sm:px-1.5 sm:text-[11px] sm:tracking-[0.06em]"
+                className="num max-w-[11rem] truncate rounded-[2px] border-0 border-b border-line-strong bg-transparent px-2 py-[3px] text-[12px] tracking-[0.04em] text-ink-dim outline-none transition-colors duration-[190ms] hover:text-ink focus-visible:ring-2 focus-visible:ring-mint sm:max-w-none sm:min-h-0 sm:px-1.5 sm:text-[11px] sm:tracking-[0.06em]"
               >
                 {clubs.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -141,7 +141,7 @@ export function PhoneTabBar() {
                 aria-current={active ? "page" : undefined}
                 className={`pressable tab ${active ? "is-active" : ""}`}
               >
-                <TabIcon name={m.label} />
+                <TabIcon name={m.icon} />
                 <span>{m.label}</span>
               </Link>
             </li>

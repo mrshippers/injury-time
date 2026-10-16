@@ -79,7 +79,7 @@ export function InstallNudge() {
   return (
     <aside
       aria-label="put injury time on your home screen"
-      className="fixed inset-x-3 z-40 border border-line-strong bg-panel p-4 shadow-[0_18px_40px_rgba(0,0,0,0.5)] sm:hidden"
+      className="fixed inset-x-3 z-40  bg-panel/60 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.5)] sm:hidden"
       style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}
     >
       <p className="text-[14px] text-ink">On your home screen, like an app. Match calls land as notifications.</p>

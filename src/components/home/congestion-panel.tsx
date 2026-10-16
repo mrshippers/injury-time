@@ -13,7 +13,7 @@ const day = (d: string) => WEEKDAY.format(new Date(`${d}T12:00:00Z`)).toLowerCas
 export function CongestionPanel({ c }: { c: Congestion }) {
   const fx = (f: Congestion["first"]) => `${day(f.match_date)} ${shortDate(f.match_date)} ${f.venue === "H" ? "v" : "at"} ${f.opponent}`;
   return (
-    <section aria-labelledby="congestion-h" className="bg-panel border border-line border-l-2 border-l-doubt px-4 py-4 sm:px-5">
+    <section aria-labelledby="congestion-h" className="plate bg-doubt/8 py-4 [--slant:14px]">
       <p className="annot" id="congestion-h">{`// two games in ${c.gap} days`}</p>
       <p className="mt-2 text-[15px] leading-snug text-ink">
         <span className="font-semibold">{fx(c.first)}</span>

@@ -22,7 +22,7 @@ export function FormationSelect({ value, onChange }: { value: string; onChange: 
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="num h-8 max-w-[calc(100vw-140px)] appearance-none border border-line-strong bg-panel pl-2.5 pr-7 text-[13px] font-semibold text-ink [color-scheme:dark] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-mint max-sm:h-11 max-sm:w-full max-sm:max-w-none sm:max-w-[380px]"
+          className="num h-8 max-w-[calc(100vw-140px)] appearance-none border-0 border-b border-line-strong bg-transparent pl-1 pr-7 text-[13px] font-semibold text-ink [color-scheme:dark] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-mint max-sm:h-11 max-sm:w-full max-sm:max-w-none sm:max-w-[380px]"
           title={current?.note}
         >
           {FORMATION_TEMPLATES.map((t) => (

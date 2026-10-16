@@ -11,7 +11,7 @@ export function LoginForm() {
 
   if (sent) {
     return (
-      <div className="bg-panel border border-line p-5">
+      <div className="bg-panel/60  p-5">
         <p className="text-sm text-ink">
           Magic link sent to <span className="num text-mint">{sent}</span>.
         </p>
@@ -45,7 +45,7 @@ export function LoginForm() {
         required
         autoComplete="email"
         placeholder="gaffer@yourclub.co.uk"
-        className="bg-panel border border-line-strong px-4 py-3 text-ink placeholder:text-ink-faint focus-visible:outline-2 focus-visible:outline-mint"
+        className="bg-transparent border-0 border-b border-line-strong px-4 py-3 text-ink placeholder:text-ink-faint focus-visible:outline-2 focus-visible:outline-mint"
       />
       <button
         type="submit"

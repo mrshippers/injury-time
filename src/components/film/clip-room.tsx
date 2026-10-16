@@ -180,7 +180,7 @@ export function ClipRoom({
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-start">
         {/* the film */}
-        <section aria-labelledby={`${id}-film`} className="border border-line bg-panel">
+        <section aria-labelledby={`${id}-film`} className=" bg-panel">
           <div className="flex items-baseline justify-between border-b border-line px-4 py-2">
             <p className="annot" id={`${id}-film`}>{"// the film"}</p>
             <a href={clip.url} target="_blank" rel="noreferrer" className="num text-[11px] text-ink-dim underline-offset-4 hover:text-ink hover:underline max-sm:inline-block max-sm:py-3 max-sm:-my-3">
@@ -203,7 +203,7 @@ export function ClipRoom({
               <p className="annot">{clip.source === "veo" ? "// veo match" : "// film elsewhere"}</p>
               <p className="max-w-[40ch] text-[13px] text-ink-dim">
                 {clip.source === "veo"
-                  ? "Veo film opens in the Veo app until the partner api is wired. Tag from there with the clock; the marks and the analysis still work here."
+                  ? "Veo film opens in the Veo app. Tag from there with the clock; the marks and the analysis work here."
                   : "This film does not play here. Open it at source and tag by the clock."}
               </p>
               <a href={clip.url} target="_blank" rel="noreferrer" className={`${BUTTON} inline-flex items-center bg-mint text-mint-ink`}>
@@ -215,7 +215,7 @@ export function ClipRoom({
         </section>
 
         {/* what happened */}
-        <section aria-labelledby={`${id}-events`} className="border border-line bg-panel">
+        <section aria-labelledby={`${id}-events`} className=" bg-panel">
           <div className="flex items-baseline justify-between border-b border-line px-4 py-2">
             <p className="annot" id={`${id}-events`}>{"// what happened"}</p>
             <p className="num text-[11px] text-ink-dim">
@@ -271,7 +271,7 @@ export function ClipRoom({
                   <input id={`${id}-t`} value={time} onChange={(e) => setTime(e.target.value)} placeholder="5:12" inputMode="numeric" className={`${FIELD} num mt-1 w-full`} />
                 </div>
                 <div className="flex items-end">
-                  <button type="button" onClick={now} disabled={!ready} className={`${BUTTON} border border-line-strong bg-panel-2 text-ink-dim hover:text-ink`}>
+                  <button type="button" onClick={now} disabled={!ready} className={`${BUTTON} plate plate-sm bg-panel-2 text-ink-dim hover:text-ink`}>
                     now
                   </button>
                 </div>
@@ -309,7 +309,7 @@ export function ClipRoom({
       </div>
 
       {/* the analyst */}
-      <section aria-labelledby={`${id}-analysis`} className="border border-line bg-panel">
+      <section aria-labelledby={`${id}-analysis`} className=" bg-panel">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-2 sm:px-5">
           <p className="annot" id={`${id}-analysis`}>{"// the match room"}</p>
           <div className="flex items-center gap-3">
@@ -455,7 +455,7 @@ function AnalysisPanel({ analysis, byId }: { analysis: ClipAnalysis; byId: Map<s
             {analysis.players.map((n) => {
               const p = byId.get(n.player_id);
               return (
-                <li key={n.player_id} className="max-w-[320px] rounded-[2px] border border-line-strong bg-panel-2 px-3 py-2">
+                <li key={n.player_id} className="max-w-[320px] rounded-[2px]  bg-panel-2 px-3 py-2">
                   <p className="text-[12.5px] font-bold lowercase text-ink">
                     {p?.squad_number !== null && p?.squad_number !== undefined ? <span className="num mr-1.5 text-gold">{p.squad_number}</span> : null}
                     {p?.name ?? "unknown"}

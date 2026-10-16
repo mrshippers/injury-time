@@ -11,7 +11,7 @@ async function open(page: Page) {
   await expect(page.getByTestId("pitch").locator("canvas")).toBeVisible({ timeout: 20_000 });
 }
 
-const xiItems = (page: Page) => page.getByRole("region", { name: /the eleven/i }).getByRole("listitem");
+const xiItems = (page: Page) => page.getByRole("region", { name: /starting XI/i }).getByRole("listitem");
 
 test.describe("the side", () => {
   test("/lineup goes to the squad room", async ({ page }) => {
@@ -110,7 +110,7 @@ test.describe("the side", () => {
     const third = xiItems(page).nth(filledIdx[2]);
     const fourth = xiItems(page).nth(filledIdx[3]);
     const fourthName = (await fourth.getByRole("button").first().textContent()) ?? "";
-    await third.getByRole("button", { name: /take .* out of the eleven/ }).click();
+    await third.getByRole("button", { name: /take .* out of the starting XI/ }).click();
     await expect(third).toContainText("empty");
     await expect(status).toContainText(`${filledBefore - 1} of 11`);
     await expect(fourth.getByRole("button").first()).toHaveText(fourthName);

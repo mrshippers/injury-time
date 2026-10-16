@@ -48,7 +48,7 @@ export function ConsentForm({ route, clubName, consented: initial, withdrawable 
       <p className="num mt-3 text-[11px] uppercase tracking-[0.12em] text-ink-faint">wording {CONSENT_VERSION}</p>
 
       {consented ? (
-        <div className="mt-6 border border-line bg-panel p-4" role="status">
+        <div className="mt-6  bg-panel/60 p-4" role="status">
           <p className="text-[14px] text-ink">You have given consent. Your club&apos;s staff can record your fitness.</p>
           {withdrawable && route.kind === "account" ? (
             <div className="mt-4 flex flex-wrap gap-3">

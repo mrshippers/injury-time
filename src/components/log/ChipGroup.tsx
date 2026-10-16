@@ -68,7 +68,7 @@ export function RpeChips({
             onFocus={roving.onFocus(i)}
             onKeyDown={roving.onKeyDown(i)}
             onClick={() => onChange(n)}
-            className={`pressable num flex h-11 w-full items-center justify-center rounded-[3px] border text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-[26px] sm:w-[26px] sm:text-[11px] ${
+            className={`pressable num flex h-11 w-full items-center justify-center rounded-[3px] plate plate-sm text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-[26px] sm:w-[26px] sm:text-[11px] ${
               selected
                 ? "border-mint bg-mint text-mint-ink"
                 : "border-line bg-panel-2 text-ink-dim hover:border-line-strong hover:text-ink"

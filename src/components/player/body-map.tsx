@@ -170,7 +170,7 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,232px)]">
         <div
           ref={stage}
-          className="relative aspect-[3/4] w-full max-h-[560px] touch-none select-none overflow-hidden border border-line bg-panel"
+          className="relative aspect-[3/4] w-full max-h-[560px] touch-none select-none overflow-hidden  bg-panel"
           data-testid="body-figure"
           data-facing={facing}
           data-surface={surface}
@@ -198,7 +198,7 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
               dpr={narrow ? [1, 1.5] : [1, 2]}
             />
           ) : null}
-          <div role="group" aria-label="turn the figure" className="absolute left-3 top-3 flex overflow-hidden rounded-[3px] border border-line">
+          <div role="group" aria-label="turn the figure" className="absolute left-3 top-3 flex overflow-hidden rounded-[3px]  bg-panel/50">
             {(["front", "back"] as const).map((side) => (
               <button
                 key={side}
@@ -220,7 +220,7 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
               aria-pressed={editing}
               onClick={() => setEditing((v) => !v)}
               onPointerDown={(e) => e.stopPropagation()}
-              className={`pressable absolute right-3 top-3 h-10 rounded-[3px] border border-line px-4 text-[12px] font-semibold tracking-[0.1em] uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-7 sm:px-3 sm:text-[11px] ${
+              className={`pressable absolute right-3 top-3 h-10 rounded-[3px] plate plate-sm px-4 text-[12px] font-semibold tracking-[0.1em] uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-7 sm:px-3 sm:text-[11px] ${
                 editing ? "bg-mint text-mint-ink" : "bg-panel-2 text-ink-dim hover:text-ink"
               }`}
             >

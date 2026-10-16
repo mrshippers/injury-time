@@ -39,7 +39,7 @@ export function SessionHeader({
     <div className="border-b border-line-strong bg-panel/60 px-3 pt-6 pb-4 sm:px-6">
       <p className="annot">{"// log a session"}</p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <div role="group" aria-label="session kind" className="flex overflow-hidden rounded-[3px] border border-line">
+        <div role="group" aria-label="session kind" className="flex overflow-hidden rounded-[3px]  bg-panel/50">
           {KINDS.map((k) => (
             <button
               key={k}
@@ -59,7 +59,7 @@ export function SessionHeader({
           aria-label="session date"
           value={sessionDate}
           onChange={(e) => onDateChange(e.target.value)}
-          className="num h-11 rounded-[3px] border border-line bg-panel-2 px-3 text-sm text-ink [color-scheme:dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-9"
+          className="num h-11 rounded-[3px] border-0 border-b border-line-strong bg-panel-2 px-3 text-sm text-ink [color-scheme:dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-9"
         />
         <input
           type="text"
@@ -71,7 +71,7 @@ export function SessionHeader({
           value={opponent}
           onChange={(e) => onOpponentChange(e.target.value)}
           maxLength={60}
-          className={`h-11 overflow-hidden rounded-[3px] border text-sm text-ink placeholder:text-ink-faint sm:h-9 transition-[opacity,transform,max-width,padding] duration-200 ease-out motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+          className={`h-11 overflow-hidden rounded-[3px] border-0 border-b border-line-strong text-sm text-ink placeholder:text-ink-faint sm:h-9 transition-[opacity,transform,max-width,padding] duration-200 ease-out motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
             kind === "match"
               ? "pointer-events-auto max-w-[220px] translate-y-0 border-line bg-panel-2 px-3 opacity-100"
               : "pointer-events-none w-0 max-w-0 -translate-y-1 border-0 border-transparent px-0 opacity-0"

@@ -61,7 +61,7 @@ export function SignupFlow({ signedInAs }: { signedInAs: string | null }) {
 
       {step === "email" ? (
         sent ? (
-          <div className="mt-6 border border-line bg-panel p-5" role="status">
+          <div className="mt-6  bg-panel/60 p-5" role="status">
             <p className="text-[14px] text-ink">
               Link sent to <span className="num text-mint">{sent}</span>.
             </p>
@@ -123,7 +123,7 @@ export function SignupFlow({ signedInAs }: { signedInAs: string | null }) {
             <legend className={LABEL}>you are</legend>
             <div className="mt-1.5 flex flex-wrap gap-2">
               {(["manager", "coach", "medical"] as const).map((r) => (
-                <label key={r} className="flex h-11 cursor-pointer items-center gap-2 border border-line-strong bg-panel px-3 text-[14px] text-ink has-[:checked]:border-mint">
+                <label key={r} className="flex h-11 cursor-pointer items-center gap-2 plate plate-sm bg-panel px-3 text-[14px] text-ink has-[:checked]:border-mint">
                   <input type="radio" name="role" value={r} required defaultChecked={r === "manager"} className="accent-mint" />
                   {r}
                 </label>
@@ -154,7 +154,7 @@ export function SignupFlow({ signedInAs }: { signedInAs: string | null }) {
             value={paste}
             onChange={(e) => setPaste(e.target.value)}
             rows={10}
-            className="mt-1.5 w-full border border-line-strong bg-panel p-3 font-mono text-[13.5px] text-ink placeholder:text-ink-faint focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-mint"
+            className="mt-1.5 w-full border-0 border-b border-line-strong bg-transparent p-3 font-mono text-[13.5px] text-ink placeholder:text-ink-faint focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-mint"
             placeholder={"1 Danny Flynn GK\n7 Jordan Mcnally MF\n9 Kushan Thomaj ST"}
           />
           {preview ? (

@@ -44,7 +44,7 @@ export function JoinForm({ token, signedInAs, role }: { token: string; signedInA
 
   if (sent)
     return (
-      <div className="border border-line bg-panel p-5" role="status">
+      <div className=" bg-panel/60 p-5" role="status">
         <p className="text-[14px] text-ink">
           Link sent to <span className="num text-mint">{sent}</span>.
         </p>

@@ -2,17 +2,17 @@ import { daysBetweenISO, getDashboard, getSquadBoard } from "@/lib/data";
 import { ClubStop } from "@/components/club/crest";
 import { matchWeather } from "@/lib/weather/grounds";
 import { LeagueTable } from "@/components/home/league-table";
+import { HubPager, type HubPage } from "@/components/home/hub-pager";
+import { QuickLinks } from "@/components/home/quick-links";
+import { cupRuns } from "@/lib/home/cups";
 import { getHomeSeason } from "@/lib/home/data";
-import Link from "next/link";
 
-import { sourceLine } from "@/lib/club/source";
 import { divisionLine } from "@/lib/league";
 import { ordinal, seasonContext } from "@/lib/home/season-context";
 import { getViewer } from "@/lib/viewer";
 import { AvailabilityStrip } from "@/components/home/availability-strip";
 import { CongestionPanel } from "@/components/home/congestion-panel";
 import { findCongestion } from "@/lib/home/congestion";
-import { HubTiles, type Tile } from "@/components/home/hub-tiles";
 import { FirstWeek } from "@/components/home/first-week";
 import { firstWeek } from "@/lib/signup/actions";
 import { SeasonLine } from "@/components/home/season-line";
@@ -20,7 +20,7 @@ import { CupsSection } from "@/components/home/cups";
 import { lastResult } from "@/lib/home/cups";
 import { FormVital, NextMatchVital, ScorersVital, WatchVital } from "@/components/home/vitals";
 import { StatReading } from "@/components/charts";
-import { longDate, shortDate } from "@/components/squad/format";
+import { longDate } from "@/components/squad/format";
 
 export const dynamic = "force-dynamic";
 
@@ -43,11 +43,11 @@ export default async function Home() {
   const fixtures = season.fixtures.length > 0 ? season.fixtures : dash.fixtures;
   const next = fixtures[0] ?? null;
   const daysUntil = next ? daysBetweenISO(asOf, next.match_date) : null;
-  const unavailable = counts.injured + counts.suspended;
   const hasLoad = board.rows.some((r) => r.readiness.key !== "unknown");
   const sinceLast = lastSession ? daysBetweenISO(lastSession.date, asOf) : null;
   const clubName = viewer.club.name || club.name;
   const weather = next ? await matchWeather(clubName, next, asOf) : null;
+  const cupsCount = cupRuns(season.results, season.fixtures, asOf).length;
   const division = divisionLine(viewer.club.league, viewer.club.division);
   const congestion = findCongestion(
     fixtures,
@@ -61,120 +61,92 @@ export default async function Home() {
     asOf,
   );
 
-  const tiles: Tile[] = [
-    { href: "/squad", label: "squad", headline: `${counts.fit} of ${dash.squadSize}`, detail: "available, pick the side", tone: counts.fit >= 14 ? "ok" : counts.fit >= 11 ? "warn" : "bad" },
-    { href: "/team", label: "team", headline: season.calls.total === 0 ? "no calls" : `${season.calls.in} in`, detail: next ? `for ${next.opponent}` : "next match", tone: season.calls.total === 0 ? "neutral" : "ok" },
+
+  const flat = "[&>section]:mt-0 [&>section]:border-t-0 [&>section]:pt-0";
+  const pages: HubPage[] = [
     {
-      href: "/log",
-      label: "log",
-      headline: sinceLast === null ? "nothing yet" : sinceLast === 0 ? "today" : sinceLast === 1 ? "yesterday" : `${sinceLast} days ago`,
-      detail: lastSession ? `${lastSession.kind === "match" ? "match" : "training"} · ${lastSession.logged} players` : "one tap per player",
-      tone: sinceLast !== null && sinceLast > 4 ? "warn" : "neutral",
+      key: "next",
+      label: "next game",
+      content: (
+        <div data-stagger className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+          <div>
+            <FirstWeek check={week} />
+            <NextMatchVital next={next} daysUntil={daysUntil} fit={counts.fit} calls={season.calls} squadSize={dash.squadSize} last={lastResult(season.results)} weather={weather} />
+          </div>
+          <div className="flex flex-col gap-6">
+            {congestion ? <CongestionPanel c={congestion} /> : null}
+            <QuickLinks
+              links={[
+                { href: "/squad", label: "starting XI", detail: `${counts.fit} of ${dash.squadSize} available` },
+                { href: "/team", label: "who's in", detail: season.calls.total === 0 ? "nobody has answered" : `${season.calls.in} in · ${season.calls.out} out` },
+                { href: "/log", label: "log a session", detail: sinceLast === null ? "nothing logged yet" : sinceLast === 0 ? "last: today" : `last: ${sinceLast} days ago` },
+              ]}
+            />
+          </div>
+        </div>
+      ),
     },
-    { href: "/squad", label: "treatment", headline: unavailable === 0 ? "nobody out" : `${unavailable} out`, detail: dash.backSoon[0] ? `${dash.backSoon[0].player.name.split(" ").at(-1)} back ${shortDate(dash.backSoon[0].availability!.return_date!)}` : counts.doubt > 0 ? `${counts.doubt} carrying a doubt` : "no return dates this week", tone: unavailable >= 3 ? "bad" : unavailable > 0 ? "warn" : "ok" },
-    { href: "/film", label: "film", headline: "the film room", detail: "clip in, tuesday out" },
-    { href: "/team", label: "fixtures", headline: `${fixtures.length} in the diary`, detail: fixtures[1] ? `then ${fixtures[1].opponent} (${fixtures[1].venue}) ${shortDate(fixtures[1].match_date)}` : "add the next match", tone: "neutral" },
+    ...(season.standings.length
+      ? [{ key: "table", label: "table", content: <div data-stagger className={flat}><LeagueTable standings={season.standings} asOf={season.standingsAsOf} /></div> }]
+      : []),
+    {
+      key: "season",
+      label: "season",
+      content: (
+        <div data-stagger className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-end">
+          <div>
+            {ctx.hasSeason ? (
+              <StatReading value={String(ctx.points)} unit="pts" label={ctx.position ? `${ordinal(ctx.position)} of ${ctx.teams} · ${ctx.played} played` : `${ctx.played} played`} size="xl" glow />
+            ) : (
+              <StatReading value={String(counts.fit)} unit={`of ${dash.squadSize}`} label="available for the next match" size="xl" glow tone={counts.fit >= 11 ? "ink" : "bad"} />
+            )}
+            <ul className="mt-4 flex max-w-[40ch] flex-col gap-1.5">
+              {ctx.sentences.map((t) => (
+                <li key={t} className="text-[14px] leading-snug text-ink">
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="min-w-0">
+            {ctx.hasSeason ? <SeasonLine ctx={ctx} results={season.results} fixtures={season.fixtures} asOf={asOf} /> : null}
+          </div>
+          <div className="lg:col-span-2">
+            <FormVital ctx={ctx} results={season.results} />
+          </div>
+        </div>
+      ),
+    },
+    ...(cupsCount > 0 ? [{ key: "cups", label: "cups", content: <div data-stagger className={flat}><CupsSection results={season.results} fixtures={season.fixtures} asOf={asOf} /></div> }] : []),
+    {
+      key: "squad",
+      label: "squad",
+      content: (
+        <div data-stagger className="flex flex-col gap-8">
+          <AvailabilityStrip rows={board.rows} counts={counts} />
+          <div className="grid gap-8 md:grid-cols-2">
+            <ScorersVital feed={season.feedScorers} logged={dash.topScorers} feedAsOf={season.feedAsOf} />
+            <WatchVital rows={dash.watchList} hasLoad={hasLoad} backSoon={dash.backSoon} />
+          </div>
+        </div>
+      ),
+    },
   ];
 
   return (
-    <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 py-7 sm:px-8 sm:py-9">
-      <header className="flex flex-col gap-2">
-        <p className="annot">{"// the hub"}</p>
-        <div className="flex items-center gap-4">
-          <h1 className="display text-4xl sm:text-5xl">
-            {clubName}
-            <ClubStop team={clubName} />
-          </h1>
-        </div>
-        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-dim">
-          <span>{division || club.league}</span>
-          <span aria-hidden className="text-line-strong">/</span>
-          <span className="num">
-            as of <time dateTime={asOf}>{longDate(asOf)}</time>
-          </span>
-          {viewer.guest ? (
-            <>
-              <span aria-hidden className="text-line-strong">/</span>
-              <span>{viewer.readOnly ? "a real club, read only: switch to Kilburn Athletic to try everything" : "looking as a guest manager"}</span>
-            </>
-          ) : null}
+    <main className="mx-auto flex h-[calc(100dvh-49px)] w-full max-w-[1240px] flex-col overflow-hidden px-4 pt-5 max-sm:h-[calc(100dvh-49px-env(safe-area-inset-bottom)-64px)] sm:px-8 sm:pt-7">
+      <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
+        <h1 className="display text-[30px] leading-none sm:text-[40px]">
+          {clubName}
+          <ClubStop team={clubName} />
+        </h1>
+        <p className="num text-[11.5px] text-ink-dim">
+          {division || club.league} · <time dateTime={asOf}>{longDate(asOf)}</time>
         </p>
       </header>
-
-      <FirstWeek check={week} />
-
-      {/* primary: the season, one number and one line */}
-      <section aria-labelledby="season-heading" className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-end">
-        <div>
-          <p className="annot" id="season-heading">{"// the season"}</p>
-          {ctx.hasSeason ? (
-            <StatReading
-              value={String(ctx.points)}
-              unit="pts"
-              label={ctx.position ? `${ordinal(ctx.position)} of ${ctx.teams} · ${ctx.played} played` : `${ctx.played} played · no table on the feed yet`}
-              size="xl"
-              glow
-              className="mt-2"
-            />
-          ) : (
-            <StatReading value={String(counts.fit)} unit={`of ${dash.squadSize}`} label="available for the next match" size="xl" glow className="mt-2" tone={counts.fit >= 11 ? "ink" : "bad"} />
-          )}
-          <ul className="mt-4 flex max-w-[40ch] flex-col gap-1.5">
-            {ctx.sentences.map((s) => (
-              <li key={s} className="text-[14px] leading-snug text-ink">
-                {s}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="min-w-0">
-          {ctx.hasSeason ? (
-            <SeasonLine ctx={ctx} results={season.results} fixtures={season.fixtures} asOf={asOf} />
-          ) : (
-            <AvailabilityStrip rows={board.rows} counts={counts} />
-          )}
-          <p className="annot mt-2 text-gold-dim">
-            {ctx.hasSeason
-              ? `points after each league game · pace lines from the origin · christmas where the diary puts it${season.standingsAsOf ? ` · table ${shortDate(season.standingsAsOf)}` : ""}`
-              : "one block per player, in squad-number order"}
-          </p>
-        </div>
-      </section>
-
-      {congestion ? (
-        <div className="mt-10">
-          <CongestionPanel c={congestion} />
-        </div>
-      ) : null}
-
-      {/* secondary: the vitals */}
-      <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2 xl:grid-cols-[1.1fr_1fr_1fr_1.2fr]">
-        <NextMatchVital next={next} daysUntil={daysUntil} fit={counts.fit} calls={season.calls} squadSize={dash.squadSize} last={lastResult(season.results)} weather={weather} />
-        <FormVital ctx={ctx} results={season.results} />
-        <ScorersVital feed={season.feedScorers} logged={dash.topScorers} feedAsOf={season.feedAsOf} />
-        <WatchVital rows={dash.watchList} hasLoad={hasLoad} backSoon={dash.backSoon} />
+      <div className="mt-4 flex min-h-0 flex-1 flex-col">
+        <HubPager pages={pages} />
       </div>
-
-      <CupsSection results={season.results} fixtures={season.fixtures} asOf={asOf} />
-      <LeagueTable standings={season.standings} asOf={season.standingsAsOf} />
-
-      {ctx.hasSeason ? (
-        <div className="mt-10">
-          <p className="annot mb-3">{"// the squad today"}</p>
-          <AvailabilityStrip rows={board.rows} counts={counts} />
-        </div>
-      ) : null}
-
-      {/* the modules, one quiet row */}
-      <div className="mt-12">
-        <HubTiles tiles={tiles} />
-      </div>
-
-      {/* tertiary */}
-      <p className="annot mt-6 text-gold-dim">
-        <Link href="/club" className="underline decoration-gold-dim underline-offset-4 hover:text-gold">{sourceLine(viewer.club).short}</Link>
-        &ensp;·&ensp;red zone is the week a hamstring goes
-      </p>
     </main>
   );
 }

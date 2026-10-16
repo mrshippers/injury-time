@@ -16,7 +16,7 @@ import { daysAwayWord, weekdayWord } from "@/lib/team/format";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "the team - injury time." };
+export const metadata = { title: "who's in - injury time." };
 
 /**
  * The squad's page. A player opens it on the bus: who are we playing, am I
@@ -36,18 +36,10 @@ export default async function TeamPage() {
   return (
     <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 py-7 sm:px-8 sm:py-9">
       <div className="mb-6 border-b border-line pb-4">
-        {viewer.guest ? (
-          <p className="text-[13px] leading-relaxed text-ink-dim">
-            <span aria-hidden className="mr-2 inline-block h-2.5 w-2.5 border border-ink-dim align-[-1px]" />
-            <span className="mr-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink">notifications</span>
-            come with a club account: the gaffer&apos;s notices and match calls, straight to your phone
-          </p>
-        ) : (
-          <NotifyToggle />
-        )}
+        {viewer.guest ? null : <NotifyToggle />}
       </div>
       <header className="mb-6">
-        <p className="annot">{`// the team · ${viewer.club.name.toLowerCase()}`}</p>
+        <p className="annot">{`// who's in · ${viewer.club.name.toLowerCase()}`}</p>
         {next ? (
           <>
             <div className="mt-2 flex items-center gap-4">
@@ -67,7 +59,7 @@ export default async function TeamPage() {
             <MatchWeatherCard weather={weather} className="mt-3 max-w-[360px]" />
             <Link
               href="/matchday"
-              className="pressable mt-4 inline-flex h-10 items-center rounded-[2px] border border-line-strong bg-pitch px-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-panel-2"
+              className="pressable mt-4 inline-flex h-10 items-center rounded-[2px] plate plate-sm bg-panel-2 px-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-panel-2"
             >
               matchday screen
             </Link>
@@ -81,9 +73,7 @@ export default async function TeamPage() {
             <p className="mt-3 text-[13.5px] text-ink-dim">Add the next fixture and the squad can start calling in.</p>
           </>
         )}
-        {viewer.guest ? (
-          <p className="annot mt-3 text-gold-dim">{"// guest view · you can call for anyone, a signed-in player calls only for themselves"}</p>
-        ) : (
+        {viewer.guest ? null : (
           <p className="annot mt-3 text-gold-dim">{`// signed in as ${viewer.role}`}</p>
         )}
       </header>

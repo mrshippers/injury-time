@@ -98,7 +98,7 @@ const PHONE_SORTS: { key: SortKey; dir: Dir; label: string }[] = [
 const HEAD = "annot sticky top-0 z-20 border-b border-line-strong bg-panel px-2 py-1.5 text-left font-normal";
 const CELL = "px-2 align-middle";
 const SELECT =
-  "num h-7 border border-line-strong bg-panel px-1.5 text-[11.5px] text-ink [color-scheme:dark] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-mint";
+  "num h-7 border-0 border-b border-line-strong bg-transparent px-1 text-[11.5px] text-ink [color-scheme:dark] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-mint";
 
 export function SquadList({
   rows,
@@ -218,10 +218,10 @@ export function SquadList({
   };
 
   return (
-    <div className="overflow-x-clip border border-line bg-panel">
+    <div className="overflow-x-clip">
       {/* filters */}
       <div className="flex flex-wrap items-center gap-2 border-b border-line px-2 py-2">
-        <div role="group" aria-label="position" className="flex overflow-hidden border border-line">
+        <div role="group" aria-label="position" className="flex">
           {(["all", "GK", "DF", "MF", "FW"] as const).map((p) => (
             <button
               key={p}
@@ -230,8 +230,8 @@ export function SquadList({
               onClick={() => {
                 remember({ position: p });
               }}
-              className={`pressable num h-7 px-2 text-[11px] font-semibold tracking-[0.06em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
-                position === p ? "bg-mint text-mint-ink" : "bg-panel-2 text-ink-dim hover:text-ink"
+              className={`pressable plate plate-sm num h-7 text-[11px] font-semibold tracking-[0.06em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
+                position === p ? "bg-panel-2 text-ink shadow-[inset_0_-2px_0_var(--mint)]" : "text-ink-dim hover:text-ink"
               }`}
             >
               {p}
@@ -352,7 +352,7 @@ export function SquadList({
               onClick={() => setPage(at - 1)}
               disabled={at === 0}
               aria-label="previous page"
-              className="pressable h-8 min-w-8 border border-line px-2 text-ink hover:bg-panel-2 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint max-sm:h-11 max-sm:min-w-11"
+              className="pressable plate plate-sm h-8 min-w-8 bg-panel text-ink hover:bg-panel-2 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint max-sm:h-11 max-sm:min-w-11"
             >
               ‹
             </button>
@@ -364,7 +364,7 @@ export function SquadList({
               onClick={() => setPage(at + 1)}
               disabled={at >= pageCount - 1}
               aria-label="next page"
-              className="pressable h-8 min-w-8 border border-line px-2 text-ink hover:bg-panel-2 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint max-sm:h-11 max-sm:min-w-11"
+              className="pressable plate plate-sm h-8 min-w-8 bg-panel text-ink hover:bg-panel-2 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint max-sm:h-11 max-sm:min-w-11"
             >
               ›
             </button>
@@ -463,8 +463,8 @@ function SquadListRow({
               beginPress(e, player.id, true);
             }}
             onClick={onSelect}
-            className={`pressable inline-flex h-7 w-7 touch-none items-center justify-center border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
-              selected ? "border-mint text-mint" : onPitch ? "border-mint/40 text-ink" : "border-line text-ink-dim"
+            className={`pressable plate plate-sm inline-flex h-7 min-w-8 touch-none items-center justify-center tabular-nums transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ${
+              selected ? "bg-mint text-mint-ink" : onPitch ? "bg-mint/15 text-ink" : "text-ink-dim hover:text-ink"
             }`}
           >
             {player.squad_number ?? "·"}
@@ -480,7 +480,7 @@ function SquadListRow({
               {player.name}
             </Link>
             {onPitch ? (
-              <span aria-label="in the eleven" className="num shrink-0 text-[9.5px] font-bold tracking-[0.1em] text-mint">
+              <span aria-label="in the starting XI" className="num shrink-0 text-[9.5px] font-bold tracking-[0.1em] text-mint">
                 XI
               </span>
             ) : null}
@@ -504,9 +504,9 @@ function SquadListRow({
               <button
                 type="button"
                 aria-pressed={onPitch}
-                aria-label={onPitch ? `take ${player.name} out of the side` : `put ${player.name} in the side`}
+                aria-label={onPitch ? `take ${player.name} out of the starting XI` : `put ${player.name} in the starting XI`}
                 onClick={onToggleIn}
-                className={`pressable inline-flex h-10 w-10 items-center justify-center rounded-[2px] border text-[12px] font-bold tracking-[0.06em] transition-colors duration-[190ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:hidden ${
+                className={`pressable inline-flex h-10 w-10 items-center justify-center rounded-[2px] plate plate-sm text-[12px] font-bold tracking-[0.06em] transition-colors duration-[190ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:hidden ${
                   onPitch ? "border-mint bg-mint text-mint-ink" : "border-line-strong bg-panel-2 text-ink-dim"
                 }`}
               >
@@ -588,7 +588,7 @@ function SquadCard({
               {player.name}
             </Link>
             {onPitch ? (
-              <span aria-label="in the eleven" className="num shrink-0 rounded-full bg-mint/15 px-1.5 text-[10px] font-bold tracking-[0.1em] text-mint">
+              <span aria-label="in the starting XI" className="plate plate-sm num shrink-0 bg-mint/15 text-[10px] font-bold tracking-[0.1em] text-mint">
                 XI
               </span>
             ) : null}
@@ -611,7 +611,7 @@ function SquadCard({
             <button
               type="button"
               aria-pressed={onPitch}
-              aria-label={onPitch ? `take ${player.name} out of the side` : `put ${player.name} in the side`}
+              aria-label={onPitch ? `take ${player.name} out of the starting XI` : `put ${player.name} in the starting XI`}
               onClick={onToggleIn}
               className={`pressable toggle-in ${onPitch ? "is-on" : ""}`}
             >

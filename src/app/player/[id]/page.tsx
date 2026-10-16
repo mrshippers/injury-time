@@ -39,7 +39,7 @@ export default async function PlayerPage(props: PageProps<"/player/[id]">) {
           <div className="flex flex-wrap items-center gap-4">
             <Link
               href={`/player/${profile.player.id}/hub`}
-              className="pressable inline-flex min-h-11 items-center gap-2 border border-gold/50 px-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-gold hover:border-gold sm:min-h-9"
+              className="pressable inline-flex min-h-11 items-center gap-2 plate plate-sm border-gold/50 px-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-gold hover:border-gold sm:min-h-9"
             >
               {`${profile.player.name.split(" ")[0]}'s page`} <span aria-hidden>→</span>
             </Link>

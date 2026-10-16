@@ -91,7 +91,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
         </div>
         <div className="min-w-0">
           <video
-            className="aspect-video w-full border border-line bg-panel"
+            className="aspect-video w-full  bg-panel"
             src="/pilot/belstone-pilot.mp4"
             poster="/pilot/belstone-pilot-poster.jpg"
             autoPlay
@@ -120,7 +120,6 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           </div>
           <div>
             <TrySwitch />
-            <p className="num mt-2 text-[11.5px] text-ink-dim">Try it. It&apos;s the real switch, on a row that isn&apos;t a real player.</p>
           </div>
         </div>
 
@@ -144,9 +143,8 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               width={756}
               height={520}
               aria-label="The squad room for Belstone: the eleven on a floodlit pitch, 4-2-3-1, our own goal at the bottom, the camera drifting slowly"
-              className="h-auto w-full border border-line bg-panel"
+              className="h-auto w-full  bg-panel"
             />
-            <figcaption className="num mt-2 text-[11.5px] text-ink-dim">Belstone&apos;s squad, from the public appearances list. Positions aren&apos;t public, so until you set them the side is a first guess: most-played, scorers up front.</figcaption>
           </figure>
         </div>
 
@@ -170,9 +168,8 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               width={424}
               height={480}
               aria-label="A player's 3D body turning a full circle, with a hamstring injury lit on the back of the right leg"
-              className="h-auto w-full border border-line bg-panel"
+              className="h-auto w-full  bg-panel"
             />
-            <figcaption className="num mt-2 text-[11.5px] text-ink-dim">A demo player on our made-up club. Belstone has no health data in here.</figcaption>
           </figure>
         </div>
 
@@ -212,7 +209,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           </div>
           <figure>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/pilot/belstone-review.jpg" alt="Belstone's season review: the league record, home against away, the table around the club" width={1100} height={712} className="h-auto w-full border border-line" loading="lazy" />
+            <img src="/pilot/belstone-review.jpg" alt="Belstone's season review: the league record, home against away, the table around the club" width={1100} height={712} className="h-auto w-full  bg-panel/50" loading="lazy" />
           </figure>
         </div>
       </section>
@@ -252,7 +249,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
         <p className="annot" id="next-h">{"// where it's going"}</p>
         <p className="num mt-2 text-[11.5px] text-ink-dim">swipe for more →</p>
         <div className="swipe-row -mx-4 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-4 pb-4 sm:-mx-8 sm:px-8">
-          <article className="w-[84%] max-w-[360px] shrink-0 snap-start border border-line bg-panel p-5 sm:w-[340px]">
+          <article className="w-[84%] max-w-[360px] shrink-0 snap-start  bg-panel/60 p-5 sm:w-[340px]">
             <h3 className="display text-[22px] text-ink">Veo, connected</h3>
             <div className="mt-4 flex flex-col gap-3 text-[14px] leading-snug text-ink-dim">
               <p>
@@ -267,7 +264,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               </p>
             </div>
           </article>
-          <article className="w-[84%] max-w-[360px] shrink-0 snap-start border border-line bg-panel p-5 sm:w-[340px]">
+          <article className="w-[84%] max-w-[360px] shrink-0 snap-start  bg-panel/60 p-5 sm:w-[340px]">
             <h3 className="display text-[22px] text-ink">Player health</h3>
             <div className="mt-4 flex flex-col gap-3 text-[14px] leading-snug text-ink-dim">
               <p>
@@ -282,7 +279,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               </p>
             </div>
           </article>
-          <article className="w-[84%] max-w-[360px] shrink-0 snap-start border border-line bg-panel p-5 sm:w-[340px]">
+          <article className="w-[84%] max-w-[360px] shrink-0 snap-start  bg-panel/60 p-5 sm:w-[340px]">
             <h3 className="display text-[22px] text-ink">Pre-match, for every player</h3>
             <div className="mt-4 flex flex-col gap-3 text-[14px] leading-snug text-ink-dim">
               <p>
@@ -292,7 +289,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               </p>
             </div>
           </article>
-          <article className="w-[84%] max-w-[360px] shrink-0 snap-start border border-line bg-panel p-5 sm:w-[340px]">
+          <article className="w-[84%] max-w-[360px] shrink-0 snap-start  bg-panel/60 p-5 sm:w-[340px]">
             <h3 className="display text-[22px] text-ink">Answers by a deadline</h3>
             <div className="mt-4 flex flex-col gap-3 text-[14px] leading-snug text-ink-dim">
               <p>
@@ -302,7 +299,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               </p>
             </div>
           </article>
-          <article className="w-[84%] max-w-[360px] shrink-0 snap-start border border-line bg-panel p-5 sm:w-[340px]">
+          <article className="w-[84%] max-w-[360px] shrink-0 snap-start  bg-panel/60 p-5 sm:w-[340px]">
             <h3 className="display text-[22px] text-ink">Matchday weather</h3>
             <div className="mt-4 flex flex-col gap-3 text-[14px] leading-snug text-ink-dim">
               <p>

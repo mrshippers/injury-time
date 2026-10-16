@@ -42,12 +42,12 @@ export function AddPlayerForm() {
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className={`${BTN} border border-line bg-panel-2 text-ink-dim hover:text-ink`}
+        className={`${BTN} plate plate-sm bg-panel-2 text-ink-dim hover:text-ink`}
       >
         {open ? "close" : "add a player"}
       </button>
       {open ? (
-        <form onSubmit={submit} className="mt-2 flex flex-wrap items-end gap-2 border border-line bg-panel p-3" aria-label="add a player">
+        <form onSubmit={submit} className="mt-2 flex flex-wrap items-end gap-2  bg-panel/60 p-3" aria-label="add a player">
           <label className="flex flex-col gap-1">
             <span className="text-[10.5px] tracking-[0.12em] uppercase text-ink-dim">name</span>
             <input className={`${FIELD} w-44`} value={name} onChange={(e) => setName(e.target.value)} required minLength={2} maxLength={60} placeholder="first and last" />
@@ -125,7 +125,7 @@ export function EditPlayerRow({ player, onDone }: { player: Player; onDone: () =
       <button type="submit" disabled={pending} className={`${BTN} bg-mint text-mint-ink`}>
         {pending ? "saving" : "save"}
       </button>
-      <button type="button" onClick={onDone} className={`${BTN} border border-line bg-panel text-ink-dim hover:text-ink`}>
+      <button type="button" onClick={onDone} className={`${BTN} plate plate-sm bg-panel text-ink-dim hover:text-ink`}>
         cancel
       </button>
       <span className="ml-auto flex items-center gap-2">
@@ -135,12 +135,12 @@ export function EditPlayerRow({ player, onDone }: { player: Player; onDone: () =
             <button type="button" onClick={retire} disabled={pending} className={`${BTN} bg-out text-ink`}>
               yes, retire
             </button>
-            <button type="button" onClick={() => setConfirmRetire(false)} className={`${BTN} border border-line bg-panel text-ink-dim`}>
+            <button type="button" onClick={() => setConfirmRetire(false)} className={`${BTN} plate plate-sm bg-panel text-ink-dim`}>
               no
             </button>
           </>
         ) : (
-          <button type="button" onClick={() => setConfirmRetire(true)} className={`${BTN} border border-out/40 bg-panel text-out`}>
+          <button type="button" onClick={() => setConfirmRetire(true)} className={`${BTN} plate plate-sm border-out/40 bg-panel text-out`}>
             retire
           </button>
         )}
@@ -165,7 +165,7 @@ export function SetPositionControl({ player }: { player: Player }) {
           await setPositionAction({ id: player.id, position });
         });
       }}
-      className="num h-6 w-[54px] appearance-none border border-gold-dim bg-panel px-1.5 text-[10.5px] tracking-[0.06em] text-gold [color-scheme:dark] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-mint"
+      className="num h-6 w-[54px] appearance-none border-0 border-b border-line-strong border-gold-dim bg-transparent px-1.5 text-[10.5px] tracking-[0.06em] text-gold [color-scheme:dark] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-mint"
       title="the league feed does not carry positions; set his"
     >
       <option value="">pos?</option>

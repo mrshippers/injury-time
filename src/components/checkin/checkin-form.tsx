@@ -20,7 +20,7 @@ export function CheckinForm({ token, clubName, consented, todayDone }: { token: 
   return (
     <div className="mt-6">
       {!consented ? (
-        <section aria-labelledby="consent-h" className="border border-line bg-panel px-4 py-4">
+        <section aria-labelledby="consent-h" className=" bg-panel/60 px-4 py-4">
           <p className="annot" id="consent-h">{"// before the first one"}</p>
           <ul className="mt-3 flex flex-col gap-2 text-[14px] leading-relaxed text-ink-dim">
             <li><span className="text-ink">What:</span> how sore you are (0 to 10), how hard your last session felt (1 to 10), and whether you are available. Nothing else, no free text.</li>
@@ -103,7 +103,7 @@ export function CheckinForm({ token, clubName, consented, todayDone }: { token: 
                 type="button"
                 disabled={pending}
                 onClick={() => start(async () => setState(await withdrawCheckinsAction(token)))}
-                className="pressable h-10 rounded-[2px] border border-out px-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink"
+                className="pressable h-10 rounded-[2px] plate plate-sm border-out px-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink"
               >
                 yes, delete
               </button>

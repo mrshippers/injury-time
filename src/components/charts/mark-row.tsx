@@ -6,9 +6,9 @@
 export type Mark = { result: "W" | "D" | "L"; title: string };
 
 const TONE: Record<Mark["result"], string> = {
-  W: "text-fit border-fit/40",
-  D: "text-ink-dim border-line-strong",
-  L: "text-out border-out/40",
+  W: "text-[var(--win)] bg-[var(--win)]/14",
+  D: "text-ink bg-panel-2",
+  L: "text-out bg-out/14",
 };
 
 export function MarkRow({ marks, label, className = "" }: { marks: Mark[]; label: string; className?: string }) {
@@ -21,7 +21,7 @@ export function MarkRow({ marks, label, className = "" }: { marks: Mark[]; label
         <li
           key={i}
           title={m.title}
-          className={`num flex h-7 w-7 items-center justify-center rounded-[2px] border bg-pitch text-[12px] font-semibold ${TONE[m.result]} chart-pop`}
+          className={`plate plate-sm num flex h-7 min-w-9 items-center justify-center text-[12px] font-semibold ${TONE[m.result]} chart-pop`}
           style={{ animationDelay: `${i * 60}ms` }}
         >
           {m.result}

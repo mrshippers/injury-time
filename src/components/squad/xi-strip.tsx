@@ -36,9 +36,9 @@ export function XiStrip({
   onCaptain?: (playerId: string) => void;
 }) {
   return (
-    <section aria-labelledby="xi-heading" className="mt-3 border border-line bg-panel">
+    <section aria-labelledby="xi-heading" className="mt-3 bg-panel/60">
       <p className="annot flex items-baseline justify-between border-b border-line px-3 py-2" id="xi-heading">
-        <span>{"// the eleven"}</span>
+        <span>{"// starting XI"}</span>
         <span className="num text-gold-dim">
           {bench.length} spare
         </span>
@@ -89,7 +89,7 @@ export function XiStrip({
               {row ? (
                 <button
                   type="button"
-                  aria-label={`take ${row.player.name} out of the eleven`}
+                  aria-label={`take ${row.player.name} out of the starting XI`}
                   onClick={() => onRemove(i)}
                   className="pressable shrink-0 border-l border-line px-2.5 text-[12px] text-ink-faint hover:text-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint"
                 >

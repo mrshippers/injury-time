@@ -146,3 +146,14 @@ describe("slotLabel", () => {
     }
   });
 });
+
+describe("named slot", () => {
+  it("a defender marked CB goes in a centre-back slot, not left back", () => {
+    const f = FORMATIONS.find((x) => x.name === "4-2-3-1")!;
+    const rows = [row(1, "GK"), row(2, "DF"), row(3, "DF"), row(4, "DF"), row(5, "DF")];
+    rows[1] = { ...rows[1], player: { ...rows[1].player, id: "cap", external_stats: { slot: "CB" } as never } };
+    const xi = pickXI(rows, f, { prefer: new Set(["cap"]) });
+    const where = xi.picks.find((p) => p.row?.player.id === "cap")?.slot.label;
+    expect(where).toBe("CB");
+  });
+});
