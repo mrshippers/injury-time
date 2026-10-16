@@ -112,7 +112,7 @@ export function ResultForm({ allowed, reason, today, awaiting = [] }: { allowed:
                 aria-pressed={on}
                 disabled={!allowed || pending}
                 onClick={() => setF((s) => ({ ...s, matchDate: a.match_date, opponent: a.opponent, venue: a.venue, competition: a.competition, goalsFor: "", goalsAgainst: "" }))}
-                className={`pressable num h-9 border px-3 text-[12px] ${on ? "border-mint text-mint" : "border-line-strong text-ink-dim hover:text-ink"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint`}
+                className={`pressable num h-9 plate plate-sm px-3 text-[12px] ${on ? "border-mint text-mint" : "border-line-strong text-ink-dim hover:text-ink"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint`}
               >
                 {a.venue === "A" ? "at" : "v"} {a.opponent} · {a.match_date.slice(5)}
               </button>

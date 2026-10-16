@@ -50,7 +50,7 @@ export function NextMatchVital({ next, daysUntil, fit, calls, squadSize, last, w
             </span>
           </p>
           <p className="text-[12.5px] text-ink-dim">
-            {isLeague(next.competition) ? null : <span className="num mr-2 border border-gold-dim px-1.5 py-px text-[10px] font-semibold tracking-[0.12em] text-gold">CUP TIE</span>}
+            {isLeague(next.competition) ? null : <span className="num mr-2 plate plate-sm border-gold-dim px-1.5 py-px text-[10px] font-semibold tracking-[0.12em] text-gold">CUP TIE</span>}
             {next.competition}
           </p>
           <MatchWeatherCard weather={weather} className="mt-1" />
@@ -85,11 +85,11 @@ export function NextMatchVital({ next, daysUntil, fit, calls, squadSize, last, w
 /** The last game in any competition: the cup tie on Saturday counts as much as a league one. */
 function LastTimeOut({ r }: { r: Result }) {
   const tone = r.goals_for > r.goals_against ? "W" : r.goals_for === r.goals_against ? "D" : "L";
-  const box = tone === "W" ? "border-[var(--win)]/50 text-[var(--win)]" : tone === "L" ? "border-out/50 text-out" : "border-line-strong text-ink";
+  const box = tone === "W" ? "bg-[var(--win)]/15 text-[var(--win)]" : tone === "L" ? "bg-out/15 text-out" : "bg-panel-2 text-ink";
   return (
     <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-line pt-3 text-[12.5px] text-ink-dim">
       <span className="annot text-[10px]">last time out</span>
-      <span className={`num flex h-6 w-6 items-center justify-center rounded-[2px] border bg-pitch text-[11.5px] font-semibold ${box}`}>{tone}</span>
+      <span className={`plate plate-sm num flex h-6 min-w-8 items-center justify-center text-[11.5px] font-semibold ${box}`}>{tone}</span>
       <span className="num font-semibold text-ink">
         {r.goals_for}-{r.goals_against}
       </span>

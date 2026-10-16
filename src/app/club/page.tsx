@@ -3,7 +3,6 @@ import { FeedKeyForm, ResultForm, type Awaiting } from "@/components/club/club-f
 import { FeedSquad } from "@/components/club/feed-squad";
 import { StaffInvites, type InviteRow } from "@/components/club/staff-invites";
 import { longDate } from "@/components/squad/format";
-import { sourceLine } from "@/lib/club/source";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getViewer } from "@/lib/viewer";
@@ -56,7 +55,6 @@ export default async function ClubPage() {
     invites = (data ?? []) as InviteRow[];
   }
 
-  const source = sourceLine(club);
   const feedAllowed = feedAllowedFor(viewer);
   const feedReason = club.is_demo
     ? "The club's manager connects the league feed."
@@ -78,7 +76,6 @@ export default async function ClubPage() {
           {club.name}
           <ClubStop team={club.name} />
         </h1>
-        <p className="mt-3 max-w-[60ch] text-[14px] leading-relaxed text-ink-dim">{source.long}</p>
         <a href="/review" className="mt-4 inline-block text-[13px] text-ink underline decoration-gold-dim underline-offset-4 hover:text-gold">
           the season review, for the committee
         </a>

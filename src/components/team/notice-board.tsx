@@ -51,7 +51,7 @@ export function NoticeBoard({ clubId, notices, canPost, role, fixture, now }: No
   const visible = list.filter((n) => n.audience.length === 0 || n.audience.includes(role));
 
   return (
-    <section aria-labelledby="notices-heading" className="border border-line bg-panel">
+    <section aria-labelledby="notices-heading" className="bg-panel/60">
       <div className="flex items-baseline justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
         <p className="annot" id="notices-heading">{"// from the staff"}</p>
         {canPost ? (
@@ -59,7 +59,7 @@ export function NoticeBoard({ clubId, notices, canPost, role, fixture, now }: No
             type="button"
             aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
-            className="pressable -my-1 h-10 rounded-[2px] border border-line-strong bg-pitch px-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:my-0 sm:h-auto sm:px-2.5 sm:py-1 sm:text-[11px]"
+            className="pressable plate -my-1 h-10 bg-panel-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:my-0 sm:h-auto sm:px-2.5 sm:py-1 sm:text-[11px]"
           >
             {open ? "close" : "post"}
           </button>
@@ -159,8 +159,8 @@ function Composer({ fixture, onPosted }: { fixture: Fixture | null; onPosted: (n
             role="radio"
             aria-checked={kind === k}
             onClick={() => setKind(k)}
-            className={`pressable h-11 rounded-[2px] border px-3 text-[12px] font-semibold uppercase tracking-[0.1em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:px-2.5 sm:py-1 sm:text-[10.5px] ${
-              kind === k ? "border-transparent bg-mint text-mint-ink" : "border-line-strong bg-pitch text-ink-dim hover:text-ink"
+            className={`pressable plate h-11 text-[12px] font-semibold uppercase tracking-[0.1em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:px-2.5 sm:py-1 sm:text-[10.5px] ${
+              kind === k ? "bg-mint text-mint-ink" : "bg-panel-2 text-ink-dim hover:text-ink"
             }`}
           >
             {KIND_META[k].label}
@@ -175,7 +175,7 @@ function Composer({ fixture, onPosted }: { fixture: Fixture | null; onPosted: (n
         onChange={(e) => setTitle(e.target.value)}
         placeholder="the one line they need"
         aria-label="title"
-        className="h-11 w-full border border-line bg-pitch px-3 text-[15px] font-semibold text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none sm:h-auto sm:py-2 sm:text-[14px]"
+        className="h-11 w-full border-0 border-b border-line-strong bg-transparent px-3 text-[15px] font-semibold text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none sm:h-auto sm:py-2 sm:text-[14px]"
       />
       <textarea
         rows={2}
@@ -184,7 +184,7 @@ function Composer({ fixture, onPosted }: { fixture: Fixture | null; onPosted: (n
         onChange={(e) => setBody(e.target.value)}
         placeholder="anything else (optional)"
         aria-label="body"
-        className="min-h-11 w-full resize-y border border-line bg-pitch px-3 py-2.5 text-[14px] text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none sm:py-2 sm:text-[13px]"
+        className="min-h-11 w-full resize-y border-0 border-b border-line-strong bg-transparent px-3 py-2.5 text-[14px] text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none sm:py-2 sm:text-[13px]"
       />
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-1" role="group" aria-label="who sees it">
@@ -195,8 +195,8 @@ function Composer({ fixture, onPosted }: { fixture: Fixture | null; onPosted: (n
               type="button"
               aria-pressed={audience.includes(r)}
               onClick={() => toggleRole(r)}
-              className={`pressable h-11 rounded-[2px] border px-3 text-[12px] tracking-[0.08em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:px-2 sm:py-0.5 sm:text-[10.5px] ${
-                audience.includes(r) ? "border-line-strong bg-panel text-ink" : "border-line bg-transparent text-ink-faint"
+              className={`pressable plate h-11 text-[12px] tracking-[0.08em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:px-2 sm:py-0.5 sm:text-[10.5px] ${
+                audience.includes(r) ? "bg-panel-2 text-ink" : "bg-transparent text-ink-faint"
               }`}
             >
               {r}
@@ -208,8 +208,8 @@ function Composer({ fixture, onPosted }: { fixture: Fixture | null; onPosted: (n
             type="button"
             aria-pressed={attach}
             onClick={() => setAttach((a) => !a)}
-            className={`pressable flex h-11 items-center gap-2 rounded-[2px] border px-3 text-[12.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:py-0.5 sm:text-[12px] ${
-              attach ? "border-line-strong bg-panel text-ink" : "border-line bg-transparent text-ink-faint"
+            className={`pressable plate flex h-11 items-center gap-2 text-[12.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:py-0.5 sm:text-[12px] ${
+              attach ? "bg-panel-2 text-ink" : "bg-transparent text-ink-faint"
             }`}
           >
             <span aria-hidden className={`block h-2 w-2 ${attach ? "bg-mint" : "border border-line-strong"}`} />

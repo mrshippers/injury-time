@@ -134,7 +134,7 @@ export function PlayerRow({
           onClick={() => onChange({ absent: !row.absent, open: false })}
           aria-pressed={row.absent}
           aria-label={row.absent ? `mark ${player.name} present` : `mark ${player.name} absent`}
-          className="pressable num flex h-11 w-11 shrink-0 items-center justify-center rounded-[3px] border border-line text-[15px] text-ink-dim hover:border-line-strong hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-7 sm:w-7 sm:text-[13px]"
+          className="pressable num flex h-11 w-11 shrink-0 items-center justify-center rounded-[3px] plate plate-sm text-[15px] text-ink-dim hover:bg-panel-2 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-7 sm:w-7 sm:text-[13px]"
         >
           {row.absent ? "↩" : "×"}
         </button>

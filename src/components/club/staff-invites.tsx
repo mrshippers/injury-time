@@ -48,7 +48,7 @@ export function StaffInvites({ allowed, reason, invites, clubName }: { allowed: 
       {!allowed && reason ? <p className="mt-3 text-[13px] text-ink-dim">{reason}</p> : null}
       {error ? <p role="alert" className="mt-3 text-[13px] text-doubt">{error}</p> : null}
       {link ? (
-        <div className="mt-4 border border-line bg-panel p-4" role="status">
+        <div className="mt-4  bg-panel/60 p-4" role="status">
           <p className="text-[13px] text-ink-dim">One person, one use, seven days. Send it to them directly.</p>
           <p className="num mt-2 break-all text-[13px] text-ink">{link.url}</p>
           <div className="mt-3 flex flex-wrap gap-3">

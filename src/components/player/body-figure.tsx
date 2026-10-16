@@ -247,7 +247,7 @@ function Figure({
         <Html position={anchor(hoveredPart.centre)} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
           <div
             role="tooltip"
-            className="min-w-44 max-w-60 -translate-x-1/2 -translate-y-[calc(100%+14px)] border border-line-strong bg-panel px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
+            className="min-w-44 max-w-60 -translate-x-1/2 -translate-y-[calc(100%+14px)] bg-panel-2 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
           >
             <p className="whitespace-nowrap text-[12px] font-bold lowercase text-ink">
               {label}

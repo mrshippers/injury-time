@@ -9,7 +9,7 @@ export function MatchWeatherCard({ weather, className = "" }: { weather: MatchWe
   if (!weather) return null;
   const rain = weather.rainChance;
   return (
-    <div className={`flex items-center gap-3 border border-line bg-pitch/40 px-3 py-2.5 ${className}`} aria-label={`kick-off weather at ${weather.ground}`}>
+    <div className={`plate flex items-center gap-3 bg-panel py-2.5 [--slant:12px] ${className}`} aria-label={`kick-off weather at ${weather.ground}`}>
       <Sky sky={weather.sky} night={Number(weather.kickoff.slice(0, 2)) >= 18} />
       <div className="min-w-0">
         <p className="flex items-baseline gap-2">

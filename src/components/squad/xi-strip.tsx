@@ -36,7 +36,7 @@ export function XiStrip({
   onCaptain?: (playerId: string) => void;
 }) {
   return (
-    <section aria-labelledby="xi-heading" className="mt-3 border border-line bg-panel">
+    <section aria-labelledby="xi-heading" className="mt-3 bg-panel/60">
       <p className="annot flex items-baseline justify-between border-b border-line px-3 py-2" id="xi-heading">
         <span>{"// starting XI"}</span>
         <span className="num text-gold-dim">

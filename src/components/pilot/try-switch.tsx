@@ -13,7 +13,7 @@ import type { CallStatus } from "@/lib/types";
 export function TrySwitch() {
   const [value, setValue] = useState<CallStatus | null>(null);
   return (
-    <div className="border border-line bg-panel">
+    <div className=" bg-panel">
       <div className="flex items-baseline justify-between gap-3 border-b border-line px-4 py-3">
         <p className="annot">{"// who's in"}</p>
         <p className="num text-[12.5px] text-ink" aria-live="polite">

@@ -4,9 +4,9 @@ import type { Fixture, Result } from "@/lib/types";
 import { shortDate } from "@/components/squad/format";
 
 const TONE_BOX: Record<NonNullable<CupTie["tone"]>, string> = {
-  win: "border-[var(--win)]/50 text-[var(--win)]",
-  draw: "border-line-strong text-ink",
-  loss: "border-out/50 text-out",
+  win: "bg-[var(--win)]/15 text-[var(--win)]",
+  draw: "bg-panel-2 text-ink",
+  loss: "bg-out/15 text-out",
 };
 const TONE_LETTER: Record<NonNullable<CupTie["tone"]>, string> = { win: "W", draw: "D", loss: "L" };
 const STATE_WORD: Record<CupRun["state"], string> = { in: "still in", out: "out", waiting: "waiting on the draw" };
@@ -42,12 +42,12 @@ export function CupsSection({ results, fixtures, asOf }: { results: Result[]; fi
               {run.ties.map((t) => (
                 <li
                   key={`${t.date}-${t.opponent}`}
-                  className={`min-w-[148px] shrink-0 px-3 py-2.5 sm:min-w-[160px] ${t.tone ? "border border-line bg-panel" : "border border-dashed border-line-strong bg-pitch"}`}
+                  className={`min-w-[148px] shrink-0 px-3 py-2.5 sm:min-w-[160px] ${t.tone ? "plate bg-panel [--slant:10px]" : "plate bg-panel/40 [--slant:10px] text-ink-dim bg-pitch"}`}
                 >
                   <p className="annot text-[10px]">{t.round}</p>
                   {t.tone ? (
                     <p className="mt-1.5 flex items-center gap-2">
-                      <span className={`num flex h-6 w-6 items-center justify-center rounded-[2px] border bg-pitch text-[11.5px] font-semibold ${TONE_BOX[t.tone]}`}>{TONE_LETTER[t.tone]}</span>
+                      <span className={`plate plate-sm num flex h-6 min-w-8 items-center justify-center text-[11.5px] font-semibold ${TONE_BOX[t.tone]}`}>{TONE_LETTER[t.tone]}</span>
                       <span className="num text-[18px] font-semibold text-ink">{t.score}</span>
                     </p>
                   ) : (

@@ -18,7 +18,7 @@ export default function LanguageToggle() {
   return (
     <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 sm:w-auto" data-testid="health-language">
       <p className="annot">{"// health words"}</p>
-      <div role="group" aria-label="how health is worded" className="flex w-full overflow-hidden rounded-[3px] border border-line sm:w-auto">
+      <div role="group" aria-label="how health is worded" className="flex w-full overflow-hidden rounded-[3px]  sm:w-auto bg-panel/50">
         {HEALTH_LANGUAGES.map((m) => (
           <button
             key={m}

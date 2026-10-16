@@ -117,7 +117,7 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
       {hub.pinned ? (
         <Link
           href={`/film/${hub.pinned.clipId}?t=${hub.pinned.t}`}
-          className="pressable mt-10 flex flex-wrap items-baseline gap-x-4 gap-y-1 border border-gold/40 bg-panel px-5 py-4 hover:border-gold"
+          className="pressable mt-10 flex flex-wrap items-baseline gap-x-4 gap-y-1 plate plate-sm border-gold/40 bg-panel px-5 py-4 hover:border-gold"
         >
           <span className="annot">{"// the one"}</span>
           <span className="text-lg text-ink">{`${KIND_WORD[hub.pinned.kind]} · ${hub.pinned.title}`}</span>
@@ -157,7 +157,7 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
               <ul className="flex flex-col gap-3">
                 {hub.won.map((m, i) => (
                   <li key={i} className="flex items-baseline gap-3">
-                    <span className="num inline-flex h-7 min-w-9 items-center justify-center border border-gold px-1 text-[10.5px] font-bold uppercase tracking-[0.06em] text-gold">{MILESTONE_MARK[m.kind]}</span>
+                    <span className="num inline-flex h-7 min-w-9 items-center justify-center plate plate-sm border-gold px-1 text-[10.5px] font-bold uppercase tracking-[0.06em] text-gold">{MILESTONE_MARK[m.kind]}</span>
                     <span>
                       <span className="text-ink">{m.title}</span>
                       {m.detail ? <span className="ml-2 text-[12.5px] text-ink-dim">{m.detail}</span> : null}
@@ -208,7 +208,7 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {hub.moments.map((m) => (
               <li key={`${m.clipId}@${m.t}`}>
-                <Link href={`/film/${m.clipId}?t=${m.t}`} className="pressable flex items-baseline justify-between gap-3 border border-line px-4 py-3 hover:border-line-strong">
+                <Link href={`/film/${m.clipId}?t=${m.t}`} className="pressable flex items-baseline justify-between gap-3 plate plate-sm px-4 py-3 hover:bg-panel-2">
                   <span className="min-w-0">
                     <span className="text-ink">{KIND_WORD[m.kind]}</span>
                     <span className="ml-2 text-[12.5px] text-ink-dim">{m.opponent ? `v ${m.opponent}` : m.title}</span>
@@ -266,14 +266,14 @@ export default async function PlayerHubPage(props: { params: Promise<{ id: strin
           ) : hub.canHandOver ? (
             <>
               <p className="mb-4 flex items-center gap-3 text-[14px] text-ink-dim">
-                <span aria-hidden className="inline-block h-2.5 w-2.5 border border-ink-dim" />
+                <span aria-hidden className="inline-block h-2.5 w-2.5 plate plate-sm border-ink-dim" />
                 {`not claimed yet. hand it over and ${first} fills it in from their own phone.`}
               </p>
               <HandOver playerId={player.id} firstName={first} />
             </>
           ) : (
             <p className="max-w-[62ch] text-[14px] text-ink-dim">
-              <span aria-hidden className="mr-3 inline-block h-2.5 w-2.5 border border-ink-dim align-middle" />
+              <span aria-hidden className="mr-3 inline-block h-2.5 w-2.5 plate plate-sm border-ink-dim align-middle" />
               {`the manager hands this page over with a link: ${first} signs in with an email, says it's them, and it's theirs.`}
             </p>
           )}

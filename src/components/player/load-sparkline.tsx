@@ -299,7 +299,7 @@ export default function LoadSparkline({
   const ariaLabel = `Session load over the last 42 days with the seven-day rolling sum${showChronic ? " and the 28-day weekly average" : ""}. This week ${endAcute} AU.${note ? ` Annotation: ${note.text}.` : ""}`;
 
   return (
-    <figure className="border border-line bg-panel p-4" data-testid="load-chart" data-mode={mode}>
+    <figure className=" bg-panel/60 p-4" data-testid="load-chart" data-mode={mode}>
       <Drawing f={frame(false)} s={series} className="hidden sm:block" ariaLabel={ariaLabel} />
       <Drawing f={frame(true)} s={series} className="sm:hidden" ariaLabel={ariaLabel} phone />
       <figcaption className="mt-3">

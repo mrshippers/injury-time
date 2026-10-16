@@ -70,7 +70,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
                     router.refresh();
                   });
                 }}
-                className="num max-w-[11rem] truncate rounded-[2px] border border-line bg-panel px-2 py-[3px] text-[12px] tracking-[0.04em] text-ink-dim outline-none transition-colors duration-[190ms] hover:text-ink focus-visible:ring-2 focus-visible:ring-mint sm:max-w-none sm:min-h-0 sm:px-1.5 sm:text-[11px] sm:tracking-[0.06em]"
+                className="num max-w-[11rem] truncate rounded-[2px] border-0 border-b border-line-strong bg-transparent px-2 py-[3px] text-[12px] tracking-[0.04em] text-ink-dim outline-none transition-colors duration-[190ms] hover:text-ink focus-visible:ring-2 focus-visible:ring-mint sm:max-w-none sm:min-h-0 sm:px-1.5 sm:text-[11px] sm:tracking-[0.06em]"
               >
                 {clubs.map((c) => (
                   <option key={c.id} value={c.id}>

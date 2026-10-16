@@ -57,7 +57,7 @@ export default function RtpPanel({ injury, steps, asOf, canEdit }: { injury: Inj
                       type="button"
                       disabled={pending}
                       onClick={() => start(async () => void (await tickRtpStepAction(s.id, !s.done_on)))}
-                      className="pressable h-9 min-w-16 rounded-[2px] border border-line-strong px-2 text-[11px] uppercase tracking-[0.1em] text-ink-dim hover:text-ink disabled:opacity-50"
+                      className="pressable h-9 min-w-16 rounded-[2px] plate plate-sm px-2 text-[11px] uppercase tracking-[0.1em] text-ink-dim hover:text-ink disabled:opacity-50"
                       aria-label={`${s.done_on ? "untick" : "tick"} ${STAGE_WORD[s.stage].plain}`}
                     >
                       {s.done_on ? "undo" : "done"}
@@ -83,7 +83,7 @@ export default function RtpPanel({ injury, steps, asOf, canEdit }: { injury: Inj
               min={asOf}
               value={returnOn}
               onChange={(e) => setReturnOn(e.target.value)}
-              className="num h-10 border border-line-strong bg-panel px-2 text-[13px] text-ink [color-scheme:dark]"
+              className="num h-10 border-0 border-b border-line-strong bg-transparent px-2 text-[13px] text-ink [color-scheme:dark]"
             />
           </label>
           <button type="submit" disabled={pending || !returnOn} className="pressable h-10 rounded-[2px] bg-mint px-4 text-[12px] font-bold uppercase tracking-[0.12em] text-mint-ink disabled:opacity-50">

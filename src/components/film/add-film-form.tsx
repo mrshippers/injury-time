@@ -33,7 +33,7 @@ export function AddFilmForm({ fixtures, results }: { fixtures: Fixture[]; result
   const chosenFixture = game.startsWith("f:") ? fixtures.find((f) => f.id === game.slice(2)) ?? null : null;
 
   return (
-    <form action={action} className="border border-line bg-panel px-5 py-4" aria-labelledby={`${id}-h`}>
+    <form action={action} className=" bg-panel/60 px-5 py-4" aria-labelledby={`${id}-h`}>
       <p className="annot" id={`${id}-h`}>{"// add film"}</p>
 
       <label className={`${LABEL} mt-4`} htmlFor={`${id}-url`}>link</label>

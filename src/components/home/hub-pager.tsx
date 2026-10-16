@@ -81,7 +81,9 @@ export function HubPager({ pages }: { pages: HubPage[] }) {
             role="group"
             aria-roledescription="slide"
             aria-label={`${n + 1} of ${pages.length}: ${p.label}`}
-            className="w-full min-w-full shrink-0 snap-start snap-always overflow-y-auto overscroll-y-contain pb-6 pr-1"
+            // a stage that scrolls (the league table) has to be reachable by keyboard
+            tabIndex={0}
+            className="w-full min-w-full shrink-0 snap-start snap-always overflow-y-auto overscroll-y-contain pb-6 pr-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-mint/60"
           >
             {p.content}
           </div>

@@ -71,7 +71,7 @@ export default function InjuryTable({
               return (
                 <li
                   key={injury.id}
-                  className="border border-line bg-panel px-3 py-3"
+                  className=" bg-panel/60 px-3 py-3"
                   style={current ? { boxShadow: "inset 3px 0 0 0 var(--out)" } : undefined}
                 >
                   <p className="text-[14px] font-bold lowercase text-ink">

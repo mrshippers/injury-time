@@ -195,7 +195,7 @@ export function StatusMenu({
         aria-expanded={mounted}
         aria-label={`set availability for ${playerName}`}
         onClick={() => (mounted ? close(true) : open())}
-        className="pressable ghost-chip num relative z-10 rounded-[2px] border border-line px-1.5 py-1 text-[10.5px] tracking-[0.08em] text-ink-dim hover:border-line-strong hover:bg-panel-2 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint focus-visible:-outline-offset-1"
+        className="pressable plate plate-sm num relative z-10 py-1 text-[10.5px] tracking-[0.08em] text-ink-dim transition-colors duration-200 hover:bg-panel-2 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint focus-visible:-outline-offset-1"
       >
         SET
       </button>
@@ -217,7 +217,7 @@ export function StatusMenu({
             width: Math.min(PANEL_WIDTH, typeof window === "undefined" ? PANEL_WIDTH : window.innerWidth - 16),
             transformOrigin: placement.origin,
           }}
-          className={`status-sheet fixed z-50 border border-line-strong bg-panel-2 p-3 text-left shadow-[0_18px_44px_rgba(0,0,0,0.55)] transition-[opacity,transform] duration-[190ms] ease-[var(--ease-out-strong)] motion-reduce:transition-opacity ${
+          className={`status-sheet fixed z-50  bg-panel-2 p-3 text-left shadow-[0_18px_44px_rgba(0,0,0,0.55)] transition-[opacity,transform] duration-[190ms] ease-[var(--ease-out-strong)] motion-reduce:transition-opacity ${
             shown ? "scale-100 opacity-100" : "scale-[0.97] opacity-0 motion-reduce:scale-100"
           }`}
         >
@@ -238,7 +238,7 @@ export function StatusMenu({
                       onChange={() => setStatus(option)}
                       className="peer absolute inset-0 z-10 m-0 h-full w-full cursor-pointer appearance-none opacity-0"
                     />
-                    <span className="pressable block cursor-pointer rounded-[2px] border border-line bg-panel px-2 py-1.5 text-center text-[12px] text-ink-dim peer-checked:border-mint peer-checked:text-mint peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-mint peer-focus-visible:-outline-offset-1 hover:border-line-strong hover:text-ink">
+                    <span className="pressable block cursor-pointer rounded-[2px] plate plate-sm bg-panel px-2 py-1.5 text-center text-[12px] text-ink-dim peer-checked:border-mint peer-checked:text-mint peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-mint peer-focus-visible:-outline-offset-1 hover:bg-panel-2 hover:text-ink">
                       {STATUS_OPTION_LABEL[option]}
                     </span>
                   </label>

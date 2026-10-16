@@ -399,12 +399,12 @@ html {
   }
   .segmented > button {
     border: 0;
-    border-radius: 999px;
-    background: var(--panel);
+    border-radius: 0;
+    background: transparent;
   }
   .segmented > button[aria-selected="true"] {
-    background: linear-gradient(180deg, color-mix(in oklab, var(--mint) 92%, white), var(--mint));
-    box-shadow: 0 6px 18px -8px rgba(149, 236, 200, 0.6);
+    background: var(--panel-2);
+    box-shadow: inset 0 -2px 0 var(--mint);
   }
 
   /* squad cards */
@@ -421,12 +421,13 @@ html {
     width: 44px;
     height: 44px;
     flex: none;
-    border-radius: 999px;
+    border-radius: 0;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
     font-size: 14px;
     font-weight: 600;
     color: var(--ink-dim);
     background: radial-gradient(120% 120% at 30% 20%, var(--panel-2), var(--pitch));
-    box-shadow: inset 0 0 0 1px var(--line-strong);
+    box-shadow: none;
   }
   .shirt-chip.is-in {
     color: var(--ink);
@@ -441,18 +442,19 @@ html {
     min-width: 64px;
     height: 40px;
     padding: 0 14px;
-    border-radius: 999px;
+    border-radius: 0;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.04em;
     color: var(--ink-dim);
     background: var(--panel-2);
-    box-shadow: inset 0 0 0 1px var(--line-strong);
+    box-shadow: none;
   }
   .toggle-in.is-on {
     color: var(--mint-ink);
-    background: linear-gradient(180deg, color-mix(in oklab, var(--mint) 88%, white), var(--mint));
-    box-shadow: 0 6px 16px -8px rgba(149, 236, 200, 0.7);
+    background: var(--mint);
+    box-shadow: none;
   }
   .ghost-chip {
     display: inline-flex;
@@ -461,7 +463,8 @@ html {
     min-height: 32px !important;
     padding: 0 10px !important;
     border: 0 !important;
-    border-radius: 999px !important;
+    border-radius: 0 !important;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
     font-family: var(--font-plex-mono), monospace;
     font-size: 12px !important;
     text-transform: lowercase;
@@ -471,7 +474,8 @@ html {
   }
   /* the status chip rides in the meta line: a soft pill, not a stamped box */
   .card-row .num.inline-flex.border {
-    border-radius: 999px;
+    border-radius: 0;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
     padding: 1px 8px;
   }
 
@@ -666,3 +670,8 @@ body:has([data-pilot]) nav[aria-label="modules"] { display: none; }
 
 .pager-track { scrollbar-width: none; }
 .pager-track::-webkit-scrollbar { display: none; }
+
+/* the instant tap feedback: a mint bar sweeping across under the nav while the next page renders */
+@keyframes route-sweep { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
+.route-bar { animation: route-sweep 900ms var(--ease-out-strong) infinite; }
+@media (prefers-reduced-motion: reduce) { .route-bar { animation: none; width: 100%; opacity: 0.6; } }

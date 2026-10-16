@@ -133,12 +133,12 @@ export function MatchdayBoard({
             </button>
           ) : null}
           {s.phase === "first" ? (
-            <button type="button" className={`${BIG} border border-line-strong bg-panel text-ink`} onClick={halfTime}>
+            <button type="button" className={`${BIG} plate plate-sm bg-panel text-ink`} onClick={halfTime}>
               half-time
             </button>
           ) : null}
           {s.phase === "second" ? (
-            <button type="button" className={`${BIG} border border-line-strong bg-panel text-ink`} onClick={fullTime}>
+            <button type="button" className={`${BIG} plate plate-sm bg-panel text-ink`} onClick={fullTime}>
               full-time
             </button>
           ) : null}
@@ -160,7 +160,7 @@ export function MatchdayBoard({
                 disabled={s.phase === "ft" || s.phase === "pre"}
                 aria-pressed={off === id}
                 onClick={() => setOff((o) => (o === id ? null : id))}
-                className={`pressable flex h-12 w-full items-center justify-between rounded-[2px] border px-3 text-left text-[15px] disabled:opacity-60 ${
+                className={`pressable flex h-12 w-full items-center justify-between rounded-[2px] plate plate-sm px-3 text-left text-[15px] disabled:opacity-60 ${
                   off === id ? "border-doubt bg-panel-2 text-ink" : "border-line bg-panel text-ink"
                 }`}
               >
@@ -182,7 +182,7 @@ export function MatchdayBoard({
                   type="button"
                   disabled={!off}
                   onClick={() => sub(id)}
-                  className="pressable flex h-12 w-full items-center justify-between rounded-[2px] border border-line bg-pitch px-3 text-left text-[15px] text-ink-dim enabled:text-ink disabled:opacity-60"
+                  className="pressable flex h-12 w-full items-center justify-between rounded-[2px] plate plate-sm bg-panel-2 px-3 text-left text-[15px] text-ink-dim enabled:text-ink disabled:opacity-60"
                 >
                   <span>{label(id)}</span>
                   {off ? <span className="num text-[11px] uppercase tracking-[0.1em] text-mint">bring on</span> : null}

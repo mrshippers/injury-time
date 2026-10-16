@@ -26,14 +26,14 @@ function shortDate(iso: string | null): string {
 export function ClipList({ clips }: { clips: Clip[] }) {
   if (clips.length === 0) {
     return (
-      <section aria-labelledby="film-list" className="border border-line bg-panel px-5 py-10 text-center">
+      <section aria-labelledby="film-list" className=" bg-panel/60 px-5 py-10 text-center">
         <p className="annot" id="film-list">{"// nothing in the room yet"}</p>
         <p className="mt-3 text-[13px] text-ink-dim">Paste the first link on the right. A Veo match or a YouTube highlights reel both work.</p>
       </section>
     );
   }
   return (
-    <section aria-labelledby="film-list" className="border border-line bg-panel">
+    <section aria-labelledby="film-list" className=" bg-panel">
       <div className="flex items-baseline justify-between border-b border-line px-4 py-2 sm:px-5">
         <p className="annot" id="film-list">{"// film"}</p>
         <p className="annot text-gold-dim">newest first</p>

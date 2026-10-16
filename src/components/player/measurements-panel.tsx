@@ -36,7 +36,7 @@ export default function MeasurementsPanel({
   };
 
   return (
-    <section aria-labelledby={`${base}-h`} className="border border-line bg-panel px-3 py-3" data-testid="measurements-panel">
+    <section aria-labelledby={`${base}-h`} className=" bg-panel/60 px-3 py-3" data-testid="measurements-panel">
       <div className="flex items-baseline justify-between gap-2 border-b border-line pb-2">
         <p className="annot" id={`${base}-h`}>{"// measurements (cm)"}</p>
         <span className="num text-[11.5px] text-ink-faint" aria-live="polite">
@@ -81,7 +81,7 @@ export default function MeasurementsPanel({
         <button
           type="button"
           onClick={onReset}
-          className="pressable h-11 border border-line-strong bg-panel-2 px-3 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-ink-dim hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:px-2.5 sm:py-1 sm:text-[10.5px]"
+          className="pressable h-11 plate plate-sm bg-panel-2 px-3 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-ink-dim hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint sm:h-auto sm:px-2.5 sm:py-1 sm:text-[10.5px]"
         >
           reset
         </button>

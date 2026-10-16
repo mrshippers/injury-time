@@ -13,7 +13,7 @@ export function Crest({ team, size = 22, className = "", plain = false }: { team
     return (
       <span
         aria-hidden
-        className={`num inline-flex shrink-0 items-center justify-center border border-line-strong text-ink-dim ${className}`}
+        className={`num inline-flex shrink-0 items-center justify-center plate plate-sm text-ink-dim ${className}`}
         style={{ width: size, height: size, fontSize: Math.max(9, Math.round(size * 0.4)), letterSpacing: "0.04em" }}
       >
         {monogram(team)}
