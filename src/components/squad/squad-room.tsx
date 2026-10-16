@@ -373,7 +373,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
               role="tab"
               aria-selected={on}
               onClick={() => chooseView(v)}
-              className={`pressable plate num h-9 text-[11.5px] font-semibold uppercase tracking-[0.1em] transition-colors duration-[190ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
+              className={`pressable plate num h-9 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.05em] transition-colors duration-[190ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
                 on ? "bg-panel-2 text-ink shadow-[inset_0_-2px_0_var(--mint)]" : "text-ink-dim"
               }`}
             >
