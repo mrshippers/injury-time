@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { RungBars } from "@/components/charts";
 import { ClubStop, Crest } from "@/components/club/crest";
 import { CupsSection } from "@/components/home/cups";
@@ -200,6 +201,7 @@ export default async function ReviewPage() {
               {ledger("away", split.away)}
             </tbody>
           </table>
+          <Link href="/#table" className="num mt-3 inline-block text-[12px] text-mint underline-offset-4 hover:underline">the full table</Link>
         </Section>
       ) : null}
 

@@ -7,7 +7,7 @@ import grounds from "../../../scripts/grounds/grounds.json";
 import { crestKey } from "@/lib/crests";
 import type { Fixture } from "@/lib/types";
 
-import { fetchKickoffWeather, weatherLine } from "./forecast";
+import { fetchKickoffWeather, type KickoffWeather } from "./forecast";
 
 export type Ground = { ground: string; town: string; lat: number; lon: number; source: string };
 
@@ -27,9 +27,11 @@ export function matchGround(clubName: string, fixture: Pick<Fixture, "venue" | "
 }
 
 /** The kick-off forecast for a match as one line and the ground it's for, or null (too far out, no ground, no forecast). */
-export async function matchWeather(clubName: string, fixture: Pick<Fixture, "venue" | "opponent" | "match_date" | "kickoff">, today: string): Promise<{ line: string; ground: string } | null> {
+export type MatchWeather = KickoffWeather & { ground: string; kickoff: string };
+
+export async function matchWeather(clubName: string, fixture: Pick<Fixture, "venue" | "opponent" | "match_date" | "kickoff">, today: string): Promise<MatchWeather | null> {
   const g = matchGround(clubName, fixture);
   if (!g) return null;
   const w = await fetchKickoffWeather(g.lat, g.lon, fixture.match_date, fixture.kickoff, today);
-  return w ? { line: weatherLine(w), ground: g.ground } : null;
+  return w ? { ...w, ground: g.ground, kickoff: fixture.kickoff ?? "15:00" } : null;
 }

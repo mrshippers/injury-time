@@ -74,16 +74,18 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
             Injury Time
             <ClubStop team={cfg.name} />
           </h1>
-          <p className="mt-3 max-w-[40ch] text-[17px] leading-snug text-ink">A management platform for clubs at our level.</p>
+          <p className="mt-3 max-w-[40ch] text-[17px] leading-snug text-ink">A club management platform for non-league.</p>
           <div className="mt-8 flex flex-col gap-4">
-            <p className={P}>Hey gaffer,</p>
-            <p className={P}>Had an idea I wanted to show you. I&apos;ve been building a management platform for clubs like ours.</p>
+            <p className={P}>Yes gaff, hope you&apos;re well.</p>
             <p className={P}>
-              The boys say in or out from their phones and the team sheet picks itself from who&apos;s available. Each player has a fitness page with a 3D body that shows where the knocks are. Results and cups
-              are all in there, plus the forecast for the ground on matchday.
+              This is the thing I was telling you about. It&apos;s a club management platform: the boys say in or out from their phones, the team sheet picks itself from who&apos;s available, every
+              player has a fitness page, and the league table, cups and the matchday forecast are all in one place.
             </p>
-            <p className={P}>I&apos;ve loaded Belstone&apos;s squad and results, have a scroll.</p>
-            <p className={P}>What d&apos;you reckon, gaff? Anything useful you&apos;d want for matchday?</p>
+            <p className={P}>I&apos;ve loaded Belstone&apos;s squad and results so have a scroll.</p>
+            <p className={P}>
+              One thing I need your help with. The league data comes from Football Web Pages and they only give keys to clubs. Could I cc you into an email to them saying I&apos;m doing the data analysis
+              for the club?
+            </p>
             <p className="text-[20px] font-extrabold tracking-[-0.01em] text-ink">Jamal</p>
           </div>
         </div>
@@ -98,9 +100,9 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
             playsInline
             controls
             preload="metadata"
-            aria-label="Twenty seconds: the price, Belstone's season as a points line, the cups, one tap to answer, the side filling itself."
+            aria-label="Eighteen seconds: Belstone's season as a points line, the cups, one tap to answer, the side filling itself on a floodlit pitch."
           />
-          <p className="num mt-2 text-[11.5px] text-ink-dim">20 seconds, no sound needed</p>
+          <p className="num mt-2 text-[11.5px] text-ink-dim">18 seconds, no sound needed</p>
         </div>
       </section>
 
@@ -318,8 +320,6 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
         <p className="annot" id="terms-h">{"// the small print, in plain words"}</p>
         <ul className="mt-5 grid gap-x-10 gap-y-3 sm:grid-cols-2">
           {[
-            "£40 a month for the club, not per player. Players and staff all included.",
-            "The first four weeks are free and there's no card. If you don't like it, bin it, nothing owed.",
             "No health information unless the player says yes first.",
             "No under-18s, and nothing sold or shared, ever.",
           ].map((t) => (

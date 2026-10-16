@@ -13,7 +13,8 @@ const h: Hourly = {
 
 describe("kick-off weather", () => {
   it("reads kick-off to the final whistle: worst sky, highest rain chance, strongest wind, kick-off temperature", () => {
-    expect(kickoffWeather(h, "2026-10-17", "15:00")).toEqual({ tempC: 14, rainChance: 70, windMph: 18, sky: "showers" });
+    expect(kickoffWeather(h, "2026-10-17", "15:00")).toEqual({ tempC: 14, rainChance: 70, windMph: 18, sky: "showers", windFromDeg: null });
+    expect(kickoffWeather({ ...h, wind_direction_10m: hours.map(() => 225) }, "2026-10-17", "15:00")?.windFromDeg).toBe(225);
   });
   it("assumes a 3pm kick-off when the diary has none", () => expect(kickoffWeather(h, "2026-10-17", null)?.tempC).toBe(14));
   it("an evening kick-off reads the evening", () => expect(kickoffWeather(h, "2026-10-17", "19:45")?.tempC).toBe(16));
