@@ -25,10 +25,10 @@ export type ScoutFacts = {
 const asRow = (s: Standing): TableRow => ({ ...s, home: s.home as TableRow["home"], away: s.away as TableRow["away"] });
 
 export function scoutFacts(
-  fixture: Pick<Fixture, "opponent" | "venue" | "competition">,
+  fixture: Pick<Fixture, "opponent" | "venue" | "competition" | "match_date">,
   standings: readonly Standing[],
   results: readonly Result[],
-  before: readonly Standing[] = [],
+  history: readonly Standing[] = [],
 ): ScoutFacts | null {
   const table = standings.map(asRow);
   const us = standings.find((s) => s.is_us);
@@ -55,7 +55,7 @@ export function scoutFacts(
       .filter((r) => crestKey(r.opponent) === key)
       .sort((a, b) => b.match_date.localeCompare(a.match_date))
       .map((r) => ({ date: r.match_date, venue: r.venue as "H" | "A", score: `${r.goals_for}-${r.goals_against}`, competition: r.competition })),
-    read: scoutRead({ them, table: standings, before, results, odds, venue }),
+    read: scoutRead({ them, table: standings, history, results, odds, venue, competition: fixture.competition, date: fixture.match_date, opponent: fixture.opponent }),
   };
 }
 
@@ -75,7 +75,9 @@ Rules:
 - Quote figures plainly ("they average 2.1 goals a game away", "34% to win") and say what they mean for the gaffer.
 - "luck" is points minus the points their goals would usually earn: positive means running hot (likely to cool), negative means unlucky.
 - Attack/defence are relative to the league average (1.00 = average; defence above 1 concedes more than average).
-- xG means the goals each side should score from the model; call it xG. Join the read together: the venue record, their form, the kind of games they play, how we do against sides like them and how we play the game state.
+- xG means the goals each side should score from the model; call it xG.
+- "The read" lists the patterns that stand out across the season (half-time leads and comebacks, where we lose, how we start away, rest days, the run, who scores, head to head, their trend and venue split). Connect them into a plan: say which patterns meet in this game and what that means (a side that starts slowly away against a side that is weak at home, say). Do not restate the read line by line.
+- Vary your wording; never open two points the same way.
 - Write like a football person talking to the manager: short sentences, plain words, no hype, British English, no em dashes. Call the squad "the boys", never "the lads"; say "formation", never "shape".`;
 
 export function briefPrompt(clubName: string, f: ScoutFacts): string {

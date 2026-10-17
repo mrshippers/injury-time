@@ -4,7 +4,7 @@
  * The analyst's server actions. Each one builds its facts from the database on the server (never trusts the
  * client for numbers), checks for words already written for the same thing, and only then asks Claude.
  */
-import { getHomeSeason, getStandingsBefore } from "@/lib/home/data";
+import { getHomeSeason, getStandingsHistory } from "@/lib/home/data";
 import { todayISO } from "@/lib/data";
 import { BRIEF_SYSTEM, BriefSchema, briefPrompt, scoutFacts, type Brief } from "@/lib/scout/brief";
 import { createClient } from "@/lib/supabase/server";
@@ -25,8 +25,8 @@ export async function writeBriefAction(fixtureId: string): Promise<ActionOutcome
   const { data: fx } = await supabase.from("fixtures").select("*").eq("id", fixtureId).eq("club_id", viewer.club.id).maybeSingle();
   if (!fx) return { ok: false, error: "that match isn't in the diary" };
   const season = await getHomeSeason(viewer.club.id, todayISO());
-  const before = await getStandingsBefore(viewer.club.id, season.standingsAsOf);
-  const facts = scoutFacts(fx as Fixture, season.standings, season.results, before);
+  const history = await getStandingsHistory(viewer.club.id);
+  const facts = scoutFacts(fx as Fixture, season.standings, season.results, history);
   if (!facts) return { ok: false, error: "they aren't in our league table, so there's nothing to model" };
   const res = await askStructured({ system: BRIEF_SYSTEM, user: briefPrompt(viewer.club.name, facts), schema: BriefSchema, effort: "medium" });
   if (!res.ok) return res;
