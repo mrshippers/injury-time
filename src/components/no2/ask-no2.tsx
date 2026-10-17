@@ -68,7 +68,7 @@ export function AskNo2() {
               {a.v.figures.map((f) => (
                 <div key={f.label}>
                   <dt className="num text-[10.5px] uppercase tracking-[0.12em] text-ink-dim">{f.label}</dt>
-                  <dd className="num mt-1 text-[20px] font-semibold text-ink">{f.value}</dd>
+                  <dd className={`mt-1 font-semibold text-ink ${f.value.length > 14 ? "max-w-[44ch] text-[15px] leading-snug" : "num text-[20px]"}`}>{f.value}</dd>
                 </div>
               ))}
             </dl>
