@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent }
 import { setCallAction, setCallDeadlineAction, setCallsBulkAction } from "@/lib/team/actions";
 import { closeLabel, isClosed, presets, timeLeft } from "@/lib/team/deadline";
 import { useStoredValue } from "@/components/three/tokens";
+import { Nudge } from "@/components/no2/nudge";
 import { countCalls, countLine } from "@/lib/team/format";
 import { useTeamRealtime } from "@/lib/team/realtime";
 import { CALL_STATUSES, type CallStatus, type ClubRole, type Fixture, type MatchCall, type Player } from "@/lib/types";
@@ -236,6 +237,7 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, 
         options={staff ? presets(fixture.match_date, now) : []}
         onSet={staff ? setDeadline : undefined}
       />
+      {staff ? <Nudge fixtureId={fixture.id} names={players.filter((p) => !rows.get(p.id)?.status).map((p) => p.name)} /> : null}
       {error ? (
         <p role="alert" className="border-b border-line px-4 py-2 text-[12.5px] text-out sm:px-5">
           {error}

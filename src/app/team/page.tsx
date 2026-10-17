@@ -3,6 +3,9 @@ import Link from "next/link";
 import { Crest } from "@/components/club/crest";
 import { MatchWeatherCard } from "@/components/home/match-weather";
 import { matchWeather } from "@/lib/weather/grounds";
+import { Opposition } from "@/components/scout/opposition";
+import { getHomeSeason } from "@/lib/home/data";
+import { scoutFacts } from "@/lib/scout/brief";
 import { AttendanceTrend } from "@/components/team/attendance-trend";
 import { CallBoard } from "@/components/team/call-board";
 import { CheckinsPanel } from "@/components/team/checkins-panel";
@@ -25,6 +28,8 @@ export const metadata = { title: "matchday - injury time." };
 export default async function TeamPage() {
   const { viewer, next, daysUntil, players, calls, usual, notices, attendance, now, asOf } = await getTeamPage();
   const weather = next ? await matchWeather(viewer.club.name, next, asOf) : null;
+  const season = next ? await getHomeSeason(viewer.club.id, asOf) : null;
+  const facts = next && season ? scoutFacts(next, season.standings, season.results) : null;
   // RLS returns rows only to staff of a real club; a guest or a player gets none
   const staff = !viewer.guest && viewer.can("view_squad_health");
   let checkins: PlayerCheckin[] = [];
@@ -86,7 +91,9 @@ export default async function TeamPage() {
         )}
       </header>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+      {next && facts ? <Opposition clubId={viewer.club.id} fixtureId={next.id} facts={facts} /> : null}
+
+      <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <div className="flex flex-col gap-5">
           {next ? (
             <CallBoard

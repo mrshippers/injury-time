@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ClubStop, Crest } from "@/components/club/crest";
+import { AskNo2 } from "@/components/no2/ask-no2";
 import { AddFilmForm } from "@/components/film/add-film-form";
 import { ClipList } from "@/components/film/clip-list";
 import { shortDate } from "@/components/squad/format";
@@ -88,6 +89,8 @@ export default async function StatsPage({ searchParams }: { searchParams: Promis
         </div>
       </nav>
 
+      <AskNo2 />
+
       {/* the record for what's selected */}
       <section aria-label="record" className="mt-8 flex flex-wrap items-end gap-x-8 gap-y-4">
         {(
@@ -132,6 +135,11 @@ export default async function StatsPage({ searchParams }: { searchParams: Promis
                     </span>
                   </span>
                   <span className="flex items-center gap-2">
+                    {"id" in g ? (
+                      <Link href={`/report/${(g as ReviewGame & { id: string }).id}`} className="num text-[10.5px] uppercase tracking-[0.1em] text-ink-dim hover:text-mint">
+                        report
+                      </Link>
+                    ) : null}
                     <span className="num text-[15px] font-semibold text-ink tabular-nums">
                       {g.goals_for}-{g.goals_against}
                     </span>
