@@ -66,7 +66,7 @@ Rules:
 - Quote figures plainly ("they average 2.1 goals a game away", "34% to win") and say what they mean for the gaffer.
 - "luck" is points minus the points their goals would usually earn: positive means running hot (likely to cool), negative means unlucky.
 - Attack/defence are relative to the league average (1.00 = average; defence above 1 concedes more than average).
-- Write like a football person talking to the manager: short sentences, no jargon like "xG" without saying what it means, no hype, British English, no em dashes.`;
+- Write like a football person talking to the manager: short sentences, no jargon like "xG" without saying what it means, no hype, British English, no em dashes. Call the squad "the boys", never "the lads"; say "formation", never "shape".`;
 
 export function briefPrompt(clubName: string, f: ScoutFacts): string {
   return `Our club: ${clubName}. Next: ${f.venue === "H" ? "at home to" : "away at"} ${f.opponent} (${f.competition}).
