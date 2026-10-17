@@ -359,6 +359,12 @@ export type Database = {
         Update: Partial<SavedLineup>
         Relationships: []
       }
+      ai_notes: {
+        Row: AiNote
+        Insert: Omit<AiNote, 'id' | 'created_at' | 'model'> & Partial<Pick<AiNote, 'id' | 'created_at' | 'model'>>
+        Update: Partial<AiNote>
+        Relationships: []
+      }
       club_feed_keys: {
         Row: ClubFeedKey
         Insert: Omit<ClubFeedKey, 'provider' | 'last_sync_at' | 'last_sync_note' | 'updated_at'> & Partial<Pick<ClubFeedKey, 'provider' | 'last_sync_at' | 'last_sync_note' | 'updated_at'>>
@@ -624,6 +630,17 @@ export type Clip = {
 }
 
 /* ── a saved side ─────────────────────────────────────────────────────── */
+
+/** What the No.2 wrote (0017): a brief, a report, a nudge, an answer, keyed per club and match. */
+export type AiNote = {
+  id: string
+  club_id: string
+  kind: 'brief' | 'report' | 'nudge' | 'answer'
+  key: string
+  body: unknown
+  model: string | null
+  created_at: TimestampString
+}
 
 export type SavedLineup = {
   id: string
