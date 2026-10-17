@@ -38,9 +38,8 @@ describe("the read", () => {
   });
   it("profile against the league, and the points carry numbers", () => {
     expect(profile(table[2], table).goals).toBe(3);
-    const r = scoutRead({ them: table[2], table, before: [], results, odds: { xgFor: 1.4, xgAgainst: 1.1, win: 0.45, draw: 0.27, loss: 0.28, scorelines: [] }, venue: "A" });
-    expect(r.points.length).toBeGreaterThanOrEqual(4);
-    for (const p of r.points) expect(p.line).toMatch(/\d/);
-    expect(r.points[0].line).toMatch(/at home/);
+    const r = scoutRead({ them: table[2], table, history: table, results, odds: { xgFor: 1.4, xgAgainst: 1.1, win: 0.45, draw: 0.27, loss: 0.28, scorelines: [] }, venue: "A", competition: "league", date: "2026-10-17", opponent: "B" });
+    expect(r.points.length).toBeGreaterThanOrEqual(2);
+    for (const p of r.points) expect(p.line).toMatch(/\d|league/);
   });
 });

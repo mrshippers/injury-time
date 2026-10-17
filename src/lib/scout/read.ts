@@ -8,14 +8,13 @@ import { crestKey } from "@/lib/crests";
 import type { Result, Standing } from "@/lib/types";
 
 import type { MatchOdds } from "./model";
+import { findPatterns } from "./patterns";
 
 export type ReadPoint = { key: string; line: string };
 
 const ppg = (w = 0, d = 0, p = 0) => (p ? (w * 3 + d) / p : 0);
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const r2 = (n: number) => Math.round(n * 100) / 100;
-const pct = (n: number) => `${Math.round(n * 100)}%`;
-const ord = (n: number) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
 
 /** Both teams to score, our clean sheet, over 2.5 goals: straight from the two scoring rates. */
 export function lines(odds: Pick<MatchOdds, "xgFor" | "xgAgainst">) {
@@ -110,45 +109,37 @@ export type ScoutRead = {
   points: ReadPoint[];
 };
 
-/** The read, plus the handful of sentences it adds up to. Each sentence carries its own number. */
+/** The read: the counted numbers the analyst gets, and the patterns that stand out, worded for this fixture. */
 export function scoutRead(opts: {
   them: Standing;
   table: readonly Standing[];
-  before: readonly Standing[];
+  history: readonly Standing[];
   results: readonly Result[];
   odds: MatchOdds;
   venue: "H" | "A";
+  competition: string;
+  date: string;
+  opponent: string;
 }): ScoutRead {
   const { them, table, odds } = opts;
   const theirVenue = opts.venue === "H" ? "away" : "home";
-  const l = lines(odds);
-  const v = venueRank(them, table, theirVenue);
-  const t = trend(them, opts.before.find((s) => s.team === them.team));
-  const pr = profile(them, table);
-  const sl = againstSidesLike(them, table, opts.results);
-  const st = gameStates(opts.results);
-  const points: ReadPoint[] = [];
-
-  if (v.p) {
-    const where = theirVenue === "home" ? "at home" : "away";
-    const tier = v.rank <= 5 ? "one of the best" : v.rank > v.of - 5 ? "one of the worst" : "mid-table";
-    points.push({ key: `them ${where}`, line: `W${v.w} D${v.d} L${v.l} ${where}, ${v.ppg} pts a game: ${ord(v.rank)} of ${v.of} ${where}, ${tier}.` });
-  }
-  if (t) {
-    const dir = t.recent > t.season + 0.3 ? "on the way up" : t.recent < t.season - 0.3 ? "going off the boil" : "steady";
-    const moved = t.moved > 0 ? `, up ${t.moved}` : t.moved < 0 ? `, down ${-t.moved}` : "";
-    points.push({ key: "their form", line: `${t.points} pts from their last ${t.games} (${t.recent} a game, season ${t.season})${moved}: ${dir}.` });
-  }
-  const open = pr.goals >= pr.leagueGoals * 1.12 ? "open" : pr.goals <= pr.leagueGoals * 0.88 ? "tight" : "average";
-  const drawy = pr.draws >= pr.leagueDraws + 0.08 ? `, and they draw ${pct(pr.draws)} of the time (league ${pct(pr.leagueDraws)})` : "";
-  points.push({ key: "their games", line: `${open === "average" ? "Normal" : open === "open" ? "Open" : "Tight"} games: ${pr.goals} goals a game against a league ${pr.leagueGoals}, they score ${pr.scored} and let in ${pr.conceded}${drawy}.` });
-  if (sl.p) points.push({ key: "sides like them", line: `Against sides ${ord(sl.from)} to ${ord(sl.to)} we're W${sl.w} D${sl.d} L${sl.l}, goals ${sl.gf}-${sl.ga}.` });
-  if (st.behind.p || st.level.p) {
-    const comeback = st.behind.p ? `behind at half time we've got something ${st.behind.w + st.behind.d} times in ${st.behind.p}` : "";
-    const level = st.level.p ? `level at half time we've won ${st.level.w} of ${st.level.p}` : "";
-    points.push({ key: "us, game state", line: `${[level, comeback].filter(Boolean).join("; ")}. ${pct(st.afterShare)} of our goals come after the break.`.replace(/^./, (c) => c.toUpperCase()) });
-  }
-  points.push({ key: "the lines", line: `Both score ${pct(l.btts)}, our clean sheet ${pct(l.ourCleanSheet)}, over 2.5 goals ${pct(l.over25)}.` });
-
-  return { lines: l, venue: v, trend: t, profile: pr, sidesLike: sl, states: st, points };
+  // the earlier table for form: the oldest snapshot two to seven weeks back
+  const latest = table[0]?.as_of ?? opts.date;
+  const snaps = [...new Set(opts.history.map((s) => s.as_of))].sort();
+  const t0 = Date.parse(latest);
+  const pick = snaps.find((d) => t0 - Date.parse(d) <= 49 * 86_400_000 && t0 - Date.parse(d) >= 14 * 86_400_000);
+  const before = pick ? opts.history.filter((s) => s.as_of === pick) : [];
+  const points = findPatterns({ opponent: opts.opponent, venue: opts.venue, competition: opts.competition, date: opts.date, results: opts.results, table, history: opts.history }).map((f) => ({
+    key: f.heading,
+    line: f.line,
+  }));
+  return {
+    lines: lines(odds),
+    venue: venueRank(them, table, theirVenue),
+    trend: trend(them, before.find((s) => s.team === them.team)),
+    profile: profile(them, table),
+    sidesLike: againstSidesLike(them, table, opts.results),
+    states: gameStates(opts.results),
+    points,
+  };
 }
