@@ -8,7 +8,6 @@
 - Matchday: drag-to-answer switch with icons (tick / ? / cross). Read-only clubs keep answers in the browser.
 
 ## Next on stats
-- Goals in 15-minute bands once goal minutes are logged (the log gets one field: the minute).
 - Head-to-head per opponent (league double, last meeting) from the results already held.
 - Player stats table (apps, goals, minutes per goal) per competition.
 

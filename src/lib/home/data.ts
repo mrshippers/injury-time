@@ -68,3 +68,20 @@ export async function getHomeSeason(clubId: string, asOf: string): Promise<HomeS
     feedAsOf,
   };
 }
+
+/**
+ * An earlier table to measure form against: the oldest snapshot two to seven weeks before the latest, so
+ * "their last N games" is a handful of matches, not the whole season and not last weekend.
+ */
+export async function getStandingsBefore(clubId: string, latestAsOf: string | null): Promise<Standing[]> {
+  if (!latestAsOf) return [];
+  const supabase = await createClient();
+  const day = 86_400_000;
+  const t = Date.parse(latestAsOf);
+  const from = new Date(t - 49 * day).toISOString().slice(0, 10);
+  const to = new Date(t - 14 * day).toISOString().slice(0, 10);
+  const { data: snap } = await supabase.from("league_standings").select("as_of").eq("club_id", clubId).gte("as_of", from).lte("as_of", to).order("as_of", { ascending: true }).limit(1).maybeSingle();
+  if (!snap) return [];
+  const { data } = await supabase.from("league_standings").select("*").eq("club_id", clubId).eq("as_of", snap.as_of);
+  return (data ?? []) as Standing[];
+}

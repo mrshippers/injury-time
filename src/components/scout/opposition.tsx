@@ -1,27 +1,26 @@
 import { Crest } from "@/components/club/crest";
-import { getNote } from "@/lib/ai/notes";
 import { aiConfigured } from "@/lib/ai/claude";
+import { getNote } from "@/lib/ai/notes";
 import type { Brief, ScoutFacts } from "@/lib/scout/brief";
 
 import { No2Brief } from "./no2-brief";
 
 const KEY = "num text-[10.5px] uppercase tracking-[0.12em] text-ink-dim";
 const pct = (n: number) => `${Math.round(n * 100)}%`;
-const hot = (d: number) => (d >= 2 ? `running hot, ${d} pts above what their goals earn` : d <= -2 ? `unlucky, ${Math.abs(d)} pts below what their goals earn` : "about where their goals say");
 
 /**
- * The opposition: the model's numbers, always there, then the No.2's plan on top. The result bar carries
- * each answer's word and percentage on the segment itself, so it never rests on colour.
+ * The opposition: the model up top (result chances with the word and number on each segment, never colour
+ * alone; xG both ways; likeliest scores), then the read, the handful of counted points that matter, then
+ * the analyst's plan on request.
  */
 export async function Opposition({ clubId, fixtureId, facts }: { clubId: string; fixtureId: string; facts: ScoutFacts }) {
   const stored = await getNote<Brief>(clubId, "brief", fixtureId);
-  const { odds, them, us } = facts;
-  const theirVenue = facts.venue === "H" ? them.awayPpg : them.homePpg;
+  const { odds, read, them } = facts;
   return (
     <section id="opposition" aria-labelledby="opp-h" className="mt-8 scroll-mt-20">
       <div className="flex items-center gap-3">
         <Crest team={facts.opponent} size={28} plain />
-        <p className="annot" id="opp-h">{`// the opposition · ${facts.opponent.toLowerCase()}`}</p>
+        <p className="annot" id="opp-h">{`// the opposition · ${facts.opponent.toLowerCase()} · ${them.position}th`}</p>
       </div>
 
       <div className="mt-4 flex h-9 w-full overflow-hidden" role="img" aria-label={`win ${pct(odds.win)}, draw ${pct(odds.draw)}, lose ${pct(odds.loss)}`}>
@@ -38,38 +37,41 @@ export async function Opposition({ clubId, fixtureId, facts }: { clubId: string;
         ))}
       </div>
 
-      <dl className="mt-5 grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4">
-        <div>
-          <dt className={KEY}>goals we should score</dt>
-          <dd className="num mt-1 text-[22px] font-semibold text-ink tabular-nums">{odds.xgFor}</dd>
-        </div>
-        <div>
-          <dt className={KEY}>goals they should score</dt>
-          <dd className="num mt-1 text-[22px] font-semibold text-ink tabular-nums">{odds.xgAgainst}</dd>
-        </div>
-        <div>
-          <dt className={KEY}>likeliest scores</dt>
-          <dd className="num mt-1 text-[15px] font-semibold text-ink">{odds.scorelines.map((s) => s.score).join(" · ")}</dd>
-        </div>
-        <div>
-          <dt className={KEY}>them {facts.venue === "H" ? "away" : "at home"}</dt>
-          <dd className="num mt-1 text-[15px] font-semibold text-ink">{theirVenue !== null ? `${theirVenue} pts a game` : "-"}</dd>
-        </div>
+      <dl className="mt-5 grid grid-cols-3 gap-x-6 gap-y-4 sm:grid-cols-6">
+        {(
+          [
+            ["our xG", odds.xgFor.toFixed(2)],
+            ["their xG", odds.xgAgainst.toFixed(2)],
+            ["likeliest", odds.scorelines[0]?.score ?? "-"],
+            ["both score", pct(read.lines.btts)],
+            ["clean sheet", pct(read.lines.ourCleanSheet)],
+            ["over 2.5", pct(read.lines.over25)],
+          ] as const
+        ).map(([k, v]) => (
+          <div key={k}>
+            <dt className={KEY}>{k}</dt>
+            <dd className="num mt-1 text-[22px] font-semibold text-ink tabular-nums">{v}</dd>
+          </div>
+        ))}
       </dl>
 
-      <ul className="mt-4 flex flex-col gap-1 text-[13px] text-ink-dim">
-        <li>
-          <span className="text-ink">{facts.opponent}</span>: {them.position}th, {them.points} pts from {them.played}, {hot(them.luck)}.
-        </li>
-        <li>
-          <span className="text-ink">us</span>: {us.position}th, {hot(us.luck)}.
-        </li>
-        {facts.meetings.length ? (
-          <li>
-            this season: {facts.meetings.map((m) => `${m.score} ${m.venue === "H" ? "at home" : "away"}`).join(", ")}
-          </li>
-        ) : null}
-      </ul>
+      <div className="mt-6">
+        <p className={KEY}>the read</p>
+        <ul data-stagger className="mt-2 flex flex-col divide-y divide-line border-y border-line">
+          {read.points.map((p) => (
+            <li key={p.key} className="grid gap-x-5 gap-y-0.5 py-2.5 sm:grid-cols-[150px_minmax(0,1fr)]">
+              <span className="num text-[11px] uppercase tracking-[0.1em] text-gold">{p.key}</span>
+              <span className="text-[14px] leading-snug text-ink">{p.line}</span>
+            </li>
+          ))}
+          {facts.meetings.length ? (
+            <li className="grid gap-x-5 gap-y-0.5 py-2.5 sm:grid-cols-[150px_minmax(0,1fr)]">
+              <span className="num text-[11px] uppercase tracking-[0.1em] text-gold">this season</span>
+              <span className="text-[14px] leading-snug text-ink">{facts.meetings.map((m) => `${m.score} ${m.venue === "H" ? "at home" : "away"}`).join(", ")}</span>
+            </li>
+          ) : null}
+        </ul>
+      </div>
 
       {aiConfigured() || stored ? <No2Brief fixtureId={fixtureId} initial={stored?.body ?? null} /> : null}
     </section>

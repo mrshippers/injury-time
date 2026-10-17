@@ -1,4 +1,4 @@
-/** The shapes the No.2 answers in. Kept out of the "use server" actions file, which may only export functions. */
+/** The shapes the analyst answers in. Kept out of the "use server" actions file, which may only export functions. */
 import { z } from "zod";
 
 export const ReportSchema = z.object({

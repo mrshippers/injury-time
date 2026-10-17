@@ -1,4 +1,4 @@
-/** Store and fetch what the No.2 wrote, keyed per club, kind and match, so the same words are paid for once. */
+/** Store and fetch what the analyst wrote, keyed per club, kind and match, so the same words are paid for once. */
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type NoteKind = "brief" | "report" | "nudge" | "answer";

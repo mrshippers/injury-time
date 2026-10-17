@@ -22,7 +22,7 @@ export async function askStructured<S extends z.ZodType>(opts: {
   effort?: "low" | "medium" | "high";
   maxTokens?: number;
 }): Promise<AiResult<z.infer<S>>> {
-  if (!aiConfigured()) return { ok: false, error: "the No.2 isn't switched on here yet" };
+  if (!aiConfigured()) return { ok: false, error: "the analyst isn't switched on here yet" };
   const client = new Anthropic();
   try {
     const response = await client.beta.messages.parse({
@@ -34,14 +34,14 @@ export async function askStructured<S extends z.ZodType>(opts: {
       output_config: { effort: opts.effort ?? "medium", format: betaZodOutputFormat(opts.schema) },
       messages: [{ role: "user", content: opts.user }],
     });
-    if (response.stop_reason === "refusal") return { ok: false, error: "the No.2 wouldn't write that one" };
+    if (response.stop_reason === "refusal") return { ok: false, error: "the analyst wouldn't write that one" };
     const out = response.parsed_output as z.infer<S> | null;
-    if (!out) return { ok: false, error: "the No.2 came back with nothing usable" };
+    if (!out) return { ok: false, error: "the analyst came back with nothing usable" };
     return { ok: true, value: out, model: response.model || NO2_MODEL };
   } catch (err) {
-    if (err instanceof Anthropic.AuthenticationError) return { ok: false, error: "the No.2's key was rejected" };
-    if (err instanceof Anthropic.RateLimitError) return { ok: false, error: "the No.2 is busy, try again in a minute" };
-    if (err instanceof Anthropic.APIError) return { ok: false, error: `the No.2 couldn't answer (${err.status ?? "api"})` };
-    return { ok: false, error: "the No.2 couldn't answer" };
+    if (err instanceof Anthropic.AuthenticationError) return { ok: false, error: "the analyst's key was rejected" };
+    if (err instanceof Anthropic.RateLimitError) return { ok: false, error: "the analyst is busy, try again in a minute" };
+    if (err instanceof Anthropic.APIError) return { ok: false, error: `the analyst couldn't answer (${err.status ?? "api"})` };
+    return { ok: false, error: "the analyst couldn't answer" };
   }
 }

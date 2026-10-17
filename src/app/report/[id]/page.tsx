@@ -14,7 +14,7 @@ import { getViewer } from "@/lib/viewer";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "match report - injury time." };
 
-/** One result, and the No.2's draft report for it: the website piece and the post, ready to copy. */
+/** One result, and the analyst's draft report for it: the website piece and the post, ready to copy. */
 export default async function ReportPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
   const viewer = await getViewer();
