@@ -4,7 +4,7 @@ import { Crest } from "@/components/club/crest";
 import { MatchWeatherCard } from "@/components/home/match-weather";
 import { matchWeather } from "@/lib/weather/grounds";
 import { Opposition } from "@/components/scout/opposition";
-import { getHomeSeason } from "@/lib/home/data";
+import { getHomeSeason, getStandingsBefore } from "@/lib/home/data";
 import { scoutFacts } from "@/lib/scout/brief";
 import { AttendanceTrend } from "@/components/team/attendance-trend";
 import { CallBoard } from "@/components/team/call-board";
@@ -29,7 +29,8 @@ export default async function TeamPage() {
   const { viewer, next, daysUntil, players, calls, usual, notices, attendance, now, asOf } = await getTeamPage();
   const weather = next ? await matchWeather(viewer.club.name, next, asOf) : null;
   const season = next ? await getHomeSeason(viewer.club.id, asOf) : null;
-  const facts = next && season ? scoutFacts(next, season.standings, season.results) : null;
+  const before = season ? await getStandingsBefore(viewer.club.id, season.standingsAsOf) : [];
+  const facts = next && season ? scoutFacts(next, season.standings, season.results, before) : null;
   // RLS returns rows only to staff of a real club; a guest or a player gets none
   const staff = !viewer.guest && viewer.can("view_squad_health");
   let checkins: PlayerCheckin[] = [];

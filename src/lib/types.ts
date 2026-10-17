@@ -631,7 +631,7 @@ export type Clip = {
 
 /* ── a saved side ─────────────────────────────────────────────────────── */
 
-/** What the No.2 wrote (0017): a brief, a report, a nudge, an answer, keyed per club and match. */
+/** What the analyst wrote (0017): a brief, a report, a nudge, an answer, keyed per club and match. */
 export type AiNote = {
   id: string
   club_id: string

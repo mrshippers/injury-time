@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { writeBriefAction } from "@/lib/ai/actions";
 import type { Brief } from "@/lib/scout/brief";
 
-/** The No.2's read of the numbers: written once per match on request, then kept. */
+/** The analyst's read of the numbers: written once per match on request, then kept. */
 export function No2Brief({ fixtureId, initial }: { fixtureId: string; initial: Brief | null }) {
   const [brief, setBrief] = useState<Brief | null>(initial);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export function No2Brief({ fixtureId, initial }: { fixtureId: string; initial: B
           }
           className="plate pressable bg-mint py-2.5 text-[13px] font-semibold text-mint-ink transition-transform duration-200 hover:translate-x-0.5 disabled:opacity-60"
         >
-          {pending ? "your No.2 is writing it up" : "get the No.2's brief"}
+          {pending ? "the analyst is writing it up" : "get the analyst's read"}
         </button>
         {pending ? <span aria-hidden className="route-bar ml-3 inline-block h-[3px] w-16 bg-mint align-middle" /> : null}
         {error ? <p className="mt-2 text-[12.5px] text-doubt">{error}</p> : null}

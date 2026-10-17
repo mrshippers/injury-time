@@ -7,7 +7,7 @@ import type { No2Answer } from "@/lib/ai/schemas";
 
 const STARTERS = ["How do we do away after going behind at half time?", "Who scores when we win at home?", "Are we better in the cups than the league?", "What's our record against the top six?"];
 
-/** Ask your No.2: a question about the season, answered from the results and the table with the numbers shown. */
+/** Ask the analyst: a question about the season, answered from the results and the table with the numbers shown. */
 export function AskNo2() {
   const [q, setQ] = useState("");
   const [a, setA] = useState<{ q: string; v: No2Answer } | null>(null);
@@ -22,7 +22,7 @@ export function AskNo2() {
     });
   return (
     <section aria-labelledby="no2-h" className="mt-10">
-      <p className="annot" id="no2-h">{"// ask your No.2"}</p>
+      <p className="annot" id="no2-h">{"// ask the analyst"}</p>
       <form
         className="mt-3 flex flex-wrap gap-2"
         onSubmit={(e) => {

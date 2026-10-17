@@ -1,10 +1,10 @@
 "use server";
 
 /**
- * The No.2's server actions. Each one builds its facts from the database on the server (never trusts the
+ * The analyst's server actions. Each one builds its facts from the database on the server (never trusts the
  * client for numbers), checks for words already written for the same thing, and only then asks Claude.
  */
-import { getHomeSeason } from "@/lib/home/data";
+import { getHomeSeason, getStandingsBefore } from "@/lib/home/data";
 import { todayISO } from "@/lib/data";
 import { BRIEF_SYSTEM, BriefSchema, briefPrompt, scoutFacts, type Brief } from "@/lib/scout/brief";
 import { createClient } from "@/lib/supabase/server";
@@ -25,7 +25,8 @@ export async function writeBriefAction(fixtureId: string): Promise<ActionOutcome
   const { data: fx } = await supabase.from("fixtures").select("*").eq("id", fixtureId).eq("club_id", viewer.club.id).maybeSingle();
   if (!fx) return { ok: false, error: "that match isn't in the diary" };
   const season = await getHomeSeason(viewer.club.id, todayISO());
-  const facts = scoutFacts(fx as Fixture, season.standings, season.results);
+  const before = await getStandingsBefore(viewer.club.id, season.standingsAsOf);
+  const facts = scoutFacts(fx as Fixture, season.standings, season.results, before);
   if (!facts) return { ok: false, error: "they aren't in our league table, so there's nothing to model" };
   const res = await askStructured({ system: BRIEF_SYSTEM, user: briefPrompt(viewer.club.name, facts), schema: BriefSchema, effort: "medium" });
   if (!res.ok) return res;
@@ -68,9 +69,9 @@ Write the report.`,
   return { ok: true, value: res.value };
 }
 
-/* ── the No.2: questions about the season ── */
+/* ── the analyst: questions about the season ── */
 
-const ANSWER_SYSTEM = `You are the No.2 (assistant manager) at an English non-league club. The gaffer asks you about the season and you answer from the club's results and the league table, which are given in full.
+const ANSWER_SYSTEM = `You are the analyst at an English non-league club. The gaffer asks you about the season and you answer from the club's results and the league table, which are given in full.
 
 Rules:
 - Count from the data; never estimate or invent. If the data can't answer it (minutes of goals, individual minutes played, opposition players), set can_answer false and say what would be needed.
