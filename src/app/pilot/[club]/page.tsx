@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const c = PILOT_CLUBS[club];
   if (!c) return {};
   const title = `Injury Time for ${c.name}`;
-  const description = "A management platform for non-league clubs. In, out or unsure from the boys' phones, the eleven fills itself, the season and the cups in one place.";
+  const description = "A management platform for non-league clubs. In, out or unsure from the boys' phones, the eleven fills itself, the opposition read before every game, the match report after it.";
   return {
     metadataBase: new URL(pilotBaseUrl()),
     title,
@@ -81,6 +81,10 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               This is the thing I was telling you about. It&apos;s a club management platform: the boys say in or out from their phones, the team sheet picks itself from who&apos;s available, every
               player has a fitness page, and the league table, cups and the matchday forecast are all in one place.
             </p>
+            <p className={P}>
+              Before every game it reads the opposition off the league table: how they do at home or away, their form, the kind of games they play, how we do against sides like them, and the
+              analyst turns that into a plan. After the game the match report&apos;s written for the website and the socials, ready to copy.
+            </p>
             <p className={P}>I&apos;ve loaded Belstone&apos;s squad and results so have a scroll.</p>
             <p className={P}>
               One thing I need your help with. The league data comes from Football Web Pages and they only give keys to clubs. Could I cc you into an email to them saying I&apos;m doing the data analysis
@@ -121,6 +125,23 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           <div>
             <TrySwitch />
           </div>
+        </div>
+
+        <div data-reveal className="mt-20">
+          <h2 className={H2}>Know who you&apos;re playing</h2>
+          <p className={`${P} mt-4`}>
+            Before every game: the chances of winning, drawing and losing, xG for both sides, and the read. Their record at home or away against the rest of the league, their form since the last
+            table, the kind of games they play, how we do against sides around them and how we do from behind at half time. Then the analyst writes the plan: our edge, where they hurt us, what to do if
+            we go ahead or behind.
+          </p>
+          <figure className="mt-8">
+            {/* a phone gets the phone layout, so the words stay readable */}
+            <picture>
+              <source media="(max-width: 640px)" srcSet="/pilot/belstone-opposition-m.jpg" width={716} height={1583} />
+              { }
+              <img src="/pilot/belstone-opposition.jpg" alt="The opposition read for Staines and Lammas: 38% win, 24% draw, 38% lose, xG 1.53 each, then the read line by line" width={2232} height={906} className="h-auto w-full bg-panel/50" loading="lazy" />
+            </picture>
+          </figure>
         </div>
 
         <div data-reveal className="mt-20 grid items-center gap-8 lg:grid-cols-2">
@@ -197,6 +218,23 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
             </div>
           ) : null}
           {season ? <CupsSection results={season.results} fixtures={season.fixtures} asOf={asOf} /> : null}
+        </div>
+
+        <div data-reveal className="mt-20 grid items-center gap-8 lg:grid-cols-2">
+          <div className="lg:order-2">
+            <h2 className={H2}>The report writes itself</h2>
+            <p className={`${P} mt-4`}>
+              Once the score&apos;s in, one tap writes the match report for the website and a post for the socials, from the score, the half time, the scorers and the crowd. Nothing made up, nothing posted for
+              you: copy it, tweak it, put it out. And ask the analyst anything about the season, it answers from the results with the numbers.
+            </p>
+          </div>
+          <figure className="lg:order-1">
+            <picture>
+              <source media="(max-width: 640px)" srcSet="/pilot/belstone-report-m.jpg" width={780} height={1998} />
+              { }
+              <img src="/pilot/belstone-report.jpg" alt="Match report for Belstone 4-2 Baldock Town: the website piece and the social post, each with a copy button" width={1740} height={1340} className="h-auto w-full bg-panel/50" loading="lazy" />
+            </picture>
+          </figure>
         </div>
 
         <div data-reveal className="mt-20 grid items-center gap-8 lg:grid-cols-2">
