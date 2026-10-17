@@ -41,7 +41,7 @@ const REPORT_SYSTEM = `You write match reports for an English non-league club's 
 Rules:
 - Use only the facts given (score, half-time score, scorers, competition, venue, crowd, what it means in the table or the cup). Never invent moments, minutes, assists or quotes.
 - Scorers: "(2)" means a brace, "pen" a penalty, "og" an own goal by the opposition.
-- British English, no em dashes, no hashtags unless it's the club name.`;
+- British English, no em dashes. Call the squad "the boys", never "the lads"; say "formation", never "shape", no hashtags unless it's the club name.`;
 
 export async function writeReportAction(resultId: string): Promise<ActionOutcome<MatchReport>> {
   const viewer = await getViewer();
@@ -74,7 +74,7 @@ const ANSWER_SYSTEM = `You are the No.2 (assistant manager) at an English non-le
 
 Rules:
 - Count from the data; never estimate or invent. If the data can't answer it (minutes of goals, individual minutes played, opposition players), set can_answer false and say what would be needed.
-- Lead with the answer, then the numbers behind it. British English, no em dashes, no jargon.`;
+- Lead with the answer, then the numbers behind it. British English, no em dashes. Call the squad "the boys", never "the lads"; say "formation", never "shape", no jargon.`;
 
 export async function askNo2Action(question: string): Promise<ActionOutcome<No2Answer>> {
   const q = question.trim().slice(0, 300);
@@ -101,7 +101,7 @@ export async function askNo2Action(question: string): Promise<ActionOutcome<No2A
 
 /* ── nudge the quiet ones ── */
 
-const NUDGE_SYSTEM = `You write the message a non-league manager drops in the team group chat to chase players who haven't said if they're available. Sound like the gaffer: short, direct, a bit of banter, never nasty, no corporate tone. Name the players. British English, no em dashes, at most one emoji.`;
+const NUDGE_SYSTEM = `You write the message a non-league manager drops in the team group chat to chase players who haven't said if they're available. Sound like the gaffer: short, direct, a bit of banter, never nasty, no corporate tone. Name the players. British English, no em dashes. Call the squad "the boys", never "the lads"; say "formation", never "shape", at most one emoji.`;
 
 export async function writeNudgeAction(fixtureId: string, names: string[]): Promise<ActionOutcome<{ message: string }>> {
   const viewer = await getViewer();
