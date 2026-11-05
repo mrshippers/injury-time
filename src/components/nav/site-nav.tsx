@@ -45,7 +45,8 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
   return (
     <nav
       aria-label="modules"
-      className="sticky top-0 z-30 border-b border-line bg-pitch/85 pt-[env(safe-area-inset-top)] backdrop-blur-md"
+      data-rim="b"
+      className="glass sticky top-0 z-30 border-b border-line pt-[env(safe-area-inset-top)]"
     >
       <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center justify-between gap-2 px-3 sm:px-8">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
@@ -130,7 +131,7 @@ export function PhoneTabBar() {
   const pathname = usePathname() ?? "/";
   if (pathname.startsWith("/login") || pathname.startsWith("/auth") || pathname.startsWith("/checkin")) return null;
   return (
-    <nav aria-label="modules" className="tabbar fixed inset-x-0 bottom-0 z-30 sm:hidden">
+    <nav aria-label="modules" data-rim="t" className="tabbar glass fixed inset-x-0 bottom-0 z-30 sm:hidden">
       <ul className="grid grid-cols-6 px-1.5 pt-1.5">
         {MODULES.map((m) => {
           const active = m.match(pathname);

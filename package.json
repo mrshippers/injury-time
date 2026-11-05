@@ -12,6 +12,7 @@
     "seed": "tsx scripts/seed.ts",
     "test:e2e": "playwright test",
     "verify": "vitest run && playwright test",
+    "verify:glass": "node scripts/verify-glass.mjs",
     "grid:squad-match": "tsx scripts/grid-squad-match.ts",
     "db:probe": "bash -c 'eval \"$(scripts/db/local.sh)\" && tsx scripts/rls-probe.ts'",
     "test:sw": "playwright test -c playwright.sw.config.ts",

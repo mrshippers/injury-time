@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { Glass } from "@/components/glass/glass";
 import { PhoneTabBar, SiteNav } from "@/components/nav/site-nav";
 import { InstallNudge, ServiceWorker, TouchFeel } from "@/components/pwa/pwa";
 import { getViewer, listPublicClubs } from "@/lib/viewer";
@@ -45,6 +46,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <InstallNudge />
         <ServiceWorker />
         <TouchFeel />
+        <Glass />
       </body>
     </html>
   );

@@ -3,6 +3,7 @@ import { ClubStop } from "@/components/club/crest";
 import { todayISO } from "@/lib/data";
 import { FeedKeyForm, ResultForm, type Awaiting } from "@/components/club/club-forms";
 import { FeedSquad } from "@/components/club/feed-squad";
+import { GlassTint } from "@/components/glass/glass";
 import { StaffInvites, type InviteRow } from "@/components/club/staff-invites";
 import { longDate } from "@/components/squad/format";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -155,6 +156,16 @@ export default async function ClubPage() {
             ))}
           </ul>
         ) : null}
+      </section>
+
+      <section aria-labelledby="device-h" data-glass-setting className="mt-10 border-t border-line pt-6">
+        <p className="annot" id="device-h">{"// this device"}</p>
+        <h2 className="mt-2 text-[20px] font-semibold text-ink">The glass, clearer or smokier</h2>
+        <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
+          The bars at the top and bottom are glass, so the page shows through them. Slide left and they thin until only the rim is left; slide right
+          and they smoke over. Kept on this phone or laptop only, and it thickens by itself when something bright slides under.
+        </p>
+        <GlassTint />
       </section>
     </main>
   );

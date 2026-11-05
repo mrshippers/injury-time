@@ -362,7 +362,8 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
       <div
         role="tablist"
         aria-label="squad room view"
-        className="segmented sticky top-[var(--nav-h)] z-20 -mx-4 grid grid-cols-2 border-b border-line bg-pitch/95 px-4 py-2 backdrop-blur-md lg:hidden"
+        data-rim="b"
+        className="segmented glass sticky top-[var(--nav-h)] z-20 -mx-4 grid grid-cols-2 border-b border-line px-4 py-2 lg:hidden"
       >
         {(["squad", "side"] as const).map((v) => {
           const on = view === v;
@@ -374,7 +375,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
               aria-selected={on}
               onClick={() => chooseView(v)}
               className={`pressable plate num h-9 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.05em] transition-colors duration-[190ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
-                on ? "bg-panel-2 text-ink shadow-[inset_0_-2px_0_var(--mint)]" : "text-ink-dim"
+                on ? "bg-(--glass-pick) text-ink shadow-[inset_0_-2px_0_var(--mint)]" : "text-ink-dim"
               }`}
             >
               {v === "squad" ? `squad · ${rows.length}` : `starting XI · ${filled}/11`}
