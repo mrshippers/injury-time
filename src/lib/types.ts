@@ -419,6 +419,12 @@ export type Database = {
         Update: never
         Relationships: []
       }
+      club_staff: {
+        Row: ClubStaff
+        Insert: Insertable<ClubStaff, 'user_id' | 'joined_on' | 'left_on'>
+        Update: Partial<Insertable<ClubStaff, 'user_id' | 'joined_on' | 'left_on'>>
+        Relationships: []
+      }
       player_checkins: {
         Row: PlayerCheckin
         Insert: Insertable<PlayerCheckin, 'checkin_on' | 'last_rpe'>
@@ -746,4 +752,22 @@ export type StaffInvite = {
   expires_at: TimestampString
   used_by: string | null
   used_at: TimestampString | null
+}
+
+/* ── the staff as people (0018) ───────────────────────────────────────── */
+
+export const STAFF_ROLES = ['manager', 'coach', 'medical', 'other'] as const
+export type StaffRole = (typeof STAFF_ROLES)[number]
+
+/** A member of staff: name, title, role, and the dates they joined and left. */
+export type ClubStaff = {
+  id: string
+  club_id: string
+  user_id: string | null
+  name: string
+  title: string
+  role: StaffRole
+  joined_on: DateString
+  left_on: DateString | null
+  created_at: TimestampString
 }
