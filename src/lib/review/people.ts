@@ -1,11 +1,10 @@
 /**
- * The people at the end of the season: one row a player, one row a member of
- * staff, each column a count of something the club actually logged. A column
- * the data cannot support is null and the table says "not tracked", never 0.
- * Pure functions, no I/O.
+ * End-of-season rows: one per player, one per member of staff. Each column
+ * counts something the club logged. Where the data cannot support a column
+ * the value is null (shown as a dash), never 0. Pure functions, no I/O.
  */
 import type { SeasonStats } from "@/lib/stats";
-import type { ClubStaff, Injury, Position, Session, StaffAttendance } from "@/lib/types";
+import type { ClubStaff, Injury, Position } from "@/lib/types";
 
 export type PlayerReviewRow = {
   id: string;
@@ -77,39 +76,14 @@ export type StaffReviewRow = {
   role: ClubStaff["role"];
   joined_on: string;
   left_on: string | null;
-  /** days on the staff this season, to asOf or the day they left */
+  /** days in post, to asOf or the day they left */
   tenureDays: number;
-  /** matchdays and training sessions marked present; null when nothing was ever marked for them */
-  matchdays: number | null;
-  sessions: number | null;
-  /** how many matchdays and sessions the season held, for the "of" */
-  matchdaysHeld: number;
-  sessionsHeld: number;
 };
 
-export function staffRows(input: {
-  staff: readonly ClubStaff[];
-  attendance: readonly StaffAttendance[];
-  sessions: readonly Pick<Session, "id" | "kind" | "session_date">[];
-  asOf: string;
-}): StaffReviewRow[] {
-  const kind = new Map(input.sessions.map((s) => [s.id, s.kind]));
-  const matchdaysHeld = input.sessions.filter((s) => s.kind === "match").length;
-  const sessionsHeld = input.sessions.filter((s) => s.kind === "training").length;
-  const marked = new Map<string, { any: boolean; match: number; train: number }>();
-  for (const a of input.attendance) {
-    const m = marked.get(a.staff_id) ?? { any: false, match: 0, train: 0 };
-    m.any = true;
-    if (a.present) {
-      if (kind.get(a.session_id) === "match") m.match += 1;
-      else if (kind.get(a.session_id) === "training") m.train += 1;
-    }
-    marked.set(a.staff_id, m);
-  }
+export function staffRows(input: { staff: readonly ClubStaff[]; asOf: string }): StaffReviewRow[] {
   const ROLE_ORDER: Record<ClubStaff["role"], number> = { manager: 0, coach: 1, medical: 2, other: 3 };
   return input.staff
     .map((s) => {
-      const m = marked.get(s.id);
       const to = s.left_on && s.left_on < input.asOf ? s.left_on : input.asOf;
       return {
         id: s.id,
@@ -119,16 +93,12 @@ export function staffRows(input: {
         joined_on: s.joined_on,
         left_on: s.left_on,
         tenureDays: daysBetween(s.joined_on, to),
-        matchdays: m ? m.match : null,
-        sessions: m ? m.train : null,
-        matchdaysHeld,
-        sessionsHeld,
       } satisfies StaffReviewRow;
     })
     .sort((a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role] || a.joined_on.localeCompare(b.joined_on) || a.name.localeCompare(b.name));
 }
 
-/** "2 yrs 3 mo", "8 mo", "3 wks": the way tenure is said in a clubhouse. */
+/** Tenure as text: "2 yrs 3 mo", "8 mo", "3 wks". */
 export function tenureWord(days: number): string {
   if (days < 21) return `${Math.max(1, Math.round(days / 7))} wk${Math.round(days / 7) === 1 ? "" : "s"}`;
   const months = Math.floor(days / 30.4);

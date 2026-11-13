@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { playerRows, staffRows, tenureWord } from "@/lib/review/people";
 import type { SeasonStats } from "@/lib/stats";
-import type { ClubStaff, StaffAttendance } from "@/lib/types";
+import type { ClubStaff } from "@/lib/types";
 
 const stats = (s: Partial<SeasonStats>): SeasonStats => ({ apps: 0, starts: 0, minutes: 0, goals: 0, assists: 0, yellow: 0, red: 0, source: "log", ...s });
 
@@ -51,31 +51,18 @@ describe("staffRows", () => {
     { id: "s2", club_id: "c", user_id: "u", name: "Gaffer", title: "manager", role: "manager", joined_on: "2024-06-01", left_on: null, created_at: "" },
     { id: "s3", club_id: "c", user_id: null, name: "Kit", title: "kit man", role: "other", joined_on: "2026-08-01", left_on: "2026-10-01", created_at: "" },
   ];
-  const sessions = [
-    { id: "m1", kind: "match" as const, session_date: "2026-08-15" },
-    { id: "m2", kind: "match" as const, session_date: "2026-08-22" },
-    { id: "t1", kind: "training" as const, session_date: "2026-08-18" },
-  ];
-  const attendance: StaffAttendance[] = [
-    { staff_id: "s1", session_id: "m1", club_id: "c", present: true },
-    { staff_id: "s1", session_id: "m2", club_id: "c", present: false },
-    { staff_id: "s1", session_id: "t1", club_id: "c", present: true },
-  ];
-  const rows = staffRows({ staff, attendance, sessions, asOf: "2026-11-13" });
+  const rows = staffRows({ staff, asOf: "2026-11-13" });
 
-  it("puts the manager first, then coaches, medical, the rest", () => {
+  it("orders manager, coaches, medical, then the rest", () => {
     expect(rows.map((r) => r.id)).toEqual(["s2", "s1", "s3"]);
   });
 
-  it("counts matchdays and sessions marked present against those held", () => {
-    const dave = rows.find((r) => r.id === "s1")!;
-    expect(dave).toMatchObject({ matchdays: 1, sessions: 1, matchdaysHeld: 2, sessionsHeld: 1 });
+  it("counts tenure to today for current staff", () => {
+    expect(rows.find((r) => r.id === "s1")!.tenureDays).toBe(469);
   });
 
-  it("leaves attendance null for someone never marked, and stops tenure at the day they left", () => {
-    const kit = rows.find((r) => r.id === "s3")!;
-    expect(kit.matchdays).toBeNull();
-    expect(kit.tenureDays).toBe(61);
+  it("stops tenure on the day someone left", () => {
+    expect(rows.find((r) => r.id === "s3")!.tenureDays).toBe(61);
   });
 
   it("words tenure", () => {

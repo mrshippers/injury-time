@@ -30,7 +30,7 @@ import {
 import { playerRows, staffRows } from "@/lib/review/people";
 import { seasonReview, seasonWindow } from "@/lib/review/season";
 import { createClient } from "@/lib/supabase/server";
-import type { ClubStaff, ExternalStats, Fixture, Injury, Position, Result, Session, StaffAttendance, Standing } from "@/lib/types";
+import type { ClubStaff, ExternalStats, Fixture, Injury, Position, Result, Standing } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -87,7 +87,7 @@ export default async function ReviewPage() {
   const asOf = todayISO();
   const supabase = await createClient();
   const win = seasonWindow(club.season, asOf);
-  const [{ data: results }, { data: fixtures }, { data: injuries }, { data: players }, { data: latest }, loads, stats, { data: staffRaw }, { data: attendance }, { data: sessions }] = await Promise.all([
+  const [{ data: results }, { data: fixtures }, { data: injuries }, { data: players }, { data: latest }, loads, stats, { data: staffRaw }] = await Promise.all([
     supabase.from("results").select("*").eq("club_id", club.id).gte("match_date", win.from).lte("match_date", win.to).order("match_date", { ascending: true }),
     supabase.from("fixtures").select("*").eq("club_id", club.id).gte("match_date", asOf).order("match_date", { ascending: true }),
     supabase.from("injuries").select("*").eq("club_id", club.id).gte("occurred_on", win.from).lte("occurred_on", win.to),
@@ -96,8 +96,6 @@ export default async function ReviewPage() {
     loadEntriesByPlayer(club.id, 365),
     seasonStatsByPlayer(club.id),
     supabase.from("club_staff").select("*").eq("club_id", club.id).order("joined_on", { ascending: true }),
-    supabase.from("staff_attendance").select("*").eq("club_id", club.id),
-    supabase.from("sessions").select("id, kind, session_date").eq("club_id", club.id).gte("session_date", win.from).lte("session_date", win.to),
   ]);
   let table: Standing[] = [];
   if (latest?.as_of) {
@@ -123,12 +121,7 @@ export default async function ReviewPage() {
 
   const squad = (players ?? []) as { id: string; name: string; squad_number: number | null; position: Position | null; external_stats: ExternalStats | null }[];
   const people = playerRows({ players: squad, stats, injuries: (injuries ?? []) as Injury[], asOf });
-  const staffPeople = staffRows({
-    staff: (staffRaw ?? []) as ClubStaff[],
-    attendance: (attendance ?? []) as StaffAttendance[],
-    sessions: (sessions ?? []) as Pick<Session, "id" | "kind" | "session_date">[],
-    asOf,
-  });
+  const staffPeople = staffRows({ staff: (staffRaw ?? []) as ClubStaff[], asOf });
   const resolve = (feedName: string) => {
     const p = matchPlayer(feedName, squad);
     return p ? { name: p.name, apps: p.external_stats?.apps ?? null } : null;

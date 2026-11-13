@@ -14,10 +14,9 @@ const CELL = "num py-1.5 text-right text-[13px] tabular-nums";
 type Who = "players" | "staff";
 
 /**
- * The second page of the review: every person, one row each, the numbers the
- * club logged for them and nothing invented. Sort any column; a column the
- * data does not carry for someone shows a dash and the foot says why. Built
- * for the end-of-season sit-down: who played, who didn't, who was there.
+ * Second page of the review: one row per person, using only what the club
+ * logged. Columns sort. Where the data has no value the cell shows a dash and
+ * the footnote says why.
  */
 export function PeopleReview({ players, staff, asOf }: { players: PlayerReviewRow[]; staff: StaffReviewRow[]; asOf: string }) {
   const [who, setWho] = useState<Who>("players");
@@ -125,8 +124,8 @@ function Players({ rows }: { rows: PlayerReviewRow[] }) {
         </tbody>
       </table>
       <p className="mt-2 text-[11.5px] text-ink-dim">
-        pl and g come from the match log, or the league feed where nothing is logged. st, min, a, y and r are only known from the log
-        {unlogged > 0 ? `: ${unlogged} of ${rows.length} have no logged match yet, so those show a dash` : ""}. Injuries are the spells recorded on the player, days to the return or to today.
+        Pl and g use the match log, or the league feed where none is logged. St, min, a, y and r use the match log only
+        {unlogged > 0 ? `; ${unlogged} of ${rows.length} players have no logged match and show a dash` : ""}. Inj counts recorded spells. Days out runs to the return date, or to today if the spell is open.
       </p>
     </div>
   );
@@ -135,28 +134,20 @@ function Players({ rows }: { rows: PlayerReviewRow[] }) {
 const ROLE_WORD: Record<StaffReviewRow["role"], string> = { manager: "manager", coach: "coach", medical: "medical", other: "staff" };
 
 function Staff({ rows }: { rows: StaffReviewRow[] }) {
-  const dash = <span className="text-ink-faint">–</span>;
-  const unmarked = rows.filter((r) => r.matchdays === null).length;
   if (rows.length === 0) {
-    return (
-      <p className="max-w-[52ch] text-[13.5px] leading-snug text-ink-dim">
-        No staff on record yet. The board page is where the manager, coaches and medical go on the books, with a title and the date they came; from then on the review can say how long they have been here and which matchdays they made.
-      </p>
-    );
+    return <p className="max-w-[52ch] text-[13.5px] leading-snug text-ink-dim">No staff recorded. Add them on the club page.</p>;
   }
   return (
     <div>
-      <table className="w-full min-w-[560px] border-collapse">
-        <caption className="sr-only">Every member of staff: role, tenure, matchdays and sessions attended</caption>
+      <table className="w-full min-w-[480px] border-collapse">
+        <caption className="sr-only">Every member of staff: title, role and time in post</caption>
         <thead>
           <tr className="border-b border-line-strong">
             <th scope="col" className={`${KEY} py-1.5 text-left font-normal`}>name</th>
             <th scope="col" className={`${KEY} py-1.5 text-left font-normal`}>title</th>
             <th scope="col" className={`${KEY} py-1.5 text-left font-normal`}>role</th>
             <th scope="col" className={`${KEY} py-1.5 text-right font-normal`}>since</th>
-            <th scope="col" className={`${KEY} py-1.5 text-right font-normal`}>here</th>
-            <th scope="col" className={`${KEY} py-1.5 text-right font-normal`} title="matchdays marked present, of the matchdays held">matchdays</th>
-            <th scope="col" className={`${KEY} py-1.5 text-right font-normal`} title="training sessions marked present, of those held">sessions</th>
+            <th scope="col" className={`${KEY} py-1.5 text-right font-normal`} title="time in post, to today or the day they left">in post</th>
           </tr>
         </thead>
         <tbody>
@@ -170,29 +161,11 @@ function Staff({ rows }: { rows: StaffReviewRow[] }) {
               <td className="num py-1.5 pr-3 text-left text-[11.5px] uppercase tracking-[0.08em] text-ink-dim">{ROLE_WORD[r.role]}</td>
               <td className={`${CELL} text-ink-dim`}>{shortDate(r.joined_on)}</td>
               <td className={`${CELL} text-ink`}>{tenureWord(r.tenureDays)}</td>
-              <td className={CELL}>
-                {r.matchdays === null ? dash : (
-                  <>
-                    <span className="text-ink">{r.matchdays}</span>
-                    <span className="text-ink-dim"> of {r.matchdaysHeld}</span>
-                  </>
-                )}
-              </td>
-              <td className={CELL}>
-                {r.sessions === null ? dash : (
-                  <>
-                    <span className="text-ink">{r.sessions}</span>
-                    <span className="text-ink-dim"> of {r.sessionsHeld}</span>
-                  </>
-                )}
-              </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <p className="mt-2 text-[11.5px] text-ink-dim">
-        Attendance is only what was marked on a session{unmarked > 0 ? `; ${unmarked} of ${rows.length} have never been marked, so they show a dash` : ""}. Tenure runs from the date on the books to today, or the day they left.
-      </p>
+      <p className="mt-2 text-[11.5px] text-ink-dim">Time in post runs from the start date to today, or to the day they left.</p>
     </div>
   );
 }

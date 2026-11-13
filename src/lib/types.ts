@@ -425,12 +425,6 @@ export type Database = {
         Update: Partial<Insertable<ClubStaff, 'user_id' | 'joined_on' | 'left_on'>>
         Relationships: []
       }
-      staff_attendance: {
-        Row: StaffAttendance
-        Insert: StaffAttendance
-        Update: Partial<StaffAttendance>
-        Relationships: []
-      }
       player_checkins: {
         Row: PlayerCheckin
         Insert: Insertable<PlayerCheckin, 'checkin_on' | 'last_rpe'>
@@ -765,7 +759,7 @@ export type StaffInvite = {
 export const STAFF_ROLES = ['manager', 'coach', 'medical', 'other'] as const
 export type StaffRole = (typeof STAFF_ROLES)[number]
 
-/** A member of staff as the club knows them: a name and a title, when they came and went. */
+/** A member of staff: name, title, role, and the dates they joined and left. */
 export type ClubStaff = {
   id: string
   club_id: string
@@ -776,12 +770,4 @@ export type ClubStaff = {
   joined_on: DateString
   left_on: DateString | null
   created_at: TimestampString
-}
-
-/** Who was at which session; only rows that were marked exist. */
-export type StaffAttendance = {
-  staff_id: string
-  session_id: string
-  club_id: string
-  present: boolean
 }
