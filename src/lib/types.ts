@@ -55,6 +55,8 @@ export type TimestampString = string
 
 export type ClubSettings = {
   health_language?: 'plain' | 'detailed'
+  /** the formation the starting XI opens in, e.g. "4-2-3-1" */
+  default_formation?: string
 }
 
 export type Club = {

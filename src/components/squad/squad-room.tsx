@@ -64,9 +64,11 @@ export type SquadRoomProps = {
   clubId: string;
   canManage: boolean;
   canPick: boolean;
+  /** the club's own default from the board; the device's last choice beats it */
+  defaultFormation?: string | null;
 };
 
-export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, canManage, canPick }: SquadRoomProps) {
+export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, canManage, canPick, defaultFormation = null }: SquadRoomProps) {
   const tokens = useSceneTokens();
   const reduced = useReducedMotion();
   const phone = useIsPhone();
@@ -85,7 +87,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
 
   /* ── the side ── */
   const [chosen, setChosen] = useState<string | null>(null);
-  const formation = formationByName(chosen ?? saved?.formation ?? stored);
+  const formation = formationByName(chosen ?? saved?.formation ?? stored ?? defaultFormation ?? undefined);
   // the side fills itself: last match's eleven again, who said out swapped for the next best, who said in first
   // the club captain (set on the player, e.g. Belstone's) is always the first name on the sheet
   const clubCaptain = useMemo(() => rows.find((r) => (r.player.external_stats as { captain?: boolean } | null)?.captain && isAvailable(r))?.player.id ?? null, [rows]);
