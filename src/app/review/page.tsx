@@ -3,9 +3,10 @@ import { RungBars } from "@/components/charts";
 import { ClubStop, Crest } from "@/components/club/crest";
 import { CupsSection } from "@/components/home/cups";
 import { REGION_LABEL } from "@/components/player/labels";
+import { PeopleReview } from "@/components/review/people";
 import { PrintButton } from "@/components/review/print-button";
 import { longDate, shortDate } from "@/components/squad/format";
-import { loadEntriesByPlayer, todayISO } from "@/lib/data";
+import { loadEntriesByPlayer, seasonStatsByPlayer, todayISO } from "@/lib/data";
 import { cupRuns } from "@/lib/home/cups";
 import { matchPlayer } from "@/lib/league";
 import type { LoadFlag } from "@/lib/load-engine";
@@ -26,9 +27,10 @@ import {
   type Record3,
   type ReviewGame,
 } from "@/lib/review/extras";
+import { playerRows, staffRows } from "@/lib/review/people";
 import { seasonReview, seasonWindow } from "@/lib/review/season";
 import { createClient } from "@/lib/supabase/server";
-import type { ExternalStats, Fixture, Injury, Result, Standing } from "@/lib/types";
+import type { ClubStaff, ExternalStats, Fixture, Injury, Position, Result, Session, StaffAttendance, Standing } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -85,13 +87,17 @@ export default async function ReviewPage() {
   const asOf = todayISO();
   const supabase = await createClient();
   const win = seasonWindow(club.season, asOf);
-  const [{ data: results }, { data: fixtures }, { data: injuries }, { data: players }, { data: latest }, loads] = await Promise.all([
+  const [{ data: results }, { data: fixtures }, { data: injuries }, { data: players }, { data: latest }, loads, stats, { data: staffRaw }, { data: attendance }, { data: sessions }] = await Promise.all([
     supabase.from("results").select("*").eq("club_id", club.id).gte("match_date", win.from).lte("match_date", win.to).order("match_date", { ascending: true }),
     supabase.from("fixtures").select("*").eq("club_id", club.id).gte("match_date", asOf).order("match_date", { ascending: true }),
     supabase.from("injuries").select("*").eq("club_id", club.id).gte("occurred_on", win.from).lte("occurred_on", win.to),
-    supabase.from("players").select("id, name, external_stats").eq("club_id", club.id),
+    supabase.from("players").select("id, name, squad_number, position, external_stats").eq("club_id", club.id).is("retired_on", null),
     supabase.from("league_standings").select("as_of").eq("club_id", club.id).order("as_of", { ascending: false }).limit(1).maybeSingle(),
     loadEntriesByPlayer(club.id, 365),
+    seasonStatsByPlayer(club.id),
+    supabase.from("club_staff").select("*").eq("club_id", club.id).order("joined_on", { ascending: true }),
+    supabase.from("staff_attendance").select("*").eq("club_id", club.id),
+    supabase.from("sessions").select("id, kind, session_date").eq("club_id", club.id).gte("session_date", win.from).lte("session_date", win.to),
   ]);
   let table: Standing[] = [];
   if (latest?.as_of) {
@@ -115,7 +121,14 @@ export default async function ReviewPage() {
   const runsList = cupRuns((results ?? []) as Result[], (fixtures ?? []) as Fixture[], asOf);
   const stillIn = runsList.filter((r) => r.state === "in").map((r) => r.name);
 
-  const squad = (players ?? []) as { id: string; name: string; external_stats: ExternalStats | null }[];
+  const squad = (players ?? []) as { id: string; name: string; squad_number: number | null; position: Position | null; external_stats: ExternalStats | null }[];
+  const people = playerRows({ players: squad, stats, injuries: (injuries ?? []) as Injury[], asOf });
+  const staffPeople = staffRows({
+    staff: (staffRaw ?? []) as ClubStaff[],
+    attendance: (attendance ?? []) as StaffAttendance[],
+    sessions: (sessions ?? []) as Pick<Session, "id" | "kind" | "session_date">[],
+    asOf,
+  });
   const resolve = (feedName: string) => {
     const p = matchPlayer(feedName, squad);
     return p ? { name: p.name, apps: p.external_stats?.apps ?? null } : null;
@@ -404,6 +417,13 @@ export default async function ReviewPage() {
             ))}
           </ul>
         ) : null}
+      </Section>
+
+      <Section id="people-h" title="the people">
+        <p className="mb-4 max-w-[60ch] text-[13.5px] leading-snug text-ink-dim">
+          Every player and every member of staff, one row each: what the club logged for them this season. The page the end-of-season sit-down is read from.
+        </p>
+        <PeopleReview players={people} staff={staffPeople} asOf={asOf} />
       </Section>
     </main>
   );

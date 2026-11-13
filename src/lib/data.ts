@@ -97,7 +97,7 @@ export async function loadEntriesByPlayer(
  * `logged_matches` provider of `@/lib/stats`: the manager's own match log is
  * the source of truth, because nothing upstream publishes Step 5 stats.
  */
-async function seasonStatsByPlayer(clubId: string): Promise<Map<string, SeasonStats>> {
+export async function seasonStatsByPlayer(clubId: string): Promise<Map<string, SeasonStats>> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("session_loads")
