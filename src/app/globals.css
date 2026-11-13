@@ -711,6 +711,7 @@ body:has([data-pilot]) nav[aria-label="modules"] { display: none; }
   box-shadow: inset 0 -2px 0 var(--mint);
   transition: transform 260ms var(--ease-out-strong), width 260ms var(--ease-out-strong);
 }
+.plate-tabs > [data-indicator][data-live] { transition: none; }
 @media (prefers-reduced-motion: reduce) { .plate-tabs > [data-indicator] { transition: none; } }
 
 /* a pager page eases its contents in when it becomes the one on screen */
@@ -720,10 +721,36 @@ body:has([data-pilot]) nav[aria-label="modules"] { display: none; }
 [data-page][data-active="true"] [data-stagger] > *:nth-child(3) { transition-delay: 100ms; }
 [data-page][data-active="true"] [data-stagger] > *:nth-child(4) { transition-delay: 150ms; }
 [data-page][data-active="true"] [data-stagger] > *:nth-child(n + 5) { transition-delay: 200ms; }
-@media (prefers-reduced-motion: reduce) { [data-page] [data-stagger] > * { transition: none; opacity: 1 !important; transform: none !important; } }
 
-.pager-track { scrollbar-width: none; }
+/* Where the browser can drive animation from scroll, the reveal rides the swipe itself: a stage fades and
+   settles as it comes into view, continuously, under the thumb. The timed stagger above is the fallback. */
+@supports (animation-timeline: view()) {
+  [data-page] { view-timeline: --stage inline; }
+  [data-page] [data-stagger] > * {
+    transition: none;
+    opacity: 1;
+    transform: none;
+    animation: stage-reveal linear both;
+    animation-timeline: --stage;
+    animation-range: entry 0% entry 100%;
+  }
+  [data-page][data-active="false"] [data-stagger] > * { opacity: 1; transform: none; }
+  [data-page] [data-stagger] > *:nth-child(2) { animation-range: entry 8% entry 100%; }
+  [data-page] [data-stagger] > *:nth-child(3) { animation-range: entry 16% entry 100%; }
+  [data-page] [data-stagger] > *:nth-child(n + 4) { animation-range: entry 24% entry 100%; }
+  @keyframes stage-reveal {
+    from { opacity: 0.15; transform: translateX(28px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-page] [data-stagger] > * { transition: none; animation: none; opacity: 1 !important; transform: none !important; }
+}
+
+.pager-track { --pager-gap: 32px; scrollbar-width: none; scroll-padding-inline: 0; }
 .pager-track::-webkit-scrollbar { display: none; }
+/* a stage that runs past the bottom fades out rather than cutting: the eye reads "more below", not "clipped" */
+.pager-page { mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); }
 
 /* the instant tap feedback: a mint bar sweeping across under the nav while the next page renders */
 @keyframes route-sweep { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
