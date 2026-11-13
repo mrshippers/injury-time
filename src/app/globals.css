@@ -60,7 +60,68 @@
   --r-md: 14px;
   --r-lg: 20px;
   --hair: linear-gradient(90deg, transparent, var(--line-strong) 18%, var(--line-strong) 82%, transparent);
+
+  /* glass: the bars that have the page moving under them. Clear rather than
+     frosted: colour and shape come through, a thick slab at the rim.
+     Dark material only, because this is a dark product; a light theme would
+     add its own block here. A surface opts in with the glass class and the
+     numbers below are the whole material. */
+  --glass-tint: #161d17;       /* panel-2: the glass is the dugout's own perspex */
+  --glass-ink: #eef2ee;        /* one ink, drawn at two fixed strengths */
+  --glass-ink-a: 0.94;
+  --glass-ink-2-a: 0.64;
+  --glass-a-thin: 0.2;         /* tint over the dark ground */
+  --glass-a-dense: 0.25;       /* tint when something bright slides under */
+  --glass-dim-thin: 0.57;      /* brightness() dims like a multiply with black, so it never goes muddy. Lower than
+                                  a clear pane's 0.8: a red knob or a glow can pass under a label unseen by the
+                                  sampler, and this is the thinnest the glass can be and still carry that label */
+  --glass-dim-dense: 0.28;     /* the dense end is set by the contrast sweep, not by eye */
+  --glass-blur: 6px;           /* a clear pane is 2px, but this page is words: at 2px a name can be read
+                                  under a label, at 6px it is a shape and a colour, at 10px it is nothing */
+  --glass-blur-deep: 16px;     /* a prompt holds sentences, and words behind sentences are noise */
+  --glass-floor: 0;            /* the least dense a surface may sit; a deep one starts at 0.55 */
+  --glass-sat: 1.6;
+  --glass-split: 0.15;         /* how far red and blue part at the rim */
+  --glass-scale: 1;            /* the tint setting, 0 to 1.5 */
+  --glass-rim-hi: rgba(255, 255, 255, 0.32);
+  --glass-rim-lo: rgba(255, 255, 255, 0.18);
+  --glass-rim-line: rgba(255, 255, 255, 0.1);
+  --glass-out: rgba(0, 0, 0, 0.45);
+  --glass-drop: rgba(0, 0, 0, 0.36);
+  /* the edge, for a slab seen whole and for bars that run off the screen */
+  --glass-edge:
+    inset 1.5px 1.5px 1px -1px var(--glass-rim-hi), inset -1.5px -1.5px 1px -1px var(--glass-rim-lo),
+    inset 0 0 0 0.5px var(--glass-rim-line), 0 0 0 0.5px var(--glass-out), 0 6px 24px var(--glass-drop);
+  --glass-edge-t:
+    inset 0 1.5px 1px -1px var(--glass-rim-hi), inset 0 0.5px 0 0 var(--glass-rim-line),
+    0 -0.5px 0 0 var(--glass-out), 0 -6px 24px var(--glass-drop);
+  --glass-edge-b:
+    inset 0 -1.5px 1px -1px var(--glass-rim-lo), inset 0 -0.5px 0 0 var(--glass-rim-line),
+    0 0.5px 0 0 var(--glass-out), 0 6px 24px var(--glass-drop);
+  /* light inside the slab: from the top left, a glow under the top rim, a little shade at the foot */
+  --glass-light:
+    radial-gradient(120% 160% at 0% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 38%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.12), transparent 34%);
+  /* a chosen row on glass is a lighter layer of the glass, never a grey wash */
+  --glass-pick: rgba(255, 255, 255, 0.14);
 }
+
+/* registered, so a surface glides between states instead of jumping */
+@property --glass-on { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --glass-density { syntax: "<number>"; inherits: false; initial-value: 1; }
+@property --glass-keep { syntax: "<number>"; inherits: false; initial-value: 1; }
+@property --glass-scale { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --glass-a-thin { syntax: "<number>"; inherits: true; initial-value: 0.2; }
+@property --glass-a-dense { syntax: "<number>"; inherits: true; initial-value: 0.25; }
+@property --glass-dim-thin { syntax: "<number>"; inherits: true; initial-value: 0.57; }
+@property --glass-dim-dense { syntax: "<number>"; inherits: true; initial-value: 0.28; }
+@property --glass-sat { syntax: "<number>"; inherits: true; initial-value: 1.6; }
+@property --glass-ink-a { syntax: "<number>"; inherits: true; initial-value: 0.94; }
+@property --glass-ink-2-a { syntax: "<number>"; inherits: true; initial-value: 0.64; }
+@property --glass-tint { syntax: "<color>"; inherits: true; initial-value: #161d17; }
+@property --glass-ink { syntax: "<color>"; inherits: true; initial-value: #eef2ee; }
+:root { transition: --glass-scale 320ms var(--ease-out-strong); }
 
 @theme inline {
   --color-pitch: var(--pitch);
@@ -376,7 +437,7 @@ html {
     background-repeat: no-repeat;
   }
   .border-b.border-line.bg-panel,
-  .border-b.border-line.bg-pitch\/95 {
+  .border-b.border-line.glass {
     background-image: none;
   }
 
@@ -403,7 +464,7 @@ html {
     background: transparent;
   }
   .segmented > button[aria-selected="true"] {
-    background: var(--panel-2);
+    background: var(--glass-pick);
     box-shadow: inset 0 -2px 0 var(--mint);
   }
 
@@ -502,6 +563,9 @@ html {
     padding: 20px 16px calc(20px + env(safe-area-inset-bottom)) !important;
     border: 0 !important;
     border-radius: var(--r-lg) var(--r-lg) 0 0;
+    /* Solid on purpose. As glass, its slide-in leaves the last 40px of the backdrop unfiltered in
+       Chromium (the filter is bounded where the animation started), so the page showed sharp under
+       cancel and save. See docs/plans/2026-11-05-liquid-glass.md. */
     background: linear-gradient(180deg, var(--panel-2), var(--panel)) !important;
     box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 var(--sheen-edge) !important;
     transform-origin: bottom center !important;
@@ -520,19 +584,9 @@ html {
     background: var(--line-strong);
   }
 
-  /* the module bar: frosted, fading up into the page, icons over words */
+  /* the module bar: glass (see "glass" below), icons over words */
   .tabbar {
     padding-bottom: env(safe-area-inset-bottom);
-    background: linear-gradient(180deg, rgba(7, 11, 9, 0.55), rgba(7, 11, 9, 0.94) 40%);
-    -webkit-backdrop-filter: blur(18px) saturate(1.4);
-    backdrop-filter: blur(18px) saturate(1.4);
-  }
-  .tabbar::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto;
-    height: 1px;
-    background: var(--hair);
   }
   .tab {
     display: flex;
@@ -680,3 +734,78 @@ body:has([data-pilot]) nav[aria-label="modules"] { display: none; }
 .call-knob.is-resting { transition: left 320ms cubic-bezier(0.25, 1.35, 0.45, 1), transform 200ms var(--ease-out-strong); }
 .call-knob { transition: transform 160ms var(--ease-out-strong); }
 @media (prefers-reduced-motion: reduce) { .call-knob, .call-knob.is-resting { transition: none; } }
+
+/* the glass setting: a hairline track, mint where it is filled, a square thumb like every other control here */
+.glass-range { height: 40px; margin: 0; background: none; -webkit-appearance: none; appearance: none; cursor: pointer; }
+.glass-range::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, var(--mint) var(--fill, 0%), var(--line-strong) var(--fill, 0%)); }
+.glass-range::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 24px; margin-top: -11px; border-radius: 2px; background: var(--mint); }
+.glass-range::-moz-range-track { height: 2px; background: var(--line-strong); }
+.glass-range::-moz-range-progress { height: 2px; background: var(--mint); }
+.glass-range::-moz-range-thumb { width: 12px; height: 24px; border: 0; border-radius: 2px; background: var(--mint); }
+.glass-range:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
+
+/* ── glass ───────────────────────────────────────────────────────────────
+   Four declarations make a surface glass: the tint, the backdrop filter (with
+   the rim lens last, so the colour steps fold into one pass and the bend
+   stays crisp), the edge, and the ink. Density (0 thin, 1 dense) and
+   saturation kept are written per surface by src/lib/glass.ts from what is
+   behind it; with no script a surface sits dense, which is the safe end.
+   data-rim names the edges that carry a rim on a bar that runs off the screen. */
+@utility glass {
+  --glass-on: 1;
+  --_d: max(var(--glass-density, 1), var(--glass-floor));
+  --_tint: calc((var(--glass-a-thin) + (var(--glass-a-dense) - var(--glass-a-thin)) * var(--_d)) * var(--glass-scale));
+  --_dim: calc(1 - (1 - (var(--glass-dim-thin) + (var(--glass-dim-dense) - var(--glass-dim-thin)) * var(--_d))) * min(var(--glass-scale), 1));
+  /* everything drawn on the glass takes the glass ink, through the tokens the utilities already read */
+  --ink: color-mix(in srgb, var(--glass-ink) calc(var(--glass-ink-a) * 100%), transparent);
+  --ink-dim: color-mix(in srgb, var(--glass-ink) calc(var(--glass-ink-2-a) * 100%), transparent);
+  --ink-faint: var(--ink-dim);
+  /* the gold annotation is drawn at full strength on glass: at 55% it is lost when the glass smokes over */
+  --gold-dim: var(--gold);
+
+  background-color: color-mix(in srgb, var(--glass-tint) min(calc(var(--_tint) * 100%), 100%), transparent);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(calc(var(--glass-sat) * var(--glass-keep, 1))) brightness(var(--_dim));
+  backdrop-filter: blur(var(--glass-blur)) saturate(calc(var(--glass-sat) * var(--glass-keep, 1))) brightness(var(--_dim)) var(--glass-lens,);
+  box-shadow: var(--glass-edge);
+  /* the edge is the line now; a border keeps its width and gives up its colour */
+  border-color: transparent;
+  color: var(--ink);
+
+  &[data-rim="t"] { box-shadow: var(--glass-edge-t); }
+  &[data-rim="b"] { box-shadow: var(--glass-edge-b); }
+  &[data-glass-live] {
+    transition: --glass-density 320ms var(--ease-out-strong), --glass-keep 320ms var(--ease-out-strong);
+  }
+  /* light text adds to what is behind it rather than covering it */
+  & > * { mix-blend-mode: plus-lighter; }
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--glass-light);
+    pointer-events: none;
+  }
+
+  /* asked for less transparency, or a forced palette: the same tint, solid */
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    background-color: var(--glass-tint);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    &::after { display: none; }
+    & > * { mix-blend-mode: normal; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    &[data-glass-live] { transition: none; }
+  }
+}
+
+/* A panel that is read, not glanced at (the install prompt). Same glass, cut deeper: the words behind go
+   to colour, it never sits thinner than half dense, and the colour split at its wide rim is pulled in
+   before it hazes. */
+@utility glass-deep {
+  --glass-blur: var(--glass-blur-deep);
+  --glass-floor: 0.55;
+  --glass-split: 0.05;
+}
