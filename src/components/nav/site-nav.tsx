@@ -17,7 +17,7 @@ import { switchClub } from "./actions";
  * A guest can swap between the public clubs; a member sees their own.
  */
 const MODULES: { href: string; label: string; icon: string; match: (p: string) => boolean }[] = [
-  { href: "/", label: "hub", icon: "hub", match: (p) => p === "/" },
+  { href: "/", label: "home", icon: "home", match: (p) => p === "/" },
   { href: "/squad", label: "squad", icon: "squad", match: (p) => p.startsWith("/squad") || p.startsWith("/player") || p.startsWith("/lineup") },
   { href: "/team", label: "matchday", icon: "team", match: (p) => p.startsWith("/team") || p.startsWith("/matchday") || p.startsWith("/log") },
   { href: "/stats", label: "stats", icon: "stats", match: (p) => p.startsWith("/stats") || p.startsWith("/film") },
@@ -50,7 +50,7 @@ export function SiteNav({ role, guest, club, clubs }: SiteNavProps) {
     >
       <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center justify-between gap-2 px-3 sm:px-8">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-          <Link href="/" className="pressable display flex shrink-0 items-center gap-1.5 text-[17px] leading-none text-ink" aria-label="injury time, hub">
+          <Link href="/" className="pressable display flex shrink-0 items-center gap-1.5 text-[17px] leading-none text-ink" aria-label="injury time, home">
             <Mark height={24} className="shrink-0" />
             {/* on a phone the mark is the brand; the club picker and role need the room */}
             <span className="hidden sm:inline">
@@ -156,7 +156,7 @@ export function PhoneTabBar() {
 /** One-stroke glyphs, drawn on the same 24 grid, round caps: lines, not boxes. */
 function TabIcon({ name }: { name: string }) {
   const d: Record<string, string> = {
-    hub: "M4 11.5 12 5l8 6.5M6.5 10v8.5h11V10",
+    home: "M4 11.5 12 5l8 6.5M6.5 10v8.5h11V10",
     squad: "M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.5 8c.6-3 2.9-5 5.5-5s4.9 2 5.5 5M16 5.2a3 3 0 0 1 0 5.6M18 14.4c1.4.8 2.3 2.4 2.6 4.6",
     team: "M5 6.5h14M5 12h14M5 17.5h9",
     film: "M4.5 7.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-9Zm11 3.5 4-2.5v7l-4-2.5",

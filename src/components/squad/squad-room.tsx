@@ -180,6 +180,19 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
       });
     };
   const clearSide = () => setXiIds((ids) => ids.map(() => null));
+  // auto pick: the side the rule would pick (last XI, who said in, then readiness and apps), over whatever was
+  // placed by hand; one undo brings the hand-picked side back
+  const [undoXi, setUndoXi] = useState<(string | null)[] | null>(null);
+  const isAuto = xiIds.every((id, i) => id === auto[i]);
+  const autoPick = () => {
+    setUndoXi(xiIds);
+    setManual({ formation: formation.name, ids: auto });
+  };
+  const undoAuto = () => {
+    if (!undoXi) return;
+    setManual({ formation: formation.name, ids: undoXi });
+    setUndoXi(null);
+  };
   // where the side on the pitch came from, said once and plainly
   const carried = !manual || manual.formation !== formation.name ? xiIds.filter((id) => id && prefer.has(id)).length : 0;
   const origin =
@@ -412,6 +425,25 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-2">
           <div className="flex flex-wrap items-center gap-2">
             <FormationSelect value={formation.name} onChange={chooseFormation} />
+            {undoXi ? (
+              <button
+                type="button"
+                onClick={undoAuto}
+                className="pressable h-8 px-2 text-[12px] font-semibold text-ink-dim underline-offset-4 hover:text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+              >
+                undo
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={autoPick}
+                disabled={isAuto}
+                title="last match's eleven first, then who said in, then readiness and appearances"
+                className="pressable h-8 px-2 text-[12px] font-semibold text-mint underline-offset-4 hover:underline disabled:text-ink-dim disabled:no-underline disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+              >
+                auto pick
+              </button>
+            )}
             <button
               type="button"
               onClick={clearSide}

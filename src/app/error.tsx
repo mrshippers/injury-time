@@ -30,7 +30,7 @@ export default function RouteError({ error, retry }: { error: Error & { digest?:
           try again
         </button>
         <Link href="/" className={SECONDARY}>
-          back to the hub
+          back home
         </Link>
       </div>
     </main>

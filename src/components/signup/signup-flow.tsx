@@ -207,7 +207,7 @@ export function SignupFlow({ signedInAs }: { signedInAs: string | null }) {
             <li><Link className="text-ink underline decoration-mint underline-offset-4" href="/club#feed-h">Connect the league feed</Link> <span className="text-ink-dim">· fixtures, results and the squad list</span></li>
             <li><Link className="text-ink underline decoration-mint underline-offset-4" href="/squad">Hand each player their page</Link> <span className="text-ink-dim">· they call in or out from their phone</span></li>
           </ul>
-          <Link href="/" className={`${PRIMARY} mt-8 inline-flex items-center`}>to the club hub</Link>
+          <Link href="/" className={`${PRIMARY} mt-8 inline-flex items-center`}>to the club home</Link>
         </div>
       ) : null}
     </div>

@@ -71,7 +71,7 @@ function Turf({ t }: { t: SceneTokens }) {
   const maps = useMemo(() => {
     // the lit stripe is the turf token lifted toward the sky; the dark stripe is the turf itself
     const lit = new THREE.Color(opaque(t.turf2)).lerp(new THREE.Color(opaque(t.ink)), 0.1);
-    const grown = growTurf({ light: `#${lit.getHexString()}`, dark: t.turf, width: 1024, height: 1536, stripes: 16, crossStripes: 10, cross: 0.16 });
+    const grown = growTurf({ light: `#${lit.getHexString()}`, dark: t.turf, width: 1024, height: 1536, stripes: 9, crossStripes: 10, cross: 0 });
     const mk = (c: HTMLCanvasElement, srgb: boolean) => {
       const tex = new THREE.CanvasTexture(c);
       if (srgb) tex.colorSpace = THREE.SRGBColorSpace;
