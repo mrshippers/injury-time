@@ -36,8 +36,8 @@
   --cold: #8fa3b6;             /* insufficient data: light enough to pass 4.5:1 on panel */
 
   /* 3D surfaces (lineup pitch, body figure) */
-  --turf: #163a26;
-  --turf-2: #1b452c;
+  --turf: #2e7a45;             /* a pitch under lights: green you'd call green, still a night surface */
+  --turf-2: #3d9657;
   --chalk: rgba(238, 242, 238, 0.72);
   --skin: #4a6a58;             /* the figure at rest: turf-toned, not flesh */
   --skin-hi: #7fb397;
@@ -359,6 +359,11 @@ body {
   [role="button"] {
     min-width: 40px;
   }
+  .shirt-chip-sm,
+  .toggle-in-sm {
+    min-height: 36px;
+    min-width: 36px;
+  }
   .glyph {
     width: 28px;
     height: 28px;
@@ -366,7 +371,11 @@ body {
   }
   /* the module bar sits at the bottom of the phone, so the page ends above it */
   main {
-    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+  /* home is one screen: it sizes itself to end at the bar, so no padding under it */
+  main.home-main {
+    padding-bottom: 0;
   }
 }
 
@@ -499,6 +508,18 @@ html {
     background: var(--mint);
     box-shadow: var(--glow-mint);
   }
+  /* the dense list: a 36px number and a 36px "in" so a row is one line of the table, not a card */
+  .shirt-chip-sm {
+    width: 36px;
+    height: 36px;
+    font-size: 12.5px;
+  }
+  .toggle-in-sm {
+    min-width: 48px;
+    height: 36px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
   .toggle-in {
     min-width: 64px;
     height: 40px;
@@ -587,6 +608,10 @@ html {
   /* the module bar: glass (see "glass" below), icons over words */
   .tabbar {
     padding-bottom: env(safe-area-inset-bottom);
+    /* denser than a header: a list of bright plates runs under it, and a plate read through
+       thin glass looks like it is on top of the bar */
+    --glass-floor: 0.6;
+    --glass-blur: 10px;
   }
   .tab {
     display: flex;

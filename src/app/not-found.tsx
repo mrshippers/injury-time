@@ -24,7 +24,7 @@ export default function NotFound() {
       </p>
       <div className="mt-8 flex flex-wrap gap-3">
         <Link href="/" className={PRIMARY}>
-          back to the hub
+          back home
         </Link>
         <Link href="/squad" className={SECONDARY}>
           the squad

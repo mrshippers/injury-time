@@ -61,8 +61,8 @@ export function SeasonColumn({ ctx, s, fit, squadSize }: { ctx: SeasonContext; s
                     {next.round} · {shortDate(next.date)} {next.venue === "A" ? "at" : "v"} <Crest team={next.opponent} size={14} /> {next.opponent}
                   </span>
                 ) : last ? (
-                  <span>
-                    {last.round} · {last.score} {last.venue === "A" ? "at" : "v"} {last.opponent}
+                  <span className="inline-flex items-center gap-1.5">
+                    {last.round} · {last.score} {last.venue === "A" ? "at" : "v"} <Crest team={last.opponent} size={14} /> {last.opponent}
                   </span>
                 ) : null}
               </span>

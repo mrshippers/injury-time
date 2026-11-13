@@ -58,10 +58,10 @@ export function HubPager({ pages }: { pages: HubPage[] }) {
   const i = pages.findIndex((p) => p.key === active);
 
   return (
-    <section aria-roledescription="carousel" aria-label="the hub" className="flex min-h-0 flex-1 flex-col">
+    <section aria-roledescription="carousel" aria-label="home" className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between gap-3">
         <div className="-mx-1 min-w-0 overflow-x-auto [scrollbar-width:none]">
-          <PlateTabs label="hub stages" items={pages.map((p) => ({ key: p.key, label: p.label }))} active={active} fraction={fraction} onChange={go} />
+          <PlateTabs label="home stages" items={pages.map((p) => ({ key: p.key, label: p.label }))} active={active} fraction={fraction} onChange={go} />
         </div>
         <div className="flex shrink-0 items-center gap-1 max-sm:hidden">
           <Arrow dir="prev" disabled={i <= 0} onClick={() => step(-1)} />
@@ -103,7 +103,7 @@ export function HubPager({ pages }: { pages: HubPage[] }) {
           </div>
         ))}
       </div>
-      <div aria-hidden className="mt-2 flex justify-center gap-1.5 sm:hidden">
+      <div aria-hidden className="mt-auto flex justify-center gap-1.5 pt-2 pb-2.5 sm:hidden">
         {pages.map((p) => (
           <span key={p.key} className={`block h-1.5 -skew-x-[20deg] transition-all duration-300 ${p.key === active ? "w-6 bg-mint" : "w-2.5 bg-line-strong"}`} />
         ))}

@@ -93,16 +93,21 @@ export function growTurf(opts: TurfOptions): TurfMaps {
   // height field for the normal map, from the blade noise
   const height = new Float32Array(W * H);
 
-  const stripeH = H / stripes;
+  // the mow is rings from the centre spot: the mower goes round, not up and down. `stripes` is how many
+  // rings fit across the half-width; the ring width is the same in both directions
+  const ringW = W / 2 / stripes;
   const crossW = W / crossStripes;
   for (let y = 0; y < H; y += 1) {
-    const stripeSign = Math.floor(y / stripeH) % 2 === 0 ? 1 : -1;
-    // stripe edges are a little soft: the roller does not draw a hard line
-    const inStripe = (y % stripeH) / stripeH;
-    const edge = Math.min(inStripe, 1 - inStripe) * stripeH;
-    const stripeSoft = Math.min(1, edge / 3);
+    const dy = y - H / 2;
     for (let x = 0; x < W; x += 1) {
       const i = y * W + x;
+      const dx = x - W / 2;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const stripeSign = Math.floor(dist / ringW) % 2 === 0 ? 1 : -1;
+      // ring edges are a little soft: the roller does not draw a hard line
+      const inStripe = (dist % ringW) / ringW;
+      const edge = Math.min(inStripe, 1 - inStripe) * ringW;
+      const stripeSoft = Math.min(1, edge / 3);
       const crossSign = Math.floor(x / crossW) % 2 === 0 ? 1 : -1;
       const inCross = (x % crossW) / crossW;
       const cedge = Math.min(inCross, 1 - inCross) * crossW;

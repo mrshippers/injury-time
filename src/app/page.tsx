@@ -21,7 +21,7 @@ import { longDate } from "@/components/squad/format";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "the hub - injury time." };
+export const metadata = { title: "home - injury time." };
 
 /**
  * The manager's homepage, as stages you swipe through. Home is the next game
@@ -97,7 +97,7 @@ export default async function Home() {
   ];
 
   return (
-    <main className="mx-auto flex h-[calc(100dvh-49px)] w-full max-w-[1240px] flex-col overflow-hidden px-4 pt-5 max-sm:h-[calc(100dvh-49px-env(safe-area-inset-bottom)-64px)] sm:px-8 sm:pt-7">
+    <main className="home-main mx-auto flex h-[calc(100dvh-49px)] w-full max-w-[1240px] flex-col overflow-hidden px-4 pt-5 max-sm:h-[calc(100dvh-49px-env(safe-area-inset-bottom)-60px)] max-sm:pb-0 sm:px-8 sm:pt-7">
       <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
         <h1 className="display text-[30px] leading-none sm:text-[40px]">
           {clubName}

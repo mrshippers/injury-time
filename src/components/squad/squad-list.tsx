@@ -44,6 +44,16 @@ function played(r: SquadRow): number {
 function goals(r: SquadRow): number {
   return r.stats.goals || (r.player.external_stats as ExternalStats | null)?.goals || 0;
 }
+function assists(r: SquadRow): number {
+  return r.stats.assists || 0;
+}
+/** "2Y 1R" from the match log; blank until a card is logged, never a guessed zero */
+function cards(r: SquadRow): string {
+  const y = r.stats.yellow || 0;
+  const red = r.stats.red || 0;
+  if (!y && !red) return "";
+  return `${y ? `${y}Y` : ""}${y && red ? " " : ""}${red ? `${red}R` : ""}`;
+}
 function statusOf(r: SquadRow): AvailabilityStatus {
   return r.availability?.status ?? "fit";
 }
@@ -55,6 +65,8 @@ type Filters = { sort: { key: SortKey; dir: Dir }; position: Position | "all"; s
 const DEFAULTS: Filters = { sort: { key: "number", dir: "asc" }, position: "all", status: "all", readiness: "all" };
 const PAGE_SIZE = 10;
 const FILTER_KEY = "injury-time.squad-filters";
+const LAYOUT_KEY = "injury-time.squad-layout";
+type Layout = "list" | "cards";
 
 /**
  * A position said, with its dot on a fingernail pitch. Not set: where he plays in today's side (the slot's
@@ -137,6 +149,15 @@ export function SquadList({
   }, [mine, storedFilters]);
   const { sort, position, status, readiness } = filters;
   const [q, setQ] = useState("");
+  const storedLayout = useStoredValue(LAYOUT_KEY);
+  const [layoutState, setLayoutState] = useState<Layout | null>(null);
+  const layout: Layout = layoutState ?? (storedLayout === "cards" ? "cards" : "list");
+  const setLayout = (l: Layout) => {
+    setLayoutState(l);
+    try {
+      localStorage.setItem(LAYOUT_KEY, l);
+    } catch {}
+  };
   const [editing, setEditing] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const remember = (patch: Partial<Filters>) => {
@@ -282,10 +303,43 @@ export function SquadList({
             </option>
           ))}
         </select>
+        <div role="group" aria-label="layout" className="flex max-sm:ml-auto">
+          {(["list", "cards"] as const).map((l) => (
+            <button
+              key={l}
+              type="button"
+              aria-pressed={layout === l}
+              onClick={() => setLayout(l)}
+              className={`pressable plate plate-sm num h-7 text-[11px] font-semibold tracking-[0.06em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mint ${
+                layout === l ? "bg-panel-2 text-ink shadow-[inset_0_-2px_0_var(--mint)]" : "text-ink-dim hover:text-ink"
+              }`}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* phone: one card per player, nothing the desk table has is missing */}
-      <ul className="divide-y divide-line sm:hidden" aria-label="squad list">
+      {/* cards: a grid of plates, two across on a phone, four at a desk */}
+      {layout === "cards" ? (
+        <ul className="grid grid-cols-2 gap-2 px-2 py-2 md:grid-cols-3 xl:grid-cols-4" aria-label="squad cards">
+          {pageRows.map((row) => (
+            <SquadTile
+              key={row.player.id}
+              row={row}
+              selected={selectedPlayer === row.player.id}
+              onPitch={inXI.has(row.player.id)}
+              maxLoad={maxLoad}
+              onSelect={() => onSelect(row.player.id)}
+              onToggleIn={onToggleIn ? () => onToggleIn(row.player.id) : undefined}
+              positionCell={<PositionCell row={row} canManage={canManage} slot={slotOf?.get(row.player.id)} />}
+            />
+          ))}
+        </ul>
+      ) : null}
+
+      {/* phone list: one dense row per player, lined up like the table */}
+      <ul className={`divide-y divide-line sm:hidden ${layout === "cards" ? "hidden" : ""}`} aria-label="squad list">
         {pageRows.map((row) => (
           <SquadCard
             key={row.player.id}
@@ -304,17 +358,19 @@ export function SquadList({
         ))}
       </ul>
 
-      <table className="hidden w-full table-fixed border-collapse sm:table">
+      <table className={`hidden w-full table-fixed border-collapse ${layout === "cards" ? "" : "sm:table"}`}>
         <caption className="sr-only">Squad list: drag a name onto the pitch, or select a name and then a slot.</caption>
         <colgroup>
           <col className="w-9 sm:w-10" />
           <col />
           <col className="w-[70px] sm:w-[80px]" />
-          <col className="w-[60px] sm:w-[112px]" />
-          <col className="hidden sm:table-column sm:w-[88px]" />
+          <col className="w-[60px] sm:w-[100px]" />
+          <col className="hidden sm:table-column sm:w-[84px]" />
           <col className="hidden sm:table-column sm:w-7" />
           <col className="hidden sm:table-column sm:w-7" />
-          <col className="w-[104px] sm:w-[84px]" />
+          <col className="hidden sm:table-column sm:w-7" />
+          <col className="hidden sm:table-column sm:w-10" />
+          <col className="w-[104px] sm:w-[76px]" />
         </colgroup>
         <thead>
           <tr>
@@ -325,6 +381,12 @@ export function SquadList({
             <Th k="training" label="training" className="hidden sm:table-cell" sort={sort} onSort={toggleSort} />
             <Th k="played" label="pl" className="hidden sm:table-cell" align="right" sort={sort} onSort={toggleSort} />
             <Th k="goals" label="g" className="hidden sm:table-cell" align="right" sort={sort} onSort={toggleSort} />
+            <th scope="col" className={`${HEAD} hidden text-right sm:table-cell`} title="assists, from the match log">
+              a
+            </th>
+            <th scope="col" className={`${HEAD} hidden text-right sm:table-cell`} title="cards, from the match log">
+              cards
+            </th>
             <th scope="col" className={`${HEAD} text-right`}>
               <span className="sr-only">actions</span>
             </th>
@@ -498,6 +560,8 @@ function SquadListRow({
         </td>
         <td className={`${CELL} num hidden text-right text-[12px] text-ink sm:table-cell`}>{played(row) || <span className="text-ink-faint">0</span>}</td>
         <td className={`${CELL} num hidden text-right text-[12px] sm:table-cell ${goals(row) > 0 ? "text-ink" : "text-ink-faint"}`}>{goals(row)}</td>
+        <td className={`${CELL} num hidden text-right text-[12px] sm:table-cell ${assists(row) > 0 ? "text-ink" : "text-ink-faint"}`}>{assists(row)}</td>
+        <td className={`${CELL} num hidden text-right text-[12px] text-ink-dim sm:table-cell`}>{cards(row)}</td>
         <td className={`${CELL} text-right`}>
           <span className="inline-flex items-center gap-1" onPointerDown={(e) => e.stopPropagation()}>
             {onToggleIn ? (
@@ -540,14 +604,13 @@ function SquadListRow({
 }
 
 /**
- * The phone row. Two lines instead of eight columns: who he is and whether he
- * can play on top, the numbers underneath, the two thumb actions on the right.
+ * The phone row, lined up like the table: number, name at the table's size, the position, status and
+ * reading in a row underneath, the numbers right-aligned so a column of them reads down the list.
  */
 function SquadCard({
   row,
   selected,
   onPitch,
-  maxLoad,
   canManage,
   editing,
   onEdit,
@@ -568,11 +631,88 @@ function SquadCard({
   onToggleIn?: () => void;
   positionCell: React.ReactNode;
 }) {
-  const { player, availability, weekLoad, readiness, flag } = row;
+  const { player, availability, readiness } = row;
   const status = statusOf(row);
   return (
     <li data-player={player.id} data-on-pitch={onPitch ? "1" : undefined} className={`card-row ${selected ? "is-selected" : ""}`}>
-      <div className="flex items-center gap-3 px-3 py-3">
+      <div className="flex items-center gap-2.5 px-2 py-1.5">
+        <button
+          type="button"
+          aria-label={`${selected ? "unselect" : "select"} ${player.name}`}
+          aria-pressed={selected}
+          onClick={onSelect}
+          className={`pressable num shirt-chip shirt-chip-sm ${selected ? "is-selected" : onPitch ? "is-in" : ""}`}
+        >
+          {player.squad_number ?? "–"}
+        </button>
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-baseline gap-2">
+            <Link href={`/player/${player.id}`} className={`truncate text-[13px] font-semibold leading-tight ${onPitch ? "text-mint" : "text-ink"}`}>
+              {player.name}
+            </Link>
+            {onPitch ? <span className="num shrink-0 text-[10px] font-bold tracking-[0.1em] text-mint">XI</span> : null}
+          </div>
+          <div className="num mt-0.5 flex min-w-0 items-center gap-x-2 overflow-hidden text-[11.5px] whitespace-nowrap text-ink-dim">
+            <span className="shrink-0 tracking-[0.08em]">{positionCell}</span>
+            <StatusPill status={status} />
+            <span className={`truncate font-semibold tracking-[0.04em] ${READINESS_TEXT[readiness.key]}`}>{readiness.word}</span>
+          </div>
+          <div className="num mt-0.5 flex min-w-0 items-center gap-x-2 overflow-hidden text-[11.5px] whitespace-nowrap text-ink-dim tabular-nums">
+            <span className="truncate">
+              <span className="text-ink">{played(row)}</span> pl · <span className={goals(row) ? "text-ink" : ""}>{goals(row)}</span> g · <span className={assists(row) ? "text-ink" : ""}>{assists(row)}</span> a
+              {cards(row) ? ` · ${cards(row)}` : ""}
+              {availability?.return_date ? ` · back ${shortDate(availability.return_date)}` : ""}
+            </span>
+            {canManage ? (
+              <button type="button" aria-label={`edit ${player.name}`} aria-expanded={editing} onClick={onEdit} className="pressable shrink-0 text-mint underline-offset-4 hover:underline max-sm:min-h-0 max-sm:min-w-0">
+                edit
+              </button>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          {onToggleIn ? (
+            <button
+              type="button"
+              aria-pressed={onPitch}
+              aria-label={onPitch ? `take ${player.name} out of the starting XI` : `put ${player.name} in the starting XI`}
+              onClick={onToggleIn}
+              className={`pressable toggle-in toggle-in-sm ${onPitch ? "is-on" : ""}`}
+            >
+              {onPitch ? "in" : "+ xi"}
+            </button>
+          ) : null}
+          <StatusMenu playerId={player.id} playerName={player.name} current={status} />
+        </div>
+      </div>
+      {editing ? <EditPlayerRow player={player} onDone={onDone} /> : null}
+    </li>
+  );
+}
+
+/** A card: the player as a plate, for reading the squad as faces rather than a sheet. */
+function SquadTile({
+  row,
+  selected,
+  onPitch,
+  maxLoad,
+  onSelect,
+  onToggleIn,
+  positionCell,
+}: {
+  row: SquadRow;
+  selected: boolean;
+  onPitch: boolean;
+  maxLoad: number;
+  onSelect: () => void;
+  onToggleIn?: () => void;
+  positionCell: React.ReactNode;
+}) {
+  const { player, availability, weekLoad, readiness, flag } = row;
+  const status = statusOf(row);
+  return (
+    <li data-player={player.id} data-on-pitch={onPitch ? "1" : undefined} className={`plate flex flex-col gap-2 bg-panel px-3 py-2.5 [--slant:10px] ${selected ? "shadow-[inset_0_-2px_0_var(--mint)]" : ""}`}>
+      <div className="flex items-start justify-between gap-2">
         <button
           type="button"
           aria-label={`${selected ? "unselect" : "select"} ${player.name}`}
@@ -582,53 +722,35 @@ function SquadCard({
         >
           {player.squad_number ?? "–"}
         </button>
-        <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-center gap-2">
-            <Link href={`/player/${player.id}`} className="pressable truncate text-[15px] font-semibold leading-tight text-ink">
-              {player.name}
-            </Link>
-            {onPitch ? (
-              <span aria-label="in the starting XI" className="plate plate-sm num shrink-0 bg-mint/15 text-[10px] font-bold tracking-[0.1em] text-mint">
-                XI
-              </span>
-            ) : null}
-          </div>
-          <div className="num mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-dim">
-            <span className="tracking-[0.08em]">{positionCell}</span>
-            <StatusPill status={status} />
-            <span className={`font-semibold tracking-[0.06em] ${READINESS_TEXT[readiness.key]}`}>{readiness.word}</span>
-            <span>
-              {played(row)} pl · {goals(row)} g
-            </span>
-            {availability?.return_date ? <span>back {shortDate(availability.return_date)}</span> : null}
-          </div>
-          <div className="mt-2 max-w-[180px]">
-            <ConditionBar value={weekLoad} max={maxLoad} flag={flag} />
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
-          {onToggleIn ? (
-            <button
-              type="button"
-              aria-pressed={onPitch}
-              aria-label={onPitch ? `take ${player.name} out of the starting XI` : `put ${player.name} in the starting XI`}
-              onClick={onToggleIn}
-              className={`pressable toggle-in ${onPitch ? "is-on" : ""}`}
-            >
-              {onPitch ? "in" : "+ xi"}
-            </button>
-          ) : null}
-          <span className="flex items-center gap-1">
-            {canManage ? (
-              <button type="button" aria-label={`edit ${player.name}`} aria-expanded={editing} onClick={onEdit} className="pressable ghost-chip">
-                edit
-              </button>
-            ) : null}
-            <StatusMenu playerId={player.id} playerName={player.name} current={status} />
-          </span>
-        </div>
+        <span className="num text-[11px] tracking-[0.08em] text-ink-dim">{positionCell}</span>
       </div>
-      {editing ? <EditPlayerRow player={player} onDone={onDone} /> : null}
+      <Link href={`/player/${player.id}`} className={`truncate text-[14px] font-semibold leading-tight ${onPitch ? "text-mint" : "text-ink"}`}>
+        {player.name}
+      </Link>
+      <div className="num flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] text-ink-dim">
+        <StatusPill status={status} />
+        <span className={`font-semibold tracking-[0.04em] ${READINESS_TEXT[readiness.key]}`}>{readiness.word}</span>
+      </div>
+      <p className="num text-[11.5px] text-ink-dim tabular-nums">
+        <span className="text-ink">{played(row)}</span> pl · {goals(row)} g · {assists(row)} a{cards(row) ? ` · ${cards(row)}` : ""}
+        {availability?.return_date ? ` · back ${shortDate(availability.return_date)}` : ""}
+      </p>
+      <ConditionBar value={weekLoad} max={maxLoad} flag={flag} />
+      <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+        {onToggleIn ? (
+          <button
+            type="button"
+            aria-pressed={onPitch}
+            aria-label={onPitch ? `take ${player.name} out of the starting XI` : `put ${player.name} in the starting XI`}
+            onClick={onToggleIn}
+            className={`pressable toggle-in toggle-in-sm ${onPitch ? "is-on" : ""}`}
+          >
+            {onPitch ? "in" : "+ xi"}
+          </button>
+        ) : <span />}
+        <StatusMenu playerId={player.id} playerName={player.name} current={status} />
+      </div>
     </li>
   );
 }
+

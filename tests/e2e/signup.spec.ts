@@ -78,7 +78,7 @@ test.describe("sign-up in a minute", () => {
 
     screens += 1; // 4: next
     await expect(page.getByRole("status")).toContainText("20 players in.");
-    await page.getByRole("link", { name: /to the club hub/i }).click();
+    await page.getByRole("link", { name: /to the club home/i }).click();
 
     screens += 1; // 5: the hub, as this club
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
