@@ -25,7 +25,7 @@ const londonToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/L
 const feedStats = (apps: number): ExternalStats => ({ apps, as_of: londonToday(), source: "fwp", position_confirmed: false });
 
 function refuse(viewer: Viewer): string | null {
-  if (viewer.guest || viewer.club.is_demo) return "a real club's own manager builds its squad from its own feed";
+  if (viewer.guest || viewer.club.is_demo) return "only a real club's manager can build the squad from its feed";
   if (viewer.role !== "manager") return "only the manager builds the squad from the feed";
   return null;
 }

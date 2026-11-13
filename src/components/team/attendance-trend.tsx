@@ -26,7 +26,7 @@ export function AttendanceTrend({ points, next }: { points: AttendancePoint[]; n
         <p className="px-4 py-6 text-[13.5px] text-ink-dim sm:px-5 sm:text-[13px]">
           {next
             ? `no calls yet, first one is ${next.opponent} ${next.venue === "H" ? "at home" : "away"} on ${next.weekday}`
-            : "no calls yet, and no fixture in the diary to call for"}
+            : "no calls yet and no fixture scheduled"}
         </p>
       </Frame>
     );

@@ -69,7 +69,7 @@ test.describe("the side", () => {
     const aWho = who(await a.textContent());
     const bWho = who(await b.textContent());
     await a.click();
-    await expect(page.getByText("now pick a name, or another slot to swap")).toBeVisible();
+    await expect(page.getByText("choose a player, or another slot to swap")).toBeVisible();
     await b.click();
     await expect.poll(async () => who(await a.textContent())).toBe(bWho);
     await expect.poll(async () => who(await b.textContent())).toBe(aWho);

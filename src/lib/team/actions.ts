@@ -49,7 +49,7 @@ export async function setCallAction(input: SetCallInput): Promise<{ ok: true } |
     const supabase = await createClient();
     if (!staff) {
       const { data: fx } = await supabase.from("fixtures").select("calls_close_at").eq("id", fixtureId).maybeSingle();
-      if (fx?.calls_close_at && Date.parse(fx.calls_close_at as string) <= Date.now()) throw new Error("answers for this match have closed; tell the gaffer");
+      if (fx?.calls_close_at && Date.parse(fx.calls_close_at as string) <= Date.now()) throw new Error("responses for this match have closed; contact the manager");
     }
     const { error } = await supabase.from("match_calls").upsert(
       {

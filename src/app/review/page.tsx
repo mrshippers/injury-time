@@ -370,7 +370,7 @@ export default async function ReviewPage() {
 
       <Section id="inj-h" title="injuries">
         {r.injuries.count === 0 ? (
-          <p className="text-[14px] text-ink-dim">None logged. That is not the same as none happening.</p>
+          <p className="text-[14px] text-ink-dim">None logged. Unlogged injuries do not appear.</p>
         ) : (
           <>
             <Tiles cols="grid-cols-3" items={[["logged", r.injuries.count], ["still out", r.injuries.ongoing], ["player-days lost", r.injuries.daysLost]]} />
@@ -385,14 +385,14 @@ export default async function ReviewPage() {
         )}
       </Section>
 
-      <Section id="red-h" title="did the load see it coming">
+      <Section id="red-h" title="workload before injuries">
         {r.judged === 0 ? (
           <p className="max-w-[62ch] text-[14px] leading-relaxed text-ink-dim">
-            Not enough training was logged before any injury to say. Log four weeks of sessions and this answers the question honestly.
+            Not enough training was logged before injuries to assess. Four weeks of logged sessions are needed.
           </p>
         ) : (
           <p className="max-w-[62ch] text-[15px] leading-relaxed text-ink">
-            Of <span className="num">{r.judged}</span> injur{r.judged === 1 ? "y" : "ies"} with a load reading the day before, <span className="num font-semibold">{r.redCalled}</span> came straight after a red-zone week.
+            Of <span className="num">{r.judged}</span> injur{r.judged === 1 ? "y" : "ies"} with a workload reading the day before, <span className="num font-semibold">{r.redCalled}</span> followed a red-zone week.
             <span className="text-ink-dim"> Injuries without a reading are listed, not counted.</span>
           </p>
         )}
@@ -414,7 +414,7 @@ export default async function ReviewPage() {
 
       <Section id="people-h" title="the people">
         <p className="mb-4 max-w-[60ch] text-[13.5px] leading-snug text-ink-dim">
-          Every player and every member of staff, one row each: what the club logged for them this season. The page the end-of-season sit-down is read from.
+          One row per player and member of staff, from what the club logged this season.
         </p>
         <PeopleReview players={people} staff={staffPeople} asOf={asOf} />
       </Section>

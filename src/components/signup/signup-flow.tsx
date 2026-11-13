@@ -65,7 +65,7 @@ export function SignupFlow({ signedInAs }: { signedInAs: string | null }) {
             <p className="text-[14px] text-ink">
               Link sent to <span className="num text-mint">{sent}</span>.
             </p>
-            <p className="mt-2 text-[13px] text-ink-dim">Open it on this device. It brings you back here to name the club.</p>
+            <p className="mt-2 text-[13px] text-ink-dim">Open it on this device to return here and name the club.</p>
           </div>
         ) : (
           <form
@@ -83,7 +83,7 @@ export function SignupFlow({ signedInAs }: { signedInAs: string | null }) {
             }}
           >
             <label htmlFor="start-email" className={LABEL}>your email</label>
-            <input id="start-email" name="email" type="email" autoComplete="email" required className={FIELD} placeholder="gaffer@yourclub.co.uk" />
+            <input id="start-email" name="email" type="email" autoComplete="email" required className={FIELD} placeholder="manager@yourclub.co.uk" />
             <button type="submit" className={PRIMARY} disabled={pending}>{pending ? "sending" : "send me a sign-in link"}</button>
             <p className="text-[12.5px] text-ink-faint">No password. The link is the key.</p>
           </form>
@@ -134,7 +134,7 @@ export function SignupFlow({ signedInAs }: { signedInAs: string | null }) {
             <input type="checkbox" name="adult" required className="mt-1 h-4 w-4 accent-mint" />
             <span>
               This is an adult side: every player is 18 or over.
-              <span className="block text-[12.5px] text-ink-dim">Under-18 sides need parental consent and safeguarding we have not built yet.</span>
+              <span className="block text-[12.5px] text-ink-dim">Under-18 sides need parental consent and safeguarding, which are not built yet.</span>
             </span>
           </label>
           <button type="submit" className={PRIMARY} disabled={pending}>{pending ? "making the club" : "make the club"}</button>
@@ -145,7 +145,7 @@ export function SignupFlow({ signedInAs }: { signedInAs: string | null }) {
         <div className="mt-6">
           <h2 className="text-[20px] font-semibold text-ink">{clubName}: paste the squad</h2>
           <p className="mt-2 max-w-[56ch] text-[14px] leading-relaxed text-ink-dim">
-            One player a line, from WhatsApp or a spreadsheet. Numbers and positions if you have them, in any order: <span className="num text-ink">7 Jordan Mcnally MF</span>.
+            One player per line, pasted from WhatsApp or a spreadsheet. Numbers and positions are optional, in any order: <span className="num text-ink">7 Jordan Mcnally MF</span>.
             Got the league feed? Skip this and the squad comes from the league&apos;s list when you connect it on the club page.
           </p>
           <label htmlFor="squad-paste" className={`${LABEL} mt-4 block`}>the squad</label>

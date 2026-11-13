@@ -28,7 +28,7 @@ export default async function ClaimPage(props: { params: Promise<{ token: string
         <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
       </h1>
       {status.claimed ? (
-        <p className="mt-6 text-[15px] text-ink-dim">This page has been claimed. If that was you, sign in and it is on the squad page. If not, tell your manager: they can make a new link.</p>
+        <p className="mt-6 text-[15px] text-ink-dim">This page has been claimed. If that was you, sign in and find it on the squad page. If not, ask your manager for a new link.</p>
       ) : (
         <>
           <p className="mt-6 max-w-[48ch] text-[16px] leading-relaxed text-ink">
@@ -36,8 +36,8 @@ export default async function ClaimPage(props: { params: Promise<{ token: string
           </p>
           <ul className="mt-6 flex flex-col gap-2 text-[13.5px] text-ink-dim">
             <li className="flex gap-3"><span aria-hidden className="num text-mint">01</span>Sign in with your email. No password.</li>
-            <li className="flex gap-3"><span aria-hidden className="num text-mint">02</span>Say it&apos;s you. The page is yours from then on.</li>
-            <li className="flex gap-3"><span aria-hidden className="num text-mint">03</span>Nothing about injuries goes on it. That stays with the club&apos;s physio.</li>
+            <li className="flex gap-3"><span aria-hidden className="num text-mint">02</span>Confirm it is you. The page is then yours.</li>
+            <li className="flex gap-3"><span aria-hidden className="num text-mint">03</span>It holds no injury information. That stays with the club&apos;s physio.</li>
           </ul>
           <div className="mt-8">
             <ClaimForm token={token} signedInAs={auth.user?.email ?? null} firstName={status.first_name} />

@@ -23,9 +23,9 @@ export function CheckinForm({ token, clubName, consented, todayDone }: { token: 
         <section aria-labelledby="consent-h" className=" bg-panel/60 px-4 py-4">
           <p className="annot" id="consent-h">{"// before the first one"}</p>
           <ul className="mt-3 flex flex-col gap-2 text-[14px] leading-relaxed text-ink-dim">
-            <li><span className="text-ink">What:</span> how sore you are (0 to 10), how hard your last session felt (1 to 10), and whether you are available. Nothing else, no free text.</li>
+            <li><span className="text-ink">What:</span> soreness (0 to 10), effort of your last session (1 to 10) and availability. Nothing else is collected.</li>
             <li><span className="text-ink">Who sees it:</span> {clubName}&apos;s manager, coaches and physio. Not other players.</li>
-            <li><span className="text-ink">Why:</span> so training load is planned around how you actually are.</li>
+            <li><span className="text-ink">Why:</span> so training workload can be planned around your condition.</li>
             <li><span className="text-ink">Stop any time:</span> the button at the bottom of this page deletes everything you have sent.</li>
           </ul>
           <label className="mt-4 flex items-start gap-3 text-[14px] text-ink">

@@ -32,8 +32,8 @@ const POSITION_ORDER: Record<Position, number> = { GK: 0, DF: 1, MF: 2, FW: 3 };
 const READINESS_FILTERS: { value: ReadinessKey | "all"; label: string }[] = [
   { value: "all", label: "any training" },
   { value: "steady", label: "steady" },
-  { value: "pushing", label: "pushing it" },
-  { value: "undercooked", label: "undercooked" },
+  { value: "pushing", label: "high load" },
+  { value: "undercooked", label: "low load" },
   { value: "red", label: "red zone" },
   { value: "unknown", label: "no reading" },
 ];
@@ -359,7 +359,7 @@ export function SquadList({
       </ul>
 
       <table className={`hidden w-full table-fixed border-collapse ${layout === "cards" ? "" : "sm:table"}`}>
-        <caption className="sr-only">Squad list: drag a name onto the pitch, or select a name and then a slot.</caption>
+        <caption className="sr-only">Drag a name onto the pitch, or select a name then a slot.</caption>
         <colgroup>
           <col className="w-9 sm:w-10" />
           <col />

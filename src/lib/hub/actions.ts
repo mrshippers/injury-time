@@ -40,10 +40,10 @@ function pick<T extends string>(allowed: readonly T[], v: unknown, field: string
 export async function saveHubAction(playerId: string, input: HubInput): Promise<HubState> {
   try {
     const viewer = await getViewer();
-    if (viewer.readOnly) return { ok: false, message: "this club is read-only: its players fill their pages in once the club links them" };
+    if (viewer.readOnly) return { ok: false, message: "read-only: players complete their pages once the club links them" };
     const own = viewer.playerId === playerId;
     const staff = viewer.role === "manager" || viewer.role === "coach";
-    if (!own && !staff && !viewer.guest) return { ok: false, message: "only the player, or their manager or coach, edits this page" };
+    if (!own && !staff && !viewer.guest) return { ok: false, message: "only the player, their manager or a coach can edit this page" };
 
     const previous = (text(input?.previousClubs, "previous clubs", 400) ?? "")
       .split(",")
@@ -59,7 +59,7 @@ export async function saveHubAction(playerId: string, input: HubInput): Promise<
       const [clipId, t] = pin.split("@");
       const { data: clip } = await supabase.from("clips").select("events").eq("id", clipId).eq("club_id", viewer.club.id).maybeSingle();
       const ok = (clip as Pick<Clip, "events"> | null)?.events?.some((e) => e.t === Number(t) && e.player_id === playerId && MOMENT_KINDS.includes(e.kind));
-      if (!ok) throw new Error("that moment is not one of yours on the club's film");
+      if (!ok) throw new Error("that moment is not on this club's film");
       pinned = { clip_id: clipId, t: Number(t) };
     }
 

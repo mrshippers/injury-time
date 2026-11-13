@@ -31,7 +31,7 @@ export async function addFilmAction(_prev: AddFilmResult | null, form: FormData)
   const opponent = String(form.get("opponent") ?? "").trim().slice(0, 80);
 
   const parsed = parseFilmUrl(url);
-  if (!parsed) return { ok: false, error: "that link is not a Veo or YouTube link we can read" };
+  if (!parsed) return { ok: false, error: "that is not a supported Veo or YouTube link" };
   if (!title) return { ok: false, error: "give the film a title" };
   if (matchDate && !ISO_DATE.test(matchDate)) return { ok: false, error: "match date must be a date" };
 

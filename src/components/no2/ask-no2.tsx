@@ -33,7 +33,7 @@ export function AskNo2() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="anything about the season, gaffer"
+          placeholder="ask about the season"
           aria-label="your question"
           maxLength={300}
           className="min-w-0 flex-1 border-0 border-b border-line-strong bg-transparent px-1 py-2 text-[15px] text-ink placeholder:text-ink-faint focus:border-mint focus:outline-none"

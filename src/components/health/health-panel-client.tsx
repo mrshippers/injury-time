@@ -106,7 +106,7 @@ export function EraseButton({ playerId, firstName }: { playerId: string; firstNa
     );
   return (
     <div className=" border-out/60 p-3 bg-panel/50">
-      <p className="text-[13.5px] text-ink">{`Only when ${firstName} has asked. Every injury, note, check-in and load about ${firstName} is deleted for good, and consent is withdrawn.`}</p>
+      <p className="text-[13.5px] text-ink">{`Only when ${firstName} has asked. Every injury, note, check-in and workload record about ${firstName} is permanently deleted and consent is withdrawn.`}</p>
       <div className="mt-3 flex gap-3">
         <button
           type="button"

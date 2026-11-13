@@ -72,9 +72,9 @@ test.describe("player profile", () => {
     await gotoPlayer(page, "Theo Braithwaite");
     const card = page.getByRole("region", { name: /load this week/i });
     await expect(card).toContainText(/red zone/i);
-    await expect(card).toContainText("big jump on his usual load");
+    await expect(card).toContainText("sharp rise on usual workload");
     // plain words: sessions and a phrase; the numbers survive only in the title, never a fabricated 1.00
-    await expect(card).toContainText(/\d sessions? this week · (well )?(over|under|about) his usual week/);
+    await expect(card).toContainText(/\d sessions? this week · (well )?(above|below|about) the usual week/);
     await expect(card.getByTestId("load-line")).toHaveAttribute("title", /ratio \d\.\d{2}/);
     await expect(card).not.toContainText("\u2014");
     // detailed words: the same card carries the ratio and the 28-day average, and the chart names both lines

@@ -23,13 +23,13 @@ const londonToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/L
  */
 export async function saveFeedKeyAction(input: { apiKey: string; teamId: string }): Promise<ActionState> {
   const viewer = await getViewer();
-  if (viewer.guest || viewer.club.is_demo) return { ok: false, message: "only a signed-in manager of a real club can connect its league feed" };
+  if (viewer.guest || viewer.club.is_demo) return { ok: false, message: "only a signed-in club manager can connect the league feed" };
   if (viewer.role !== "manager") return { ok: false, message: "only the club's manager can connect the league feed" };
 
   const apiKey = String(input.apiKey ?? "").trim();
   const teamId = String(input.teamId ?? "").trim();
-  if (apiKey.length < 8 || apiKey.length > 200 || /\s/.test(apiKey)) return { ok: false, message: "that does not look like a Football Web Pages key" };
-  if (!/^\d{1,9}$/.test(teamId)) return { ok: false, message: "the team id is the number in your club's Football Web Pages address" };
+  if (apiKey.length < 8 || apiKey.length > 200 || /\s/.test(apiKey)) return { ok: false, message: "that is not a valid Football Web Pages key" };
+  if (!/^\d{1,9}$/.test(teamId)) return { ok: false, message: "the team ID is the number in your club's Football Web Pages address" };
 
   const admin = createAdminClient();
   const outcome = await syncClubFeed(admin, viewer.club, { apiKey, teamId }, londonToday());
@@ -58,7 +58,7 @@ export async function removeFeedKeyAction(): Promise<ActionState> {
   if (error) return { ok: false, message: error.message };
   await admin.from("clubs").update({ season_source: "manual" }).eq("id", viewer.club.id);
   revalidatePath("/", "layout");
-  return { ok: true, message: "disconnected; the key is deleted and results are yours to enter" };
+  return { ok: true, message: "disconnected. The key is deleted; enter results manually" };
 }
 
 /**

@@ -38,7 +38,7 @@ export async function updateClubProfileAction(input: ProfileInput): Promise<Acti
   if (founded && !/^\d{4}$/.test(founded)) return { ok: false, message: "founded is a year, like 1921" };
   const home = clean(input.home, 7);
   const away = clean(input.away, 7);
-  if ((home && !COLOUR.test(home)) || (away && !COLOUR.test(away))) return { ok: false, message: "a colour is six hex digits, like #1b5e20" };
+  if ((home && !COLOUR.test(home)) || (away && !COLOUR.test(away))) return { ok: false, message: "colours are six hex digits, for example #1b5e20" };
   const colours = { ...(viewer.club.colours ?? {}), ...(home ? { home } : {}), ...(away ? { away } : {}) };
   const { error: e } = await createAdminClient()
     .from("clubs")
@@ -80,7 +80,7 @@ export async function saveStaffAction(input: StaffInput): Promise<ActionState> {
   if (!STAFF_ROLES.includes(role)) return { ok: false, message: "a role is manager, coach, medical or other" };
   if (!DATE.test(input.joined_on)) return { ok: false, message: "the date they came is needed" };
   const left = clean(input.left_on, 10);
-  if (left && (!DATE.test(left) || left < input.joined_on)) return { ok: false, message: "the date they left comes after the date they came" };
+  if (left && (!DATE.test(left) || left < input.joined_on)) return { ok: false, message: "the leave date must be on or after the start date" };
   const userId = clean(input.user_id, 36);
   if (userId && !UUID.test(userId)) return { ok: false, message: "that login is not right" };
   const row = { club_id: viewer.club.id, name, title, role, joined_on: input.joined_on, left_on: left || null, ...(userId ? { user_id: userId } : {}) };

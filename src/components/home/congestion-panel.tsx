@@ -21,12 +21,12 @@ export function CongestionPanel({ c }: { c: Congestion }) {
         <span className="font-semibold">{fx(c.second)}</span>
       </p>
       {!c.judged ? (
-        <p className="mt-2 text-[13.5px] leading-snug text-ink-dim">Not enough training logged to say who is carrying load. Log the sessions and this names them.</p>
+        <p className="mt-2 text-[13.5px] leading-snug text-ink-dim">Not enough training logged to identify high workload. Log sessions to see who is affected.</p>
       ) : c.rotate.length === 0 ? (
-        <p className="mt-2 text-[13.5px] leading-snug text-ink-dim">Nobody available is over their usual load. Both games as picked.</p>
+        <p className="mt-2 text-[13.5px] leading-snug text-ink-dim">No available player is above usual workload. Both games as picked.</p>
       ) : (
         <>
-          <p className="mt-2 text-[13.5px] leading-snug text-ink-dim">Already over their usual load, so start them in one, not both:</p>
+          <p className="mt-2 text-[13.5px] leading-snug text-ink-dim">Above usual workload. Start in one game, not both:</p>
           <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5">
             {c.rotate.map((p) => (
               <li key={p.id} className="text-[14px]">

@@ -17,7 +17,7 @@ test.describe("home", () => {
     await expect(page.getByRole("group", { name: /: season$/ })).toContainText(/league|no league games|not started/i);
     await page.getByRole("tab", { name: "squad" }).click();
     // the watch list is a reading or an honest sentence, never a fabricated number
-    await expect(page.getByRole("region", { name: /watch before you pick/i })).toContainText(/red zone|undercooked|pushing it|no training logged|pick on form/i);
+    await expect(page.getByRole("region", { name: /watch before you pick/i })).toContainText(/red zone|low load|high load|no workload flags|no training logged|pick on form/i);
     await expect(page.locator("main")).not.toContainText(/acwr/i);
   });
 

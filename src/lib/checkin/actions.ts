@@ -17,7 +17,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  */
 export async function checkinLinkAction(playerId: string): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
   const viewer = await getViewer();
-  if (viewer.guest || viewer.club.is_demo) return { ok: false, error: "check-ins are for a real club's own players, never a public demo" };
+  if (viewer.guest || viewer.club.is_demo) return { ok: false, error: "check-ins are for a real club's players, not the public demo" };
   if (!viewer.can("view_squad_health")) return { ok: false, error: "only staff send check-in links" };
   if (!UUID.test(playerId)) return { ok: false, error: "unknown player" };
 
@@ -64,7 +64,7 @@ export async function submitCheckinAction(input: {
   if (data === "consent_required") return { ok: false, message: "tick the box to agree first" };
   if (data !== "ok") return { ok: false, message: "this link is not recognised" };
   revalidatePath(`/checkin/${input.token}`);
-  return { ok: true, message: "done. You can change today's answers until midnight." };
+  return { ok: true, message: "saved. You can change today's answers until midnight." };
 }
 
 export async function withdrawCheckinsAction(token: string): Promise<CheckinState> {
@@ -73,5 +73,5 @@ export async function withdrawCheckinsAction(token: string): Promise<CheckinStat
   const { data, error } = await supabase.rpc("withdraw_checkins", { token });
   if (error || data !== "withdrawn") return { ok: false, message: "could not withdraw, try again" };
   revalidatePath(`/checkin/${token}`);
-  return { ok: true, message: "withdrawn. Every check-in you sent is deleted and the club sees nothing from you." };
+  return { ok: true, message: "withdrawn. All your check-ins are deleted and the club sees nothing further from you." };
 }

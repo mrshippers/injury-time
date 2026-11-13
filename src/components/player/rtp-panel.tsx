@@ -70,7 +70,7 @@ export default function RtpPanel({ injury, steps, asOf, canEdit }: { injury: Inj
         </>
       ) : (
         <p className="mt-3 text-[14px] text-ink-dim">
-          No plan yet. {canEdit ? "Pick the date he should be ready for a game and the stages lay themselves out." : "The physio sets one."}
+          No plan yet. {canEdit ? "Set the target return date to generate the stages." : "The physio sets one."}
         </p>
       )}
 

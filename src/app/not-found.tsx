@@ -19,8 +19,7 @@ export default function NotFound() {
         <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
       </h1>
       <p className="mt-4 max-w-[46ch] text-[15px] leading-relaxed text-ink-dim">
-        That link points at a player, a clip or a page this club does not have. It may have been removed, or it
-        belongs to another club.
+        This player, clip or page does not exist for this club. It may have been removed or belong to another club.
       </p>
       <div className="mt-8 flex flex-wrap gap-3">
         <Link href="/" className={PRIMARY}>

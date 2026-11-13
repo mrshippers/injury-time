@@ -202,7 +202,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
       ? null
       : prefer.size > 0
         ? `filled from last match's eleven${carried < 11 ? `, ${11 - carried} change${11 - carried === 1 ? "" : "s"} for who is out` : ""}`
-        : "filled from who is in and who has played most";
+        : "based on availability and appearances";
 
   /* ── one tap from the list: in he goes, to the first slot that fits him ── */
   const [toggleNote, setToggleNote] = useState<string | null>(null);
@@ -218,7 +218,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
     const fits = empties.find((i) => formation.slots[i].role === row.player.position);
     const slot = fits ?? empties[0];
     if (slot === undefined) {
-      setToggleNote("the starting XI is full, take someone out first");
+      setToggleNote("starting XI is full; remove a player first");
       return;
     }
     place(playerId, slot);
@@ -366,7 +366,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
       : selectedPlayer
         ? "now pick the slot he goes in"
         : selectedSlot !== null
-          ? "now pick a name, or another slot to swap"
+          ? "choose a player, or another slot to swap"
           : filled === 11
             ? "XI picked"
             : `${filled} of 11 · ${11 - filled} slot${11 - filled === 1 ? "" : "s"} empty`;
@@ -440,7 +440,7 @@ export function SquadRoom({ rows, nextFixture, saved, previous, calls, clubId, c
                 type="button"
                 onClick={autoPick}
                 disabled={isAuto}
-                title="last match's eleven first, then who said in, then readiness and appearances"
+                title="order: last match's XI, availability, readiness, appearances"
                 className="pressable h-8 px-2 text-[12px] font-semibold text-mint underline-offset-4 hover:underline disabled:text-ink-dim disabled:no-underline disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
               >
                 auto pick

@@ -13,7 +13,7 @@ type Res<T> = ({ ok: true } & T) | { ok: false; error: string };
 export async function mintClaimAction(playerId: string): Promise<Res<{ path: string }>> {
   if (!UUID.test(playerId)) return { ok: false, error: "no such player" };
   const viewer = await getViewer();
-  if (viewer.guest) return { ok: false, error: "only the club's own manager or coach hands a page over" };
+  if (viewer.guest) return { ok: false, error: "only the club's manager or a coach can hand over a page" };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("mint_player_claim", { pid: playerId });
   if (error || !data) return { ok: false, error: error?.message ?? "could not make the link" };

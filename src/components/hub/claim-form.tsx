@@ -47,7 +47,7 @@ export function ClaimForm({ token, signedInAs, firstName }: { token: string; sig
         <p className="text-[14px] text-ink">
           Link sent to <span className="num text-mint">{sent}</span>.
         </p>
-        <p className="mt-2 text-[13px] text-ink-dim">Open it on this phone. If you land somewhere else, open your manager&apos;s link again and it will say it&apos;s you.</p>
+        <p className="mt-2 text-[13px] text-ink-dim">Open it on this phone. If you land elsewhere, open your manager&apos;s link again to confirm it is you.</p>
       </div>
     );
 
