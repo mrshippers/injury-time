@@ -20,7 +20,7 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "injury time.",
   description:
-    "Squad availability and load for non-league. Your best eleven on the park more often.",
+    "Squad availability and workload for non-league clubs. Your strongest eleven on the pitch more often.",
   appleWebApp: { capable: true, title: "injury time", statusBarStyle: "black-translucent" },
 };
 

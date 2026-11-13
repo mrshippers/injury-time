@@ -52,7 +52,7 @@ export async function analyseFilm(ctx: AnalysisContext): Promise<AnalysisOutcome
       return { ok: false, error: "the analyst declined this film" };
     }
     const out = response.parsed_output;
-    if (!out) return { ok: false, error: "the analyst did not return a usable answer" };
+    if (!out) return { ok: false, error: "the analysis returned no usable result" };
     return {
       ok: true,
       analysis: {
@@ -66,7 +66,7 @@ export async function analyseFilm(ctx: AnalysisContext): Promise<AnalysisOutcome
     };
   } catch (err) {
     if (err instanceof Anthropic.AuthenticationError) return { ok: false, error: "the analysis key was rejected" };
-    if (err instanceof Anthropic.RateLimitError) return { ok: false, error: "the analyst is busy, try again in a minute" };
+    if (err instanceof Anthropic.RateLimitError) return { ok: false, error: "the analysis service is busy; try again shortly" };
     if (err instanceof Anthropic.APIError) return { ok: false, error: `analysis failed (${err.status ?? "api"})` };
     return { ok: false, error: "analysis failed" };
   }

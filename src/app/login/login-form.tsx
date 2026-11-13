@@ -16,7 +16,7 @@ export function LoginForm() {
           Magic link sent to <span className="num text-mint">{sent}</span>.
         </p>
         <p className="mt-2 text-sm text-ink-dim">
-          Open it on this device and you land in the squad room.
+          Open it on this device to go to the squad room.
         </p>
       </div>
     );
@@ -44,7 +44,7 @@ export function LoginForm() {
         type="email"
         required
         autoComplete="email"
-        placeholder="gaffer@yourclub.co.uk"
+        placeholder="manager@yourclub.co.uk"
         className="bg-transparent border-0 border-b border-line-strong px-4 py-3 text-ink placeholder:text-ink-faint focus-visible:outline-2 focus-visible:outline-mint"
       />
       <button

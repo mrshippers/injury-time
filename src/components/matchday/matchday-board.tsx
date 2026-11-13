@@ -216,7 +216,7 @@ export function MatchdayBoard({
       ) : null}
 
       <p className="mt-8 text-[12.5px] leading-relaxed text-ink-faint">
-        Minutes go to the logger at full-time. How hard the game felt (RPE) is each player&apos;s to give there; it is never filled in for them.
+        Minutes pass to the match log at full time. Each player gives their own RPE there; it is never filled in for them.
       </p>
     </div>
   );

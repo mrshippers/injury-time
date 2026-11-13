@@ -40,7 +40,7 @@ export async function askStructured<S extends z.ZodType>(opts: {
     return { ok: true, value: out, model: response.model || NO2_MODEL };
   } catch (err) {
     if (err instanceof Anthropic.AuthenticationError) return { ok: false, error: "the analyst's key was rejected" };
-    if (err instanceof Anthropic.RateLimitError) return { ok: false, error: "the analyst is busy, try again in a minute" };
+    if (err instanceof Anthropic.RateLimitError) return { ok: false, error: "the analysis service is busy; try again shortly" };
     if (err instanceof Anthropic.APIError) return { ok: false, error: `the analyst couldn't answer (${err.status ?? "api"})` };
     return { ok: false, error: "the analyst couldn't answer" };
   }

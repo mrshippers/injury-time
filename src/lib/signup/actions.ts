@@ -24,8 +24,8 @@ export async function createClubAction(input: { name: string; league: string; ro
   if (!auth.user) return { ok: false, error: "sign in first" };
   const name = String(input?.name ?? "").trim();
   const league = String(input?.league ?? "").trim();
-  if (!(ROLES as readonly string[]).includes(input?.role)) return { ok: false, error: "you sign up as the manager, a coach or medical" };
-  if (input?.adultSide !== true) return { ok: false, error: "Injury Time takes adult sides only for now: every player 18 or over" };
+  if (!(ROLES as readonly string[]).includes(input?.role)) return { ok: false, error: "sign up as the manager, a coach or medical staff" };
+  if (input?.adultSide !== true) return { ok: false, error: "Injury Time supports adult sides only: every player must be 18 or over" };
   const { data, error } = await supabase.rpc("create_club", { club_name: name, league, my_role: input.role, adult_side: true });
   if (error || !data) return { ok: false, error: (error?.message ?? "could not make the club").replace(/^adults_only: /, "") };
   (await cookies()).set(CLUB_COOKIE, data, { path: "/", sameSite: "lax", httpOnly: true, secure: true, maxAge: 60 * 60 * 24 * 365 });

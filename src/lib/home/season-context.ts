@@ -151,7 +151,7 @@ export function seasonContext(input: {
 
   const sentences: string[] = [];
   if (!hasSeason) {
-    sentences.push("no league games in yet. the line starts with the first result.");
+    sentences.push("no league games played. The line starts with the first result.");
   } else {
     const rounded = Math.round(ppg * 10) / 10;
     const ppgWord = Number.isInteger(rounded) ? `${word(rounded)} a game` : `${rounded.toFixed(1)} a game`;

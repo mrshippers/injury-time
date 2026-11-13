@@ -284,8 +284,8 @@ export default function BodyMap({ injuries, asOf, playerId, initialParams, canEd
                 ? `${current.length} live injur${current.length === 1 ? "y" : "ies"}: shown in red, the rest tint by days out.`
                 : `${current.length} unresolved: drawn in red; resolved regions tint by cumulative days lost (under 14, under 42, 42 and over).`
               : mode === "plain"
-                ? "No live injury. Past ones tint by days out."
-                : "No unresolved injury. Resolved regions tint by cumulative days lost."}
+                ? "No current injury. Past injuries shade by days out."
+                : "No unresolved injury. Resolved regions shade by total days lost."}
           </p>
           {editing && canEdit ? (
             <>

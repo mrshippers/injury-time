@@ -76,7 +76,7 @@ export function NextMatchVital({ next, daysUntil, fit, calls, squadSize, last, w
           {last ? <LastTimeOut r={last} /> : null}
         </div>
       ) : (
-        <p className="text-[12.5px] text-ink-dim">No fixture in the diary. The next match is what everything on this page is for.</p>
+        <p className="text-[12.5px] text-ink-dim">No fixture scheduled. Add the next match to populate this page.</p>
       )}
     </Vital>
   );
@@ -159,7 +159,7 @@ export function WatchVital({ rows, hasLoad, backSoon }: { rows: SquadRow[]; hasL
           .
         </p>
       ) : rows.length === 0 ? (
-        <p className="text-[12.5px] text-ink-dim">Nobody is carrying a load flag. Pick on form.</p>
+        <p className="text-[12.5px] text-ink-dim">No workload flags. Pick on form.</p>
       ) : (
         <ul className="flex flex-col">
           {rows.map((r) => (

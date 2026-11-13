@@ -75,7 +75,7 @@ function halfTime(c: Ctx): Finding[] {
             line: say(c, "leads0", [
               `Ahead at half time ${n} times, won every one of them.`,
               `We've never let a half-time lead go: ${n} from ${n}.`,
-              `Get in front by the break and it's done. ${n} half-time leads, ${n} wins.`,
+              `${n} half-time leads, ${n} wins.`,
             ]),
           }
         : {
@@ -137,7 +137,7 @@ function halfTime(c: Ctx): Finding[] {
         heading: "0-0 at the break",
         about: "us",
         strength: clamp(0.25 + stayed * 0.1),
-        line: say(c, "nn", [`0-0 at half time ${times(goalless.length)}; ${stayed} of those finished 0-0. When it's tight early, it stays tight.`, `${stayed} of our ${goalless.length} goalless first halves ended goalless.`]),
+        line: say(c, "nn", [`0-0 at half time ${times(goalless.length)}; ${stayed} of those finished 0-0.`, `${stayed} of our ${goalless.length} goalless first halves ended goalless.`]),
       });
   }
   return out;
@@ -162,7 +162,7 @@ function venueHalves(c: Ctx): Finding[] {
                 `${c.venue === "A" ? "Away from home" : "At home"} we've scored ${first} first-half goal${first === 1 ? "" : "s"} in ${atV.length} games, ${all - first} after the break.`,
                 `Slow starters ${venueWord(c.venue)}: ${first} of our ${all} goals there came before half time.`,
               ])
-            : say(c, "vh-fast", [`${venueWord(c.venue)[0].toUpperCase() + venueWord(c.venue).slice(1)} we do the damage early: ${first} of ${all} goals before the break.`, `Quick out of the blocks ${venueWord(c.venue)}: ${first} first-half goals from ${all}.`]),
+            : say(c, "vh-fast", [`${venueWord(c.venue)[0].toUpperCase() + venueWord(c.venue).slice(1)} we do the damage early: ${first} of ${all} goals before the break.`, `Fast starters ${venueWord(c.venue)}: ${first} first-half goals from ${all}.`]),
       });
   }
   const losses = c.results.filter((r) => r.goals_for < r.goals_against);
@@ -215,7 +215,7 @@ function rest(c: Ctx): Finding[] {
       line: worseTired
         ? say(c, "rest-t", [
             `On three days' rest or less we take ${r2(a)} points a game; with longer, ${r2(b)}.${restNow <= 3 ? ` This one comes ${restNow} days after the last.` : ""}`,
-            `The quick turnarounds cost us: ${r2(a)} a game on short rest against ${r2(b)} with a proper week.${restNow <= 3 ? ` Another short one here (${restNow} days).` : ""}`,
+            `The quick turnarounds cost us: ${r2(a)} a game on short rest against ${r2(b)} with a full week.${restNow <= 3 ? ` Another short one here (${restNow} days).` : ""}`,
           ])
         : say(c, "rest-f", [`We're better on the quick turnaround: ${r2(a)} points a game on three days' rest, ${r2(b)} with longer.`, `Short rest suits us: ${r2(a)} a game with three days or fewer between, ${r2(b)} otherwise.`]),
     },
@@ -284,7 +284,7 @@ function streaks(c: Ctx): Finding[] {
   const winning = run(sorted, (r) => pts(r) === 3);
   const winless = run(sorted, (r) => pts(r) < 3);
   const scoring = run(sorted, (r) => r.goals_for > 0);
-  if (winning >= 3) out.push({ key: "run", heading: "the run", about: "us", strength: clamp(0.3 + winning * 0.06), line: say(c, "run-w", [`${winning} wins on the bounce, ${sorted.slice(0, winning).reduce((n, r) => n + r.goals_for, 0)} goals in them.`, `We've won the last ${winning}.`]) });
+  if (winning >= 3) out.push({ key: "run", heading: "the run", about: "us", strength: clamp(0.3 + winning * 0.06), line: say(c, "run-w", [`${winning} consecutive wins, ${sorted.slice(0, winning).reduce((n, r) => n + r.goals_for, 0)} goals in them.`, `We've won the last ${winning}.`]) });
   else if (unbeaten >= 4) out.push({ key: "run", heading: "the run", about: "us", strength: clamp(0.25 + unbeaten * 0.05), line: `Unbeaten in ${unbeaten}.` });
   else if (winless >= 3) out.push({ key: "run", heading: "the run", about: "us", strength: clamp(0.3 + winless * 0.07), line: say(c, "run-l", [`${winless} without a win.`, `It's ${winless} games since the last win.`]) });
   if (scoring >= 6 && winning < 3) out.push({ key: "scoring-run", heading: "goals", about: "us", strength: clamp(0.2 + scoring * 0.03), line: `We've scored in each of the last ${scoring}.` });
@@ -328,7 +328,7 @@ function scorers(c: Ctx, them: Standing | undefined): Finding[] {
       strength: clamp(0.3 + (awayMen[0].away / Math.max(1, awayGoals)) * 0.3),
       line: say(c, "as", [
         `Away goals have come from ${awayMen.slice(0, 3).map((s) => `${s.name} (${s.away})`).join(", ")}: ${awayGoals} in all.`,
-        `On the road it's been ${awayMen[0].name} with ${awayMen[0].away} of our ${awayGoals} away goals.`,
+        `Away from home it has been ${awayMen[0].name} with ${awayMen[0].away} of our ${awayGoals} away goals.`,
       ]),
     });
   }
@@ -350,7 +350,7 @@ function scorers(c: Ctx, them: Standing | undefined): Finding[] {
       line: say(c, "ts", [`${top.name} has ${top.goals} of our ${total} goals, scoring in ${top.games} games.`, `${Math.round((top.goals / total) * 100)}% of the goals are ${top.name}'s (${top.goals}).`]),
     });
   else if (list.filter((s) => s.goals > 0).length >= 8)
-    out.push({ key: "spread", heading: "the goals", about: "us", strength: 0.25, line: `${list.length} different scorers, nobody past ${top.goals}: the goals are shared round.` });
+    out.push({ key: "spread", heading: "the goals", about: "us", strength: 0.25, line: `${list.length} different scorers, nobody past ${top.goals}: goals are spread across the squad.` });
   void them;
   return out;
 }
@@ -364,7 +364,7 @@ function margins(c: Ctx): Finding[] {
     out.push({ key: "big-wins", heading: "when we win", about: "us", strength: clamp(0.2 + big.length / wins.length / 2), line: say(c, "bw", [`${big.length} of our ${wins.length} wins have been by three or more.`, `When we win it's usually comfortable: ${big.length} of ${wins.length} by three goals or more.`]) });
   const heavy = losses.filter((r) => r.goals_against - r.goals_for >= 3);
   if (heavy.length >= 2)
-    out.push({ key: "heavy", heading: "when we lose", about: "us", strength: clamp(0.3 + heavy.length * 0.1), line: say(c, "hv", [`When it goes wrong it goes badly: ${heavy.map((r) => `${score(r)} at ${r.opponent}`).join(", ")}.`, `${heavy.length} defeats by three or more (${heavy.map(score).join(", ")}).`]) });
+    out.push({ key: "heavy", heading: "when we lose", about: "us", strength: clamp(0.3 + heavy.length * 0.1), line: say(c, "hv", [`Heaviest defeats: ${heavy.map((r) => `${score(r)} at ${r.opponent}`).join(", ")}.`, `${heavy.length} defeats by three or more (${heavy.map(score).join(", ")}).`]) });
   return out;
 }
 
@@ -449,11 +449,11 @@ function theirTrajectory(c: Ctx, them: Standing | undefined): Finding[] {
       strength: clamp(0.3 + Math.abs(latest.ppg! - season) * 0.35),
       line: up
         ? say(c, "tf-up", [
-            `On the up: ${ptsA(latest.ppg!)} over their last ${latest.g}, against ${r2(season)} for the season. ${path} across the last tables.`,
-            `They've picked up lately, ${r2(latest.ppg!)} a game in the last ${latest.g} (season ${r2(season)}).`,
+            `Improving: ${ptsA(latest.ppg!)} over their last ${latest.g}, against ${r2(season)} for the season. ${path} across the last tables.`,
+            `They have improved recently, ${r2(latest.ppg!)} a game in the last ${latest.g} (season ${r2(season)}).`,
           ])
         : down
-          ? say(c, "tf-dn", [`Going off the boil: ${r2(latest.ppg!)} a game over their last ${latest.g}, down from ${r2(season)} for the season. Table: ${path}.`, `Their form's dipped, ${ptsA(latest.ppg!)} in the last ${latest.g}.`])
+          ? say(c, "tf-dn", [`Declining form: ${r2(latest.ppg!)} a game over their last ${latest.g}, down from ${r2(season)} for the season. Table: ${path}.`, `Their form has dipped, ${ptsA(latest.ppg!)} in the last ${latest.g}.`])
           : say(c, "tf-st", [`Steady, ${r2(latest.ppg!)} a game recently and ${r2(season)} across the season. They've gone ${path}.`, `No real swing in their form: ${r2(latest.ppg!)} a game lately, ${r2(season)} overall.`]),
     },
   ];
@@ -522,7 +522,7 @@ function matchup(c: Ctx, them: Standing | undefined, us: Standing | undefined): 
       theirAtk >= n - 6 && ourDef <= 4
         ? say(c, "mu-a", [
             `Their attack (${theirAtkW}) runs into our defence (${ourDefW}). Goals should be hard for them to come by.`,
-            `Blunt against tight: they're ${theirAtkW} in front of goal, we're ${ourDefW} at the back.`,
+            `Attack against defence: they're ${theirAtkW} in front of goal, we're ${ourDefW} at the back.`,
           ])
         : leak <= 6 && ourAtk <= 8
           ? say(c, "mu-b", [`They let goals in (${leakW}) and we score them (${ourAtkW}).`, `Their defence is ${leakW}; our attack is ${ourAtkW}.`])

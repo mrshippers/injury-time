@@ -82,7 +82,7 @@ export function InstallNudge() {
       className="glass glass-deep fixed inset-x-3 z-40 p-4 sm:hidden"
       style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}
     >
-      <p className="text-[14px] text-ink">On your home screen, like an app. Match calls land as notifications.</p>
+      <p className="text-[14px] text-ink">Add to your home screen to use it as an app. Match calls arrive as notifications.</p>
       {ios ? (
         <p className="mt-2 text-[13px] text-ink-dim">
           Tap <span className="text-ink">Share</span>, then <span className="text-ink">Add to Home Screen</span>.
@@ -140,7 +140,7 @@ export function NotifyToggle() {
     setError(null);
     try {
       const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-      if (!key) throw new Error("notifications aren't set up on this server yet");
+      if (!key) throw new Error("notifications are not enabled on this server");
       if ((await Notification.requestPermission()) !== "granted") {
         setState("blocked");
         return;
@@ -180,10 +180,10 @@ export function NotifyToggle() {
   const line: Record<NotifyState, string> = {
     checking: "checking this device",
     unsupported: "this browser can't take notifications",
-    "install-first": "on iPhone, add injury time to your home screen first (Share, then Add to Home Screen), then turn these on from there",
+    "install-first": "on iPhone, first add Injury Time to your home screen (Share, then Add to Home Screen), then enable notifications there",
     blocked: "notifications are blocked for this site in your browser settings",
     off: "off on this device",
-    on: "on for this device: notices from the staff and match calls",
+    on: "on for this device: staff notices and match calls",
   };
 
   return (
