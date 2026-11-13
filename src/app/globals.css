@@ -788,13 +788,6 @@ body:has([data-pilot]) nav[aria-label="modules"] { display: none; }
 @media (prefers-reduced-motion: reduce) { .call-knob, .call-knob.is-resting { transition: none; } }
 
 /* the glass setting: a hairline track, mint where it is filled, a square thumb like every other control here */
-.glass-range { height: 40px; margin: 0; background: none; -webkit-appearance: none; appearance: none; cursor: pointer; }
-.glass-range::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, var(--mint) var(--fill, 0%), var(--line-strong) var(--fill, 0%)); }
-.glass-range::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 24px; margin-top: -11px; border-radius: 2px; background: var(--mint); }
-.glass-range::-moz-range-track { height: 2px; background: var(--line-strong); }
-.glass-range::-moz-range-progress { height: 2px; background: var(--mint); }
-.glass-range::-moz-range-thumb { width: 12px; height: 24px; border: 0; border-radius: 2px; background: var(--mint); }
-.glass-range:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
 
 /* ── glass ───────────────────────────────────────────────────────────────
    Four declarations make a surface glass: the tint, the backdrop filter (with

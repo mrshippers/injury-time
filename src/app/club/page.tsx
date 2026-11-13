@@ -3,7 +3,9 @@ import { ClubStop } from "@/components/club/crest";
 import { todayISO } from "@/lib/data";
 import { FeedKeyForm, ResultForm, type Awaiting } from "@/components/club/club-forms";
 import { FeedSquad } from "@/components/club/feed-squad";
-import { GlassTint } from "@/components/glass/glass";
+import { ClubProfileForm, SeasonSetupForm, StaffBooks } from "@/components/club/board-forms";
+import { listMembers, type MemberRow } from "@/lib/club/members";
+import type { ClubStaff } from "@/lib/types";
 import { StaffInvites, type InviteRow } from "@/components/club/staff-invites";
 import { longDate } from "@/components/squad/format";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -15,10 +17,10 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "the board - injury time." };
 
 /**
- * Where the club's season comes from, and the two ways it gets in: the club's
- * own league-feed key, or the staff typing the result. Injury Time holds no
- * key of its own; each club brings the free one Football Web Pages gives
- * non-league clubs, so every club reads its own data under its own terms.
+ * The board: the club as it names itself, the season and where it comes from
+ * (the club's own league-feed key, or the staff typing the result), and the
+ * staff on the books. Injury Time holds no feed key of its own; each club
+ * brings the free one Football Web Pages gives non-league clubs.
  */
 const feedAllowedFor = (v: Awaited<ReturnType<typeof getViewer>>) => !v.guest && !v.club.is_demo && v.role === "manager";
 
@@ -58,6 +60,14 @@ export default async function ClubPage() {
     invites = (data ?? []) as InviteRow[];
   }
 
+  // the staff on the books, and the logins with no name yet (manager only: it reads with the admin client)
+  const { data: staffRows } = await supabase.from("club_staff").select("*").eq("club_id", club.id).order("joined_on", { ascending: true });
+  const staff = (staffRows ?? []) as ClubStaff[];
+  const boardAllowed = (club.is_demo && club.demo_writable && !viewer.readOnly) || (!viewer.guest && viewer.role === "manager");
+  const boardReason = boardAllowed ? null : club.is_demo ? "This club is read-only." : "Only the club's manager changes this.";
+  let members: MemberRow[] = [];
+  if (!viewer.guest && viewer.role === "manager") members = await listMembers(club.id);
+
   const feedAllowed = feedAllowedFor(viewer);
   const feedReason = club.is_demo
     ? "The club's manager connects the league feed."
@@ -81,6 +91,28 @@ export default async function ClubPage() {
         </h1>
         <BoardSummary clubId={club.id} asOf={todayISO()} />
       </header>
+
+      <section aria-labelledby="club-h" className="mt-10 border-t border-line pt-6">
+        <p className="annot" id="club-h">{"// the club"}</p>
+        <h2 className="mt-2 text-[20px] font-semibold text-ink">As it names itself</h2>
+        <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
+          The name on the badge, the league and division, the ground and the colours. The home page and the review read these.
+        </p>
+        <ClubProfileForm
+          values={{ name: club.name, league: club.league, division: club.division ?? "", ground: club.ground ?? "", founded: club.founded ? String(club.founded) : "", home: club.colours?.home ?? "", away: club.colours?.away ?? "" }}
+          allowed={boardAllowed}
+          reason={boardReason}
+        />
+      </section>
+
+      <section aria-labelledby="season-h" className="mt-10 border-t border-line pt-6">
+        <p className="annot" id="season-h">{"// the season"}</p>
+        <h2 className="mt-2 text-[20px] font-semibold text-ink">Which season, and how the side opens</h2>
+        <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
+          The season the review runs on, and the formation the starting XI opens in before anyone has placed a name.
+        </p>
+        <SeasonSetupForm season={club.season ?? ""} defaultFormation={club.settings?.default_formation ?? "4-2-3-1"} allowed={boardAllowed} reason={boardReason} />
+      </section>
 
       <section aria-labelledby="feed-h" className="mt-10 border-t border-line pt-6">
         <p className="annot" id="feed-h">{"// the league feed"}</p>
@@ -119,7 +151,13 @@ export default async function ClubPage() {
 
       <section aria-labelledby="staff-h" className="mt-10 border-t border-line pt-6">
         <p className="annot" id="staff-h">{"// the staff"}</p>
-        <h2 className="mt-2 text-[20px] font-semibold text-ink">Bring your coaches and physio in</h2>
+        <h2 className="mt-2 text-[20px] font-semibold text-ink">Who is on the books</h2>
+        <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
+          The manager, the coaches, medical and the rest, each with a title and the date they came. The review counts their season from here; a login
+          with no name is listed until you put one to it.
+        </p>
+        <StaffBooks staff={staff} members={members} allowed={boardAllowed} reason={boardReason} today={today} />
+        <h3 className="mt-8 text-[16px] font-semibold text-ink">Bring your coaches and physio in</h3>
         <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
           A link for each person. A coach logs sessions and posts to the squad; medical keeps the injuries and the notes, which only medical and the
           player themselves can read.
@@ -156,16 +194,6 @@ export default async function ClubPage() {
             ))}
           </ul>
         ) : null}
-      </section>
-
-      <section aria-labelledby="device-h" data-glass-setting className="mt-10 border-t border-line pt-6">
-        <p className="annot" id="device-h">{"// this device"}</p>
-        <h2 className="mt-2 text-[20px] font-semibold text-ink">The glass, clearer or smokier</h2>
-        <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
-          The bars at the top and bottom are glass, so the page shows through them. Slide left and they thin until only the rim is left; slide right
-          and they smoke over. Kept on this phone or laptop only, and it thickens by itself when something bright slides under.
-        </p>
-        <GlassTint />
       </section>
     </main>
   );
