@@ -65,3 +65,21 @@ describe("lastResult", () => {
   });
   it("is null with no games", () => expect(lastResult([])).toBeNull());
 });
+
+describe("splitCompetition with rounds in words", () => {
+  it("folds worded rounds and replays into the cup", () => {
+    expect(splitCompetition("FA Cup Preliminary replay")).toEqual({ name: "FA Cup", token: "Preliminary replay" });
+    expect(splitCompetition("FA Cup Preliminary")).toEqual({ name: "FA Cup", token: "Preliminary" });
+    expect(splitCompetition("FA Vase First Qualifying")).toEqual({ name: "FA Vase", token: "First Qualifying" });
+    expect(splitCompetition("FA Vase Second Round")).toEqual({ name: "FA Vase", token: "Second Round" });
+    expect(splitCompetition("Herts Cup Semi-Final")).toEqual({ name: "Herts Cup", token: "Semi-Final" });
+    expect(splitCompetition("League Cup Round 2 replay")).toEqual({ name: "League Cup", token: "Round 2 replay" });
+  });
+  it("words them the same way as the numbered ones", () => {
+    expect(roundLabel("Preliminary replay")).toBe("preliminary round replay");
+    expect(roundLabel("First Qualifying")).toBe("1st qualifying round");
+    expect(roundLabel("Second Round")).toBe("round 2");
+    expect(roundLabel("Round 2 replay")).toBe("round 2 replay");
+    expect(roundLabel("Semi-Final")).toBe("semi-final");
+  });
+});

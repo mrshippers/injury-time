@@ -6,12 +6,9 @@
 import { SEASON_BENCHMARKS } from "@/lib/config";
 import type { Fixture, ProgressPoint, Result, Standing } from "@/lib/types";
 
-const CUP = /cup|vase|trophy|shield|plate/i;
-
-/** A league game is anything that is not a cup tie. */
-export function isLeague(competition: string): boolean {
-  return !CUP.test(competition);
-}
+/** One reading of "is this a league game" for the whole app: the hub and the review agree. */
+import { isLeague } from "@/lib/league/normalise";
+export { isLeague };
 
 /** `2026-12-25` for a season that starts in 2026. */
 export function christmasFor(seasonStartIso: string): string {

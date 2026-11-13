@@ -6,6 +6,9 @@ import { PlateTabs } from "@/components/ui/plate-tabs";
 
 export type HubPage = { key: string; label: string; content: ReactNode };
 
+/** the dark between two stages while you drag; matches --pager-gap in globals.css */
+const GAP = 32;
+
 /**
  * The hub as stages you swipe through, not a page you scroll down: one screen, the next game first. Native
  * horizontal scroll-snap does the swiping (thumb, trackpad, shift-wheel); the tabs, the arrows and the
@@ -14,6 +17,16 @@ export type HubPage = { key: string; label: string; content: ReactNode };
 export function HubPager({ pages }: { pages: HubPage[] }) {
   const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(pages[0]?.key ?? "");
+  // where the track is, in stages: 1.4 is forty percent of the way from the second stage to the third.
+  // The tab plate follows this, so it moves with the thumb rather than jumping once the snap lands.
+  const [fraction, setFraction] = useState(0);
+  const onScroll = useCallback(() => {
+    const el = track.current;
+    if (!el) return;
+    const first = el.querySelector<HTMLElement>("[data-page]");
+    const stride = first ? first.offsetWidth + GAP : el.clientWidth;
+    setFraction(stride > 0 ? el.scrollLeft / stride : 0);
+  }, []);
 
   // the stage on screen is the one most visible in the track
   useEffect(() => {
@@ -48,7 +61,7 @@ export function HubPager({ pages }: { pages: HubPage[] }) {
     <section aria-roledescription="carousel" aria-label="the hub" className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between gap-3">
         <div className="-mx-1 min-w-0 overflow-x-auto [scrollbar-width:none]">
-          <PlateTabs label="hub stages" items={pages.map((p) => ({ key: p.key, label: p.label }))} active={active} onChange={go} />
+          <PlateTabs label="hub stages" items={pages.map((p) => ({ key: p.key, label: p.label }))} active={active} fraction={fraction} onChange={go} />
         </div>
         <div className="flex shrink-0 items-center gap-1 max-sm:hidden">
           <Arrow dir="prev" disabled={i <= 0} onClick={() => step(-1)} />
@@ -61,6 +74,7 @@ export function HubPager({ pages }: { pages: HubPage[] }) {
       <div
         ref={track}
         tabIndex={0}
+        onScroll={onScroll}
         onKeyDown={(e) => {
           if (e.key === "ArrowRight") {
             e.preventDefault();
@@ -70,7 +84,7 @@ export function HubPager({ pages }: { pages: HubPage[] }) {
             step(-1);
           }
         }}
-        className="pager-track mt-4 flex min-h-0 flex-1 snap-x snap-mandatory overflow-x-auto overscroll-x-contain focus-visible:outline-none"
+        className="pager-track mt-4 flex min-h-0 flex-1 snap-x snap-mandatory gap-(--pager-gap) overflow-x-auto overscroll-x-contain focus-visible:outline-none"
       >
         {pages.map((p, n) => (
           <div
@@ -83,7 +97,7 @@ export function HubPager({ pages }: { pages: HubPage[] }) {
             aria-label={`${n + 1} of ${pages.length}: ${p.label}`}
             // a stage that scrolls (the league table) has to be reachable by keyboard
             tabIndex={0}
-            className="w-full min-w-full shrink-0 snap-start snap-always overflow-y-auto overscroll-y-contain pb-6 pr-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-mint/60"
+            className="pager-page w-full min-w-full shrink-0 snap-start snap-always overflow-y-auto overscroll-y-contain pb-8 pr-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-mint/60"
           >
             {p.content}
           </div>

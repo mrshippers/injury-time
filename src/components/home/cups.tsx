@@ -26,49 +26,61 @@ export function CupsSection({ results, fixtures, asOf }: { results: Result[]; fi
       <ul className="mt-3 flex flex-col gap-6">
         {runs.map((run) => (
           <li key={run.name}>
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <h2 className="display text-[22px] leading-none text-ink">
-                {run.name}
-                <span
-                  className={`num ml-3 inline-flex items-center gap-1.5 align-middle text-[10.5px] font-semibold uppercase tracking-[0.12em] ${run.state === "out" ? "text-out" : "text-ink-dim"}`}
-                >
-                  <span aria-hidden className={`inline-block size-2 rounded-full ${run.state === "in" ? "bg-[var(--win)]" : "border-[1.5px] border-current"}`} />
-                  {STATE_WORD[run.state]}
-                </span>
-              </h2>
-              <p className="text-[12.5px] text-ink-dim">{run.line}</p>
-            </div>
-            <ol className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" aria-label={`${run.name} ties`}>
-              {run.ties.map((t) => (
-                <li
-                  key={`${t.date}-${t.opponent}`}
-                  className={`min-w-[148px] shrink-0 px-3 py-2.5 sm:min-w-[160px] ${t.tone ? "plate bg-panel [--slant:10px]" : "plate bg-panel/40 [--slant:10px] text-ink-dim bg-pitch"}`}
-                >
-                  <p className="annot text-[10px]">{t.round}</p>
-                  {t.tone ? (
-                    <p className="mt-1.5 flex items-center gap-2">
-                      <span className={`plate plate-sm num flex h-6 min-w-8 items-center justify-center text-[11.5px] font-semibold ${TONE_BOX[t.tone]}`}>{TONE_LETTER[t.tone]}</span>
-                      <span className="num text-[18px] font-semibold text-ink">{t.score}</span>
-                    </p>
-                  ) : (
-                    <p className="num mt-1.5 text-[12px] font-semibold tracking-[0.1em] text-gold">NEXT · {shortDate(t.date).toUpperCase()}</p>
-                  )}
-                  <p className="mt-1 flex items-center gap-1.5 truncate text-[12.5px] text-ink">
-                    <Crest team={t.opponent} size={16} />
-                    <span className="truncate">
-                      {t.venue === "A" ? "at " : "v "}
-                      {t.opponent}
-                    </span>
-                  </p>
-                  <p className="num text-[11px] text-ink-dim">
-                    {t.tone ? shortDate(t.date) : `${t.venue === "H" ? "home" : "away"}${t.kickoff ? ` · ${t.kickoff}` : ""}`}
-                  </p>
-                </li>
-              ))}
-            </ol>
+            <CupRunBlock run={run} />
           </li>
         ))}
       </ul>
     </section>
+  );
+}
+
+/** One cup: its name and state on a line, its ties as a row of plates. Used by the cups list and the season slide. */
+export function CupRunBlock({ run, aside }: { run: CupRun; aside?: React.ReactNode }) {
+  return (
+    <>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 className="display text-[22px] leading-none text-ink">
+          {run.name}
+          <span
+            className={`num ml-3 inline-flex items-center gap-1.5 align-middle text-[10.5px] font-semibold uppercase tracking-[0.12em] ${run.state === "out" ? "text-out" : "text-ink-dim"}`}
+          >
+            <span aria-hidden className={`inline-block size-2 rounded-full ${run.state === "in" ? "bg-[var(--win)]" : "border-[1.5px] border-current"}`} />
+            {STATE_WORD[run.state]}
+          </span>
+        </h2>
+        <p className="text-[12.5px] text-ink-dim">
+          {run.line}
+          {aside}
+        </p>
+      </div>
+      <ol className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" aria-label={`${run.name} ties`}>
+        {run.ties.map((t) => (
+          <li
+            key={`${t.date}-${t.opponent}`}
+            className={`min-w-[148px] shrink-0 px-3 py-2.5 sm:min-w-[160px] ${t.tone ? "plate bg-panel [--slant:10px]" : "plate bg-panel/40 [--slant:10px] text-ink-dim bg-pitch"}`}
+          >
+            <p className="annot text-[10px]">{t.round}</p>
+            {t.tone ? (
+              <p className="mt-1.5 flex items-center gap-2">
+                <span className={`plate plate-sm num flex h-6 min-w-8 items-center justify-center text-[11.5px] font-semibold ${TONE_BOX[t.tone]}`}>{TONE_LETTER[t.tone]}</span>
+                <span className="num text-[18px] font-semibold text-ink">{t.score}</span>
+              </p>
+            ) : (
+              <p className="num mt-1.5 text-[12px] font-semibold tracking-[0.1em] text-gold">NEXT · {shortDate(t.date).toUpperCase()}</p>
+            )}
+            <p className="mt-1 flex items-center gap-1.5 truncate text-[12.5px] text-ink">
+              <Crest team={t.opponent} size={16} />
+              <span className="truncate">
+                {t.venue === "A" ? "at " : "v "}
+                {t.opponent}
+              </span>
+            </p>
+            <p className="num text-[11px] text-ink-dim">
+              {t.tone ? shortDate(t.date) : `${t.venue === "H" ? "home" : "away"}${t.kickoff ? ` · ${t.kickoff}` : ""}`}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </>
   );
 }
