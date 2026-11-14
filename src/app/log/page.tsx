@@ -33,9 +33,9 @@ export default async function LogPage({ searchParams }: { searchParams: Promise<
   const [editId, editDate] = (sp.night ?? "").split(":");
   const editing = training.due.find((n) => n.scheduleId === editId && n.date === editDate);
 
-  const suggestion = editing
-    ? ({ kind: "training", night: editing } as const)
-    : suggestSession(today, played ?? [], new Set((logged ?? []).map((s) => s.session_date as string)), training.due);
+  // the logger opens on a night only when asked to; otherwise the cards above are the way to confirm one,
+  // and a session logged here stays a different session
+  const suggestion = suggestSession(today, played ?? [], new Set((logged ?? []).map((s) => s.session_date as string)), editing ? [editing] : []);
 
   let prefill: NightPrefill | undefined;
   if (suggestion.kind === "training" && suggestion.night) {
