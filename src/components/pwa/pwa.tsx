@@ -8,7 +8,8 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
-import { removeSubscriptionAction, saveSubscriptionAction } from "@/lib/push/actions";
+import { removeSubscriptionAction, savePrefAction, saveSubscriptionAction } from "@/lib/push/actions";
+import { PREF_KEYS, PREF_META, type PrefKey, type Prefs } from "@/lib/push/prefs";
 
 type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 const DISMISS_KEY = "it.install.dismissed";
@@ -82,7 +83,7 @@ export function InstallNudge() {
       className="glass glass-deep fixed inset-x-3 z-40 p-4 sm:hidden"
       style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}
     >
-      <p className="text-[14px] text-ink">Add to your home screen to use it as an app. Match calls arrive as notifications.</p>
+      <p className="text-[14px] text-ink">Add to your home screen to use it as an app. Match calls and training reminders arrive as notifications.</p>
       {ios ? (
         <p className="mt-2 text-[13px] text-ink-dim">
           Tap <span className="text-ink">Share</span>, then <span className="text-ink">Add to Home Screen</span>.
@@ -113,8 +114,9 @@ export function InstallNudge() {
 type NotifyState = "checking" | "unsupported" | "install-first" | "blocked" | "off" | "on";
 
 /** The switch. Needs a signed-in member of a real club; the page decides whether to show it. */
-export function NotifyToggle() {
+export function NotifyToggle({ prefs: initialPrefs }: { prefs?: Prefs }) {
   const [state, setState] = useState<NotifyState>("checking");
+  const [prefs, setPrefs] = useState<Prefs | undefined>(initialPrefs);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -183,7 +185,7 @@ export function NotifyToggle() {
     "install-first": "on iPhone, first add Injury Time to your home screen (Share, then Add to Home Screen), then enable notifications there",
     blocked: "notifications are blocked for this site in your browser settings",
     off: "off on this device",
-    on: "on for this device: staff notices and match calls",
+    on: "on for this device",
   };
 
   return (
@@ -203,6 +205,38 @@ export function NotifyToggle() {
         </button>
       ) : null}
       {error ? <p role="alert" className="w-full text-[13px] text-doubt">{error}</p> : null}
+      {state === "on" && prefs ? (
+        <fieldset className="w-full border-t border-line pt-3" aria-label="which notifications">
+          <legend className="sr-only">which notifications</legend>
+          <ul className="flex flex-col gap-2.5">
+            {PREF_KEYS.map((k) => (
+              <li key={k}>
+                <label className="flex cursor-pointer items-start gap-3 text-[13px] leading-snug">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded-none accent-[var(--mint)]"
+                    checked={prefs[k]}
+                    disabled={busy}
+                    onChange={async (e) => {
+                      const next = e.target.checked;
+                      setBusy(true);
+                      setError(null);
+                      const r = await savePrefAction(k as PrefKey, next);
+                      if (r.ok) setPrefs(r.prefs);
+                      else setError(r.error);
+                      setBusy(false);
+                    }}
+                  />
+                  <span>
+                    <span className="text-ink">{PREF_META[k].label}</span>
+                    <span className="block text-ink-dim">{PREF_META[k].note}</span>
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </fieldset>
+      ) : null}
     </div>
   );
 }

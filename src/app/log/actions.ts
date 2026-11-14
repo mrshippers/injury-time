@@ -9,10 +9,13 @@ export type LogSessionInput = {
   sessionDate: string;
   kind: SessionKind;
   opponent?: string;
+  /** the scheduled training night this confirms */
+  scheduleId?: string;
   entries: LoadEntryInput[];
 };
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Validate and persist a session logged from /log. This is invoked directly
@@ -26,6 +29,9 @@ export async function logSessionAction(input: LogSessionInput): Promise<void> {
   }
   if (!SESSION_KINDS.includes(input.kind)) {
     throw new Error("invalid session kind");
+  }
+  if (input.scheduleId !== undefined && (typeof input.scheduleId !== "string" || !UUID_RE.test(input.scheduleId) || input.kind !== "training")) {
+    throw new Error("invalid training night");
   }
   if (!Array.isArray(input.entries) || input.entries.length === 0) {
     throw new Error("at least one player must be logged");
@@ -68,6 +74,7 @@ export async function logSessionAction(input: LogSessionInput): Promise<void> {
     sessionDate: input.sessionDate,
     kind: input.kind,
     opponent,
+    scheduleId: input.scheduleId,
     entries,
   });
 

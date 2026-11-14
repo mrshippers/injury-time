@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { getViewer } from "@/lib/viewer";
 
+import { PREF_KEYS, withDefaults, type PrefKey, type Prefs } from "./prefs";
+
 type Res = { ok: true } | { ok: false; error: string };
 export type BrowserSubscription = { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown } };
 
@@ -32,4 +34,18 @@ export async function removeSubscriptionAction(endpoint: string): Promise<Res> {
   const { error } = await (await createClient()).from("push_subscriptions").delete().eq("endpoint", endpoint);
   if (error) return { ok: false, error: error.message };
   return { ok: true };
+}
+
+/** Turn one kind of push on or off for the signed-in member, for the club they are viewing. */
+export async function savePrefAction(key: PrefKey, value: boolean): Promise<{ ok: true; prefs: Prefs } | { ok: false; error: string }> {
+  const viewer = await getViewer();
+  if (!viewer.userId || viewer.guest) return { ok: false, error: "sign in to your club to choose notifications" };
+  if (!PREF_KEYS.includes(key) || typeof value !== "boolean") return { ok: false, error: "unknown notification" };
+  const supabase = await createClient();
+  const { data: current, error: readErr } = await supabase.from("notification_prefs").select("*").eq("user_id", viewer.userId).eq("club_id", viewer.club.id).maybeSingle();
+  if (readErr) return { ok: false, error: readErr.message };
+  const prefs = { ...withDefaults(current), [key]: value };
+  const { error } = await supabase.from("notification_prefs").upsert({ user_id: viewer.userId, club_id: viewer.club.id, ...prefs, updated_at: new Date().toISOString() });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, prefs };
 }

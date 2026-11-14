@@ -9,6 +9,8 @@ import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ClubRole } from "@/lib/types";
 
+import { whoWants, type PrefKey } from "./prefs";
+
 export type PushPayload = {
   title: string;
   body?: string;
@@ -34,19 +36,27 @@ export function audienceUsers(members: readonly { user_id: string; role: ClubRol
   return [...new Set(members.filter((m) => roles.includes(m.role) && m.user_id !== except).map((m) => m.user_id))];
 }
 
-export async function pushToUsers(clubId: string, userIds: readonly string[], payload: PushPayload): Promise<PushReport> {
-  return pushEach(clubId, userIds.map((userId) => ({ userId, payload })));
+export async function pushToUsers(clubId: string, userIds: readonly string[], payload: PushPayload, pref?: PrefKey): Promise<PushReport> {
+  return pushEach(clubId, userIds.map((userId) => ({ userId, payload })), pref);
 }
 
 /**
  * One payload per person: a match call carries a token signed for that one
- * player, so it cannot be the same bytes for the whole squad.
+ * player, so it cannot be the same bytes for the whole squad. With `pref`, anyone
+ * who turned that kind of push off is left out (lib/push/prefs.ts).
  */
-export async function pushEach(clubId: string, items: readonly { userId: string; payload: PushPayload }[]): Promise<PushReport> {
+export async function pushEach(clubId: string, items: readonly { userId: string; payload: PushPayload }[], pref?: PrefKey): Promise<PushReport> {
   if (!configure()) return { sent: 0, pruned: 0, failed: 0, skipped: "not configured" };
-  if (!items.length) return { sent: 0, pruned: 0, failed: 0, skipped: "nobody subscribed" };
-  const byUser = new Map(items.map((i) => [i.userId, JSON.stringify(i.payload)]));
   const db = createAdminClient();
+  let wanted = items;
+  if (pref && items.length) {
+    const { data: rows, error: prefErr } = await db.from("notification_prefs").select("user_id, training_reminder, training_confirm, match_calls, notices").eq("club_id", clubId).in("user_id", items.map((i) => i.userId));
+    if (prefErr) throw prefErr;
+    const keep = new Set(whoWants(items.map((i) => i.userId), rows ?? [], pref));
+    wanted = items.filter((i) => keep.has(i.userId));
+  }
+  if (!wanted.length) return { sent: 0, pruned: 0, failed: 0, skipped: "nobody subscribed" };
+  const byUser = new Map(wanted.map((i) => [i.userId, JSON.stringify(i.payload)]));
   const { data, error } = await db.from("push_subscriptions").select("id, user_id, endpoint, p256dh, auth").eq("club_id", clubId).in("user_id", [...byUser.keys()]);
   if (error) throw error;
   if (!data?.length) return { sent: 0, pruned: 0, failed: 0, skipped: "nobody subscribed" };
@@ -72,12 +82,12 @@ export async function pushEach(clubId: string, items: readonly { userId: string;
   return { sent, pruned: dead.length, failed };
 }
 
-export async function pushToClub(clubId: string, roles: readonly ClubRole[], payload: PushPayload, except?: string | null): Promise<PushReport> {
+export async function pushToClub(clubId: string, roles: readonly ClubRole[], payload: PushPayload, except?: string | null, pref?: PrefKey): Promise<PushReport> {
   if (!configure()) return { sent: 0, pruned: 0, failed: 0, skipped: "not configured" };
   const db = createAdminClient();
   const { data, error } = await db.from("club_members").select("user_id, role").eq("club_id", clubId);
   if (error) throw error;
-  return pushToUsers(clubId, audienceUsers((data ?? []) as { user_id: string; role: ClubRole }[], roles, except), payload);
+  return pushToUsers(clubId, audienceUsers((data ?? []) as { user_id: string; role: ClubRole }[], roles, except), payload, pref);
 }
 
 /** One payload per silent player with an account; pure, for the test. */
@@ -111,5 +121,5 @@ export async function pushMatchCall(
   players: readonly { id: string; user_id: string | null }[],
   sign: ((playerId: string, fixtureId: string) => string) | null,
 ): Promise<PushReport> {
-  return pushEach(clubId, matchCallItems(fixture, players, sign));
+  return pushEach(clubId, matchCallItems(fixture, players, sign), "match_calls");
 }

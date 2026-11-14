@@ -7,6 +7,8 @@ import { ClubProfileForm, SeasonSetupForm, StaffBooks } from "@/components/club/
 import { listMembers, type MemberRow } from "@/lib/club/members";
 import type { ClubStaff } from "@/lib/types";
 import { StaffInvites, type InviteRow } from "@/components/club/staff-invites";
+import { TrainingSchedule } from "@/components/club/training-schedule";
+import { loadTraining } from "@/lib/club/training-data";
 import { longDate } from "@/components/squad/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -68,6 +70,8 @@ export default async function ClubPage() {
   let members: MemberRow[] = [];
   if (!viewer.guest && viewer.role === "manager") members = await listMembers(club.id);
 
+  const { schedule } = await loadTraining(supabase, club.id);
+
   const feedAllowed = feedAllowedFor(viewer);
   const feedReason = club.is_demo
     ? "The club's manager connects the league feed."
@@ -112,6 +116,15 @@ export default async function ClubPage() {
           The season the review covers, and the default formation for the starting XI.
         </p>
         <SeasonSetupForm season={club.season ?? ""} defaultFormation={club.settings?.default_formation ?? "4-2-3-1"} allowed={boardAllowed} reason={boardReason} />
+      </section>
+
+      <section aria-labelledby="training-h" className="mt-10 border-t border-line pt-6">
+        <p className="annot" id="training-h">{"// training"}</p>
+        <h2 className="mt-2 text-[20px] font-semibold text-ink">Weekly training nights</h2>
+        <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
+          Set the nights you train. Each one waits on the log screen once it has ended, ready to confirm in one tap. Nothing counts toward workload until it is confirmed.
+        </p>
+        <TrainingSchedule schedule={schedule} allowed={boardAllowed} reason={boardReason} today={today} />
       </section>
 
       <section aria-labelledby="feed-h" className="mt-10 border-t border-line pt-6">

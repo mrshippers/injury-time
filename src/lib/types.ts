@@ -170,6 +170,8 @@ export type Session = {
   kind: SessionKind
   opponent: string | null
   minutes_planned: number | null
+  /** the training night this session confirmed, if it came from the schedule (0019) */
+  schedule_id: string | null
   created_at: TimestampString
 }
 
@@ -263,6 +265,39 @@ export type PushSubscriptionRow = {
   created_at: TimestampString
 }
 
+/** a night the club trains, every week (0019). weekday is ISO: 1 Monday to 7 Sunday */
+export type TrainingSchedule = {
+  id: string
+  club_id: string
+  weekday: number
+  start_time: string
+  minutes: number
+  default_rpe: number
+  active_from: DateString
+  active_to: DateString | null
+  created_at: TimestampString
+}
+
+/** a scheduled night that did not happen (0019) */
+export type TrainingSkip = {
+  id: string
+  club_id: string
+  schedule_id: string
+  skipped_on: DateString
+  created_at: TimestampString
+}
+
+/** which pushes a person wants, per club (0019); no row means the defaults */
+export type NotificationPrefs = {
+  user_id: string
+  club_id: string
+  training_reminder: boolean
+  training_confirm: boolean
+  match_calls: boolean
+  notices: boolean
+  updated_at: TimestampString
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -298,7 +333,7 @@ export type Database = {
       }
       sessions: {
         Row: Session
-        Insert: Insertable<Session, 'opponent' | 'minutes_planned'>
+        Insert: Insertable<Session, 'opponent' | 'minutes_planned' | 'schedule_id'>
         Update: Partial<Session>
         Relationships: []
       }
@@ -383,6 +418,24 @@ export type Database = {
         Row: RtpStep
         Insert: Insertable<RtpStep, 'done_on'>
         Update: Partial<RtpStep>
+        Relationships: []
+      }
+      training_schedule: {
+        Row: TrainingSchedule
+        Insert: Insertable<TrainingSchedule, 'start_time' | 'minutes' | 'default_rpe' | 'active_from' | 'active_to'>
+        Update: Partial<TrainingSchedule>
+        Relationships: []
+      }
+      training_skips: {
+        Row: TrainingSkip
+        Insert: Insertable<TrainingSkip>
+        Update: Partial<TrainingSkip>
+        Relationships: []
+      }
+      notification_prefs: {
+        Row: NotificationPrefs
+        Insert: Omit<NotificationPrefs, 'training_reminder' | 'training_confirm' | 'match_calls' | 'notices' | 'updated_at'> & Partial<Pick<NotificationPrefs, 'training_reminder' | 'training_confirm' | 'match_calls' | 'notices' | 'updated_at'>>
+        Update: Partial<NotificationPrefs>
         Relationships: []
       }
       push_subscriptions: {

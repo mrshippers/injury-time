@@ -133,7 +133,7 @@ export async function postNoticeAction(input: PostNoticeInput): Promise<{ ok: tr
     // the tap on the shoulder; the notice row above is the record, so a push failure never fails the post
     const isCall = kind === "call" && fixtureId !== null && audience.includes("player");
     const others = isCall ? audience.filter((r) => r !== "player") : audience;
-    if (others.length) await pushToClub(viewer.club.id, others, { title, body: body ?? undefined, url: "/team", tag: `notice:${data.id}` }, viewer.userId).catch(() => null);
+    if (others.length) await pushToClub(viewer.club.id, others, { title, body: body ?? undefined, url: "/team", tag: `notice:${data.id}` }, viewer.userId, "notices").catch(() => null);
     if (isCall) {
       // players get in / out / unsure on the notification itself, signed for each of them
       const [{ data: fixture }, { data: squad }] = await Promise.all([
