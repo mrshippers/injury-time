@@ -9,7 +9,7 @@ export const metadata = { title: "join the staff - injury time.", robots: { inde
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ROLE_WORDS: Record<string, { word: string; does: string }> = {
   coach: { word: "a coach", does: "You log sessions, pick the side with the manager, and post to the squad." },
-  medical: { word: "medical staff", does: "You keep the injuries, the return-to-play steps and the notes. Only you and the player read a note; the manager sees the status and the date." },
+  medical: { word: "medical staff", does: "You manage injuries, return-to-play steps and notes. Only you and the player can read a note. The manager sees status and return date." },
 };
 
 /** A staff invite from the manager (0015). Before sign-in it shows the club and the role, nothing else. */
@@ -37,7 +37,7 @@ export default async function JoinPage(props: { params: Promise<{ token: string 
           </div>
         </>
       ) : (
-        <p className="mt-6 text-[15px] text-ink-dim">This link has been used or has run out (they last seven days). Ask the manager for a new one.</p>
+        <p className="mt-6 text-[15px] text-ink-dim">This link has been used or has expired (links last seven days). Ask the manager for a new one.</p>
       )}
     </main>
   );

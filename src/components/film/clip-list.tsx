@@ -28,7 +28,7 @@ export function ClipList({ clips }: { clips: Clip[] }) {
     return (
       <section aria-labelledby="film-list" className=" bg-panel/60 px-5 py-10 text-center">
         <p className="annot" id="film-list">{"// nothing in the room yet"}</p>
-        <p className="mt-3 text-[13px] text-ink-dim">Paste the first link on the right. A Veo match or a YouTube highlights reel both work.</p>
+        <p className="mt-3 text-[13px] text-ink-dim">Paste a Veo or YouTube link on the right.</p>
       </section>
     );
   }

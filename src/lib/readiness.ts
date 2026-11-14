@@ -1,10 +1,9 @@
 /**
- * Readiness vocabulary: the load engine's flag translated into a word a
- * non-league gaffer or physio would use, plus one line saying what to do.
+ * Readiness vocabulary: the workload engine's flag as a short word, plus one
+ * line on what to do.
  *
- * The ratio itself (ACWR) stays available for anyone who wants it, but it is
- * never the headline. "Red zone" is what changes what happens on Tuesday;
- * "1.47" is not.
+ * The ratio itself (ACWR) stays available but is never the headline. "Red zone"
+ * changes what happens on Tuesday; "1.47" does not.
  */
 import {
   DEFAULT_ACWR_THRESHOLDS,
@@ -29,23 +28,23 @@ export type Readiness = {
 const WORDS: Record<ReadinessKey, { word: string; gloss: string }> = {
   unknown: {
     word: "no reading",
-    gloss: "needs four weeks of sessions logged before load means anything",
+    gloss: "needs four weeks of logged sessions",
   },
   undercooked: {
-    word: "undercooked",
-    gloss: "doing less than his usual, sharpness will drop if it carries on",
+    word: "low load",
+    gloss: "below usual workload; match fitness drops if it continues",
   },
   steady: {
     word: "steady",
-    gloss: "training about what his body is used to",
+    gloss: "workload in line with usual",
   },
   pushing: {
-    word: "pushing it",
-    gloss: "doing more than usual, ease him off on the next training night",
+    word: "high load",
+    gloss: "above usual workload; reduce at the next session",
   },
   red: {
     word: "red zone",
-    gloss: "big jump on his usual load, the week a hamstring goes",
+    gloss: "sharp rise on usual workload; highest injury risk",
   },
 };
 

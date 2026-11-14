@@ -29,7 +29,7 @@ const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
 export function planSteps(severity: Severity, occurredOn: string, returnOn: string, today: string): { stage: RtpStage; target_date: string }[] | { error: string } {
   const start = Math.max(Date.parse(occurredOn), Date.parse(today));
   const end = Date.parse(returnOn);
-  if (Number.isNaN(end)) return { error: "pick the date he should be ready for a game" };
+  if (Number.isNaN(end)) return { error: "set the target return date" };
   const stages = LADDER[severity];
   const span = Math.round((end - start) / DAY);
   if (span < stages.length - 1) return { error: `${stages.length} stages need at least ${stages.length - 1} days; pick a later date` };

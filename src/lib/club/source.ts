@@ -22,7 +22,7 @@ export function sourceLine(club: Pick<Club, "season_source" | "season_synced_at"
     default:
       return {
         short: club.is_demo ? "results: entered by the club (a fictional demo side)" : "results: entered by the club",
-        long: "Results are entered here by the club's staff. Connect the club's league feed to pull fixtures and the table as well.",
+        long: "Club staff enter results. Connect the league feed to add fixtures and the table.",
       };
   }
 }

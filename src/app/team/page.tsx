@@ -84,7 +84,7 @@ export default async function TeamPage() {
               no match in the diary
               <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
             </h1>
-            <p className="mt-3 text-[13.5px] text-ink-dim">Add the next fixture and the squad can start calling in.</p>
+            <p className="mt-3 text-[13.5px] text-ink-dim">Add the next fixture so players can respond.</p>
           </>
         )}
         {viewer.guest ? null : (
@@ -134,7 +134,7 @@ export default async function TeamPage() {
       </div>
 
       <p className="annot mt-6 text-gold-dim">
-        in · out · unsure is the player&apos;s own call for the next match&ensp;·&ensp;it lands on every phone the moment it is made&ensp;·&ensp;a notice from the staff does the same
+        in · out · unsure is each player&apos;s response for the next match&ensp;·&ensp;it reaches every phone immediately&ensp;·&ensp;staff notices do the same
       </p>
     </main>
   );

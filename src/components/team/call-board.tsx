@@ -287,7 +287,7 @@ export function CallBoard({ clubId, fixture, players, calls, role, ownPlayerId, 
                     autoFocus
                     defaultValue={row.note ?? ""}
                     maxLength={140}
-                    placeholder="note for the gaffer"
+                    placeholder="note for the manager"
                     aria-label={`${p.name}: note`}
                     onBlur={(e) => saveNote(p.id, e.target.value)}
                     onKeyDown={(e) => {

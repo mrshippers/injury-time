@@ -119,7 +119,7 @@ describe("season context, a club with nothing in yet", () => {
     expect(ctx.hasSeason).toBe(false);
     expect(ctx.points).toBe(0);
     expect(ctx.line).toEqual([]);
-    expect(ctx.sentences[0]).toMatch(/no league games in yet/);
+    expect(ctx.sentences[0]).toMatch(/no league games played/);
   });
 });
 

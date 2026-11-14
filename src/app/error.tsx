@@ -21,8 +21,7 @@ export default function RouteError({ error, retry }: { error: Error & { digest?:
         <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-doubt align-baseline" />
       </h1>
       <p className="mt-4 max-w-[46ch] text-[15px] leading-relaxed text-ink-dim">
-        This page could not load its data just now. Try again, and if it keeps happening the reference below tells
-        us where to look.
+        This page could not load its data. Try again. If it persists, quote the reference below.
       </p>
       {error.digest ? <p className="num mt-3 text-[12px] text-ink-faint">ref {error.digest}</p> : null}
       <div className="mt-8 flex flex-wrap gap-3">

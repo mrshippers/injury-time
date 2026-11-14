@@ -37,7 +37,7 @@ export default async function MatchdayPage() {
       {!next ? (
         <>
           <h1 className="display mt-2 text-4xl">no match in the diary</h1>
-          <p className="mt-3 text-[14px] text-ink-dim">Add the next fixture and pick the side, then the dugout screen is ready.</p>
+          <p className="mt-3 text-[14px] text-ink-dim">Add the next fixture and pick the side to set up the matchday screen.</p>
         </>
       ) : xi.length < 7 ? (
         <>

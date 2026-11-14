@@ -14,7 +14,7 @@ const facts = {
 
 describe("health words", () => {
   it("plain is sessions and a phrase; detailed is the numbers", () => {
-    expect(loadLine("plain", facts)).toMatch(/^3 sessions this week · (well )?(over|under|about) his usual week$/);
+    expect(loadLine("plain", facts)).toMatch(/^3 sessions this week · (well )?(above|below|about) the usual week$/);
     expect(loadLine("plain", { ...facts, sessions: 0 })).toBe("nothing logged this week");
     const d = loadLine("detailed", facts);
     expect(d).toContain("7-day 1,240 AU");

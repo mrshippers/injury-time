@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "injury time.",
     short_name: "injury time",
-    description: "Squad availability and load for non-league. Your best eleven on the park more often.",
+    description: "Squad availability and workload for non-league clubs. Your strongest eleven on the pitch more often.",
     start_url: "/",
     scope: "/",
     display: "standalone",

@@ -15,8 +15,7 @@ export default async function StartPage() {
         <span aria-hidden className="ml-[0.08em] inline-block h-[0.14em] w-[0.14em] bg-mint align-baseline" />
       </h1>
       <p className="mt-4 max-w-[52ch] text-[15px] leading-relaxed text-ink-dim">
-        Who&apos;s in on Saturday, who&apos;s carrying a knock, and the season so far, in one place the whole squad uses from their phones. Free while we
-        pilot with clubs at Steps 5 to 7.
+        Saturday availability, injuries and the season so far, in one place the whole squad uses on their phones. Free during the pilot with Step 5 to 7 clubs.
       </p>
       <SignupFlow signedInAs={data.user?.email ?? null} />
     </main>

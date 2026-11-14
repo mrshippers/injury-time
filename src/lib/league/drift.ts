@@ -27,7 +27,7 @@ export function describeDrift(report: Pick<RefreshReport, "resultsDetail" | "fix
   if (results.length === 0 && diary === 0) return null;
   const lines: string[] = results.map(resultSentence);
   if (report.fixturesAdded > 0) lines.push(report.fixturesAdded === 1 ? "One new fixture in the diary." : `${report.fixturesAdded} new fixtures in the diary.`);
-  if ((report.fixturesChanged ?? 0) > 0) lines.push((report.fixturesChanged ?? 0) === 1 ? "A fixture moved or came out of the diary." : `${report.fixturesChanged} fixtures moved or came out of the diary.`);
+  if ((report.fixturesChanged ?? 0) > 0) lines.push((report.fixturesChanged ?? 0) === 1 ? "A fixture was moved or removed." : `${report.fixturesChanged} fixtures moved or came out of the diary.`);
   if (report.tableNew) lines.push("The league table is up to date.");
   if (report.playersChanged.length > 0) lines.push("Appearances and goals are up to date.");
 

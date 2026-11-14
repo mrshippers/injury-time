@@ -14,7 +14,7 @@ type Res<T> = ({ ok: true } & T) | { ok: false; error: string };
 export async function mintInviteAction(role: string): Promise<Res<{ url: string }>> {
   if (role !== "coach" && role !== "medical") return { ok: false, error: "an invite is for a coach or medical" };
   const viewer = await getViewer();
-  if (viewer.guest || viewer.club.is_demo) return { ok: false, error: "a real club's manager invites its own staff" };
+  if (viewer.guest || viewer.club.is_demo) return { ok: false, error: "only a real club's manager can invite staff" };
   const { data, error } = await (await createClient()).rpc("mint_staff_invite", { cid: viewer.club.id, invite_role: role });
   if (error || !data) return { ok: false, error: error?.message ?? "could not make the link" };
   revalidatePath("/club");

@@ -48,7 +48,7 @@ export function JoinForm({ token, signedInAs, role }: { token: string; signedInA
         <p className="text-[14px] text-ink">
           Link sent to <span className="num text-mint">{sent}</span>.
         </p>
-        <p className="mt-2 text-[13px] text-ink-dim">Open it on this device and you come back here to join.</p>
+        <p className="mt-2 text-[13px] text-ink-dim">Open it on this device to return here and join.</p>
       </div>
     );
 

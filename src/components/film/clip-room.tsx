@@ -203,8 +203,8 @@ export function ClipRoom({
               <p className="annot">{clip.source === "veo" ? "// veo match" : "// film elsewhere"}</p>
               <p className="max-w-[40ch] text-[13px] text-ink-dim">
                 {clip.source === "veo"
-                  ? "Veo film opens in the Veo app. Tag from there with the clock; the marks and the analysis work here."
-                  : "This film does not play here. Open it at source and tag by the clock."}
+                  ? "Veo film opens in the Veo app. Tag by the clock; marks and analysis work here."
+                  : "This film cannot play here. Open the source and tag by the clock."}
               </p>
               <a href={clip.url} target="_blank" rel="noreferrer" className={`${BUTTON} inline-flex items-center bg-mint text-mint-ink`}>
                 open the film
@@ -225,7 +225,7 @@ export function ClipRoom({
           </div>
 
           {events.length === 0 ? (
-            <p className="px-4 py-4 text-[13px] text-ink-dim">Nothing tagged yet. Watch, and mark the moments that matter.</p>
+            <p className="px-4 py-4 text-[13px] text-ink-dim">Nothing tagged yet. Mark key moments as you watch.</p>
           ) : (
             <ol className="max-h-[360px] overflow-y-auto">
               {events.map((e, i) => {
@@ -337,10 +337,10 @@ export function ClipRoom({
         ) : (
           <p className="px-4 py-5 text-[13px] text-ink-dim sm:px-5">
             {!analysisAvailable
-              ? "No analysis key on this server, so nothing gets written here. Set ANTHROPIC_API_KEY and it comes alive."
+              ? "No analysis key is set on this server. Set ANTHROPIC_API_KEY to enable analysis."
               : events.length === 0
-                ? "Tag the moments first. The analyst only writes from what you mark, never from what it imagines."
-                : "Press analyse and this fills with what to do on the day and what Tuesday looks like."}
+                ? "Tag the moments first. The analysis uses only what you mark."
+                : "Press analyse for a matchday plan and a training plan."}
           </p>
         )}
         {analysing ? (

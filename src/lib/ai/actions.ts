@@ -37,12 +37,12 @@ export async function writeBriefAction(fixtureId: string): Promise<ActionOutcome
 /* ── match report ── */
 
 
-const REPORT_SYSTEM = `You write match reports for an English non-league club's website and socials, the way the club's own media volunteer would: warm, specific, proud, never hype.
+const REPORT_SYSTEM = `You write match reports for an English non-league club's website and socials, in a professional club-media style: clear, specific and measured, never hype.
 
 Rules:
 - Use only the facts given (score, half-time score, scorers, competition, venue, crowd, what it means in the table or the cup). Never invent moments, minutes, assists or quotes.
 - Scorers: "(2)" means a brace, "pen" a penalty, "og" an own goal by the opposition.
-- British English, no em dashes. Call the squad "the boys", never "the lads"; say "formation", never "shape", no hashtags unless it's the club name.`;
+- British English, no em dashes. Refer to "the squad" or "the players"; say "formation", never "shape"; no hashtags unless it's the club name.`;
 
 export async function writeReportAction(resultId: string): Promise<ActionOutcome<MatchReport>> {
   const viewer = await getViewer();
@@ -71,15 +71,15 @@ Write the report.`,
 
 /* ── the analyst: questions about the season ── */
 
-const ANSWER_SYSTEM = `You are the analyst at an English non-league club. The gaffer asks you about the season and you answer from the club's results and the league table, which are given in full.
+const ANSWER_SYSTEM = `You are the analyst at an English non-league club. The manager asks you about the season and you answer from the club's results and the league table, which are given in full.
 
 Rules:
 - Count from the data; never estimate or invent. If the data can't answer it (minutes of goals, individual minutes played, opposition players), set can_answer false and say what would be needed.
-- Lead with the answer, then the numbers behind it. British English, no em dashes. Call the squad "the boys", never "the lads"; say "formation", never "shape", no jargon.`;
+- Lead with the answer, then the numbers behind it. British English, no em dashes. Refer to "the squad" or "the players"; say "formation", never "shape"; no jargon.`;
 
 export async function askNo2Action(question: string): Promise<ActionOutcome<No2Answer>> {
   const q = question.trim().slice(0, 300);
-  if (q.length < 4) return { ok: false, error: "ask a proper question, gaffer" };
+  if (q.length < 4) return { ok: false, error: "enter a question of at least four characters" };
   const viewer = await getViewer();
   const key = q.toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ");
   const existing = await getNote<No2Answer>(viewer.club.id, "answer", key);
@@ -93,7 +93,7 @@ export async function askNo2Action(question: string): Promise<ActionOutcome<No2A
     system: ANSWER_SYSTEM,
     schema: AnswerSchema,
     effort: "medium",
-    user: `Club: ${viewer.club.name}.\n\nResults this season (date | competition | venue | opponent | score | half time | crowd | our scorers):\n${results}\n\nLeague table:\n${table}\n\nThe gaffer asks: ${q}`,
+    user: `Club: ${viewer.club.name}.\n\nResults this season (date | competition | venue | opponent | score | half time | crowd | our scorers):\n${results}\n\nLeague table:\n${table}\n\nThe manager asks: ${q}`,
   });
   if (!res.ok) return res;
   await putNote(viewer.club.id, "answer", key, res.value, res.model);
@@ -102,7 +102,7 @@ export async function askNo2Action(question: string): Promise<ActionOutcome<No2A
 
 /* ── nudge the quiet ones ── */
 
-const NUDGE_SYSTEM = `You write the message a non-league manager drops in the team group chat to chase players who haven't said if they're available. Sound like the gaffer: short, direct, a bit of banter, never nasty, no corporate tone. Name the players. British English, no em dashes. Call the squad "the boys", never "the lads"; say "formation", never "shape", at most one emoji.`;
+const NUDGE_SYSTEM = `You write the message a non-league manager drops in the team group chat to chase players who haven't said if they're available. Write as the manager: short, direct and courteous, no banter, no corporate tone. Name the players. British English, no em dashes. Refer to "the squad" or "the players"; say "formation", never "shape"; at most one emoji.`;
 
 export async function writeNudgeAction(fixtureId: string, names: string[]): Promise<ActionOutcome<{ message: string }>> {
   const viewer = await getViewer();

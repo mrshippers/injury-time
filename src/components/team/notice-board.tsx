@@ -86,7 +86,7 @@ export function NoticeBoard({ clubId, notices, canPost, role, fixture, now }: No
       ) : null}
 
       {visible.length === 0 ? (
-        <p className="px-4 py-6 text-[13px] text-ink-dim sm:px-5">Nothing posted yet. The first notice lands here for everyone at once.</p>
+        <p className="px-4 py-6 text-[13px] text-ink-dim sm:px-5">No notices yet. A posted notice reaches the whole squad at once.</p>
       ) : (
         <ul className="divide-y divide-line" data-testid="notice-feed">
           {visible.map((n) => (

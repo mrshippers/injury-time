@@ -78,7 +78,7 @@ export async function answerCall(
   const club = await deps.store.club(player.club_id);
   if (!club || (club.is_demo && !club.demo_writable)) return { ok: false, code: 404, reason: "this club does not take calls" };
   if (fixture.match_date < deps.today) return { ok: false, code: 409, reason: "that match has been played" };
-  if (fixture.calls_close_at && Date.parse(fixture.calls_close_at) <= deps.nowSeconds * 1000) return { ok: false, code: 409, reason: "answers for this match have closed; tell the gaffer" };
+  if (fixture.calls_close_at && Date.parse(fixture.calls_close_at) <= deps.nowSeconds * 1000) return { ok: false, code: 409, reason: "responses for this match have closed; contact the manager" };
   const status = input.status as CallStatus;
   await deps.store.upsertCall({
     club_id: player.club_id,

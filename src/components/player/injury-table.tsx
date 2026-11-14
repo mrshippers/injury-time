@@ -47,8 +47,8 @@ export default function InjuryTable({
       {injuries.length === 0 ? (
         <p className="mt-4 text-sm text-ink-dim">
           {mode === "plain"
-            ? "Nothing logged. Not the same as nothing happening - if he has been carrying something, it is not in here yet."
-            : "No injury records. Absence of a record is not evidence of absence; unlogged niggles do not appear here."}
+            ? "No injuries logged. Unlogged knocks do not appear here."
+            : "No injury records. Unlogged knocks do not appear here."}
         </p>
       ) : (
         <>

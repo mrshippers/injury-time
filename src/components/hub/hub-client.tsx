@@ -68,7 +68,7 @@ export function HubEditor({ playerId, profile, moments, startOpen }: { playerId:
     >
       <p className="annot">{"// your page, your words. football only: injuries live with the physio, not here"}</p>
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="what the lads call you">
+        <Field label="nickname">
           <input className={FIELD} maxLength={24} value={v.nickname} onChange={set("nickname")} placeholder="Jonno" />
         </Field>
         <Field label="name on the back of the shirt">
@@ -103,7 +103,7 @@ export function HubEditor({ playerId, profile, moments, startOpen }: { playerId:
         <Field label="the player you grew up on">
           <input className={FIELD} maxLength={40} value={v.hero} onChange={set("hero")} />
         </Field>
-        <Field label="clubs before this one" hint="oldest first, commas between, up to eight">
+        <Field label="clubs before this one" hint="up to eight, oldest first, comma separated">
           <input className={FIELD} maxLength={400} value={v.previousClubs} onChange={set("previousClubs")} placeholder="Sunday side, youth club, last season's" />
         </Field>
         <div className="sm:col-span-2">

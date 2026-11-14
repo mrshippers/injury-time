@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const c = PILOT_CLUBS[club];
   if (!c) return {};
   const title = `Injury Time for ${c.name}`;
-  const description = "A management platform for non-league clubs. In, out or unsure from the boys' phones, the eleven fills itself, the opposition read before every game, the match report after it.";
+  const description = "A management platform for non-league clubs. Players respond in, out or unsure from their phones, the side selects itself, the opposition is analysed before every game and the match report is written after it.";
   return {
     metadataBase: new URL(pilotBaseUrl()),
     title,
@@ -78,14 +78,12 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           <div className="mt-8 flex flex-col gap-4">
             <p className={P}>Yes gaff, hope you&apos;re well.</p>
             <p className={P}>
-              This is the thing I was telling you about. It&apos;s a club management platform: the boys say in or out from their phones, the team sheet picks itself from who&apos;s available, every
-              player has a fitness page, and the league table, cups and the matchday forecast are all in one place.
+              This is the thing I was telling you about. It&apos;s a club management platform: players say in or out from their phones, the team sheet selects itself from who is available, every player has a fitness page, and the league table, cups and matchday forecast are in one place.
             </p>
             <p className={P}>
-              Before every game it reads the opposition off the league table: how they do at home or away, their form, the kind of games they play, how we do against sides like them, and the
-              analyst turns that into a plan. After the game the match report&apos;s written for the website and the socials, ready to copy.
+              Before every game it analyses the opposition from the league table: home and away record, form, style of games, and our record against similar sides. The analyst turns that into a plan. After the game it drafts the match report for the website and socials.
             </p>
-            <p className={P}>I&apos;ve loaded Belstone&apos;s squad and results so have a scroll.</p>
+            <p className={P}>I&apos;ve loaded Belstone&apos;s squad and results, so have a look.</p>
             <p className={P}>
               One thing I need your help with. The league data comes from Football Web Pages and they only give keys to clubs. Could I cc you into an email to them saying I&apos;m doing the data analysis
               for the club?
@@ -118,8 +116,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           <div>
             <h2 className={H2}>Who&apos;s in on Saturday</h2>
             <p className={`${P} mt-4`}>
-              Every player gets one switch: in, out or unsure. It shows on everyone&apos;s phone as soon as it&apos;s tapped. Set a time answers close, and anyone who&apos;s gone quiet you
-              answer for, or fill the rest with what they said last time in one tap.
+              Each player has one switch: in, out or unsure. It appears on every phone immediately. Set a closing time, answer for anyone who has not responded, or fill the rest with their last answers in one tap.
             </p>
           </div>
           <div>
@@ -130,9 +127,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
         <div data-reveal className="mt-20">
           <h2 className={H2}>Know who you&apos;re playing</h2>
           <p className={`${P} mt-4`}>
-            Before every game: the chances of winning, drawing and losing, xG for both sides, and the read. Their record at home or away against the rest of the league, their form since the last
-            table, the kind of games they play, how we do against sides around them and how we do from behind at half time. Then the analyst writes the plan: our edge, where they hurt us, what to do if
-            we go ahead or behind.
+            Before every game: win, draw and loss probabilities, xG for both sides, and the read. Their home and away record, recent form, style of games, our record against similar sides and our record from behind at half time. The analyst then writes the plan: our advantage, their threats, and how to play if we lead or trail.
           </p>
           <figure className="mt-8">
             {/* a phone gets the phone layout, so the words stay readable */}
@@ -163,7 +158,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               preload="metadata"
               width={756}
               height={520}
-              aria-label="The squad room for Belstone: the eleven on a floodlit pitch, 4-2-3-1, our own goal at the bottom, the camera drifting slowly"
+              aria-label="The squad room for Belstone: the starting eleven on a floodlit pitch in a 4-2-3-1, with the camera moving slowly"
               className="h-auto w-full  bg-panel"
             />
           </figure>
@@ -173,8 +168,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           <div>
             <h2 className={H2}>Every player&apos;s fitness</h2>
             <p className={`${P} mt-4`}>
-              Each player has his own page: a 3D body you can turn round that lights up where the knocks are, fit, doubt or out in plain English, and a return-to-play ladder for anyone coming back.
-              Check-ins go by private link and only once the player has said yes.
+              Each player has a page with a 3D body model that highlights injuries, a plain fit, doubt or out status, and a return-to-play plan. Check-ins use a private link and only start once the player consents.
             </p>
           </div>
           <figure className="mx-auto w-full max-w-[424px]">
@@ -197,8 +191,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
         <div data-reveal className="mt-20">
           <h2 className={H2}>The whole season, cups included</h2>
           <p className={`${P} mt-4`}>
-            Not just the league. The FA Vase, the Herts Cup and the CCL Challenge Cup sit in the same diary and the same season page. Every dot on the line is a game: hover it, or tap it, and it tells you the
-            score.
+            Leagues and cups together. The FA Vase, Herts Cup and CCL Challenge Cup share the same diary and season page. Each dot on the line is a game; hover or tap it for the score.
           </p>
           {ctx && season ? (
             <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:items-end">
@@ -224,8 +217,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
           <div className="lg:order-2">
             <h2 className={H2}>The report writes itself</h2>
             <p className={`${P} mt-4`}>
-              Once the score&apos;s in, one tap writes the match report for the website and a post for the socials, from the score, the half time, the scorers and the crowd. Nothing made up, nothing posted for
-              you: copy it, tweak it, put it out. And ask the analyst anything about the season, it answers from the results with the numbers.
+              Once the score is in, one tap drafts the match report and a social post from the score, half-time score, scorers and crowd. Nothing is invented and nothing is posted for you. The analyst also answers questions about the season from the results, with the numbers.
             </p>
           </div>
           <figure className="lg:order-1">
@@ -257,12 +249,12 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
         <p className="annot" id="clicks-h">{"// fewer clicks, because it's football"}</p>
         <ul className="mt-5 grid gap-x-10 gap-y-3 sm:grid-cols-2">
           {[
-            "The side fills itself from last match and who said in.",
-            "One tap answers for everyone who hasn't, as they did last time.",
-            "The result form opens on the game that's waiting for its score.",
+            "The side is pre-filled from the last match and who said in.",
+            "One tap fills answers for everyone who has not responded, using their last answers.",
+            "The result form opens on the game awaiting a score.",
             "The match log opens on the game you played on Saturday.",
             "It remembers your formation, your filters and a side you haven't saved yet.",
-            "Squad numbers and apps come from the league's own pages, so nobody types them.",
+            "Squad numbers and appearances come from the league's pages, so there is nothing to type.",
           ].map((t) => (
             <li key={t} className="relative pl-5 text-[15px] leading-snug text-ink">
               <span aria-hidden className="absolute left-0 top-[0.62em] h-px w-3 bg-gold" />
@@ -293,12 +285,12 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               <p>
                 <Lamp on word="live" />
                 <br />
-                Paste a Veo or YouTube link, tag the goals and key moments, and jump straight to the second.
+                Paste a Veo or YouTube link, tag goals and key moments, and jump to the exact second.
               </p>
               <p>
                 <Lamp on={false} word="next" />
                 <br />
-                Straight from the camera, once Veo opens its partner connection.
+                Direct from the camera once Veo opens its partner connection.
               </p>
             </div>
           </article>
@@ -308,12 +300,12 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               <p>
                 <Lamp on word="live" />
                 <br />
-                Fit, doubt or out in plain English, a return-to-play ladder, check-ins by private link where the player says yes first.
+                Fit, doubt or out status, a return-to-play plan, and check-ins by private link with player consent.
               </p>
               <p>
                 <Lamp on={false} word="next" />
                 <br />
-                A load flag once four weeks of sessions are logged.
+                A workload flag once four weeks of sessions are logged.
               </p>
             </div>
           </article>
@@ -323,7 +315,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               <p>
                 <Lamp on={false} word="next" />
                 <br />
-                Before every game each player gets his own sheet: who you&apos;re playing and how they&apos;re doing, what the formation asks of him, his job on set pieces. The gaffer edits it before it goes out.
+                Before every game each player receives a sheet: the opponent and their form, what the formation asks of the player, and set-piece duties. The manager edits it before it is sent.
               </p>
             </div>
           </article>
@@ -333,7 +325,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               <p>
                 <Lamp on word="live" />
                 <br />
-                Set when answers close, Thursday 9pm say. The boys see the clock, and whoever hasn&apos;t answered by then shows up in one list.
+                Set a closing time, such as Thursday 9pm. Players see the countdown and anyone who has not answered appears in one list.
               </p>
             </div>
           </article>
@@ -343,7 +335,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
               <p>
                 <Lamp on word="live" />
                 <br />
-                The forecast for kick-off at the ground, home or away, from the week before: rain, wind, temperature. Moulds or studs, sorted.
+                The forecast for kick-off at the ground, home or away, from the week before: rain, wind and temperature, to help choose boots.
               </p>
             </div>
           </article>
@@ -355,8 +347,8 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
         <p className="annot" id="terms-h">{"// the small print, in plain words"}</p>
         <ul className="mt-5 grid gap-x-10 gap-y-3 sm:grid-cols-2">
           {[
-            "No health information unless the player says yes first.",
-            "No under-18s, and nothing sold or shared, ever.",
+            "No health information without player consent.",
+            "No under-18s. Nothing is sold or shared.",
           ].map((t) => (
             <li key={t} className="relative pl-5 text-[15px] leading-snug text-ink">
               <span aria-hidden className="absolute left-0 top-[0.62em] h-px w-3 bg-gold" />

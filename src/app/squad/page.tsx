@@ -50,7 +50,7 @@ export default async function SquadPage() {
       <SquadRoom rows={rows} nextFixture={nextFixture} saved={saved} previous={previous} calls={calls} clubId={club.id} canManage={viewer.can("manage_squad")} canPick={viewer.can("pick_side")} defaultFormation={club.settings?.default_formation ?? null} />
 
       <p className="annot mt-5 text-gold-dim">
-        training is this week against his usual: steady · pushing it · undercooked · red zone&ensp;·&ensp;no reading until four weeks are logged&ensp;·&ensp;gold ring = playing out of position
+        workload this week against usual: steady · high load · low load · red zone&ensp;·&ensp;no reading until four weeks are logged&ensp;·&ensp;gold ring: playing out of position
       </p>
     </main>
   );

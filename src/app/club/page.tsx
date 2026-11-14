@@ -96,7 +96,7 @@ export default async function ClubPage() {
         <p className="annot" id="club-h">{"// the club"}</p>
         <h2 className="mt-2 text-[20px] font-semibold text-ink">As it names itself</h2>
         <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
-          The name on the badge, the league and division, the ground and the colours. The home page and the review read these.
+          Club name, league and division, ground and colours. Used on the home page and the review.
         </p>
         <ClubProfileForm
           values={{ name: club.name, league: club.league, division: club.division ?? "", ground: club.ground ?? "", founded: club.founded ? String(club.founded) : "", home: club.colours?.home ?? "", away: club.colours?.away ?? "" }}
@@ -109,7 +109,7 @@ export default async function ClubPage() {
         <p className="annot" id="season-h">{"// the season"}</p>
         <h2 className="mt-2 text-[20px] font-semibold text-ink">Which season, and how the side opens</h2>
         <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
-          The season the review runs on, and the formation the starting XI opens in before anyone has placed a name.
+          The season the review covers, and the default formation for the starting XI.
         </p>
         <SeasonSetupForm season={club.season ?? ""} defaultFormation={club.settings?.default_formation ?? "4-2-3-1"} allowed={boardAllowed} reason={boardReason} />
       </section>
@@ -119,16 +119,13 @@ export default async function ClubPage() {
         <h2 className="mt-2 text-[20px] font-semibold text-ink">Your club&apos;s own key, not ours</h2>
         <ol className="mt-3 flex max-w-[64ch] flex-col gap-2 text-[14px] leading-relaxed text-ink-dim">
           <li>
-            <span className="num mr-2 text-gold">01</span>Football Web Pages gives non-league clubs an API key free. The club secretary asks for it from
-            footballwebpages.co.uk, as the club.
+            <span className="num mr-2 text-gold">01</span>Football Web Pages provides non-league clubs a free API key. The club secretary requests it at footballwebpages.co.uk.
           </li>
           <li>
-            <span className="num mr-2 text-gold">02</span>Paste it here with the team id from your club&apos;s page address. Injury Time checks it
-            with a real sync before keeping it, and never shows it again.
+            <span className="num mr-2 text-gold">02</span>Paste it here with the team ID from your club&apos;s page address. It is verified with a test sync before saving and is not shown again.
           </li>
           <li>
-            <span className="num mr-2 text-gold">03</span>Fixtures, results and the table then pull every morning at 06:15. No key, no problem: enter
-            results below.
+            <span className="num mr-2 text-gold">03</span>Fixtures, results and the table then sync daily at 06:15. Without a key, enter results below.
           </li>
         </ol>
         {feed ? (
@@ -143,8 +140,7 @@ export default async function ClubPage() {
         <p className="annot" id="feed-squad-h">{"// the squad from the feed"}</p>
         <h2 className="mt-2 text-[20px] font-semibold text-ink">The league&apos;s list, not your typing</h2>
         <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
-          With the feed connected, every name on the league&apos;s appearance list comes in. Anyone already in the squad is left as you set them. A
-          name that is close but not the same waits for you to say which. The feed has no shirt numbers, so those stay yours to add.
+          Imports every name on the league&apos;s appearance list. Existing squad members are unchanged. Near matches wait for you to confirm. The feed has no shirt numbers; add them yourself.
         </p>
         <FeedSquad allowed={feedAllowed && !!feed} reason={feedAllowed && !feed ? "Connect the league feed above first." : feedReason} />
       </section>
@@ -153,14 +149,12 @@ export default async function ClubPage() {
         <p className="annot" id="staff-h">{"// the staff"}</p>
         <h2 className="mt-2 text-[20px] font-semibold text-ink">Who is on the books</h2>
         <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
-          The manager, the coaches, medical and the rest, each with a title and the date they came. The review counts their season from here; a login
-          with no name is listed until you put one to it.
+          Manager, coaches, medical and other staff, each with a title and start date. The review reads time in post from here. A login without a name stays listed until you add one.
         </p>
         <StaffBooks staff={staff} members={members} allowed={boardAllowed} reason={boardReason} today={today} />
         <h3 className="mt-8 text-[16px] font-semibold text-ink">Bring your coaches and physio in</h3>
         <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
-          A link for each person. A coach logs sessions and posts to the squad; medical keeps the injuries and the notes, which only medical and the
-          player themselves can read.
+          One link per person. Coaches log sessions and post to the squad. Medical staff keep injuries and notes, which only medical staff and the player can read.
         </p>
         <StaffInvites
           allowed={feedAllowed}
@@ -174,7 +168,7 @@ export default async function ClubPage() {
         <p className="annot" id="result-h">{"// enter a result"}</p>
         <h2 className="mt-2 text-[20px] font-semibold text-ink">You were there, so it counts</h2>
         <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-ink-dim">
-          Cup ties, friendlies, or every game if the club has no feed. The points line and the form rebuild from what you enter.
+          Cup ties and friendlies, or every game if there is no feed. The points line and form update from what you enter.
         </p>
         <ResultForm allowed={resultAllowed} reason={resultReason} today={today} awaiting={awaiting} />
         {results?.length ? (

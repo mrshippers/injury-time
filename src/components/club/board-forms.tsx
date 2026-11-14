@@ -152,7 +152,7 @@ export function StaffBooks({ staff, members, allowed, reason, today }: { staff: 
 
   const remove = (s: ClubStaff) =>
     start(async () => {
-      if (!confirm(`Take ${s.name} off the books entirely? If they have left, set the date instead.`)) return;
+      if (!confirm(`Delete ${s.name}? If they have left, set a leave date instead.`)) return;
       setState(await removeStaffAction(s.id));
     });
 
@@ -190,7 +190,7 @@ export function StaffBooks({ staff, members, allowed, reason, today }: { staff: 
       ) : null}
       {unnamed.length > 0 ? (
         <div className="mt-4">
-          <p className="text-[13px] text-ink-dim">Signed in but not on the books yet. Put a name to them so the review can count their season.</p>
+          <p className="text-[13px] text-ink-dim">Signed in, no staff record. Add a name so the review includes them.</p>
           <ul className="mt-2 border-t border-line" aria-label="logins with no name">
             {unnamed.map((m) => (
               <li key={m.user_id} className="border-b border-line py-2.5">

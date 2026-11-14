@@ -36,7 +36,7 @@ export function CheckinsPanel({ players, today, isDemo, canSend }: { players: P[
       <p className="annot" id="checkins-h">{"// check-ins today"}</p>
       {isDemo ? (
         <p className="mt-2 text-[13.5px] leading-snug text-ink-dim">
-          Players check in from a private link: how sore, how hard the last session felt, available or not. A public demo never takes health data from anyone, so there are none here. On your own club each player gets a link to send.
+          Players check in by private link: soreness, session effort and availability. The public demo takes no health data. Your own club gets one link per player.
         </p>
       ) : (
         <>

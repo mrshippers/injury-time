@@ -30,7 +30,7 @@ export default async function FilmPage() {
             <ClubStop team={viewer.club.name} />
           </h1>
           <p className="mt-2 max-w-[52ch] text-[13px] text-ink-dim">
-            Paste a Veo or YouTube link, tag what happened, and the analyst turns it into Saturday&apos;s plan and Tuesday&apos;s session.
+            Paste a Veo or YouTube link and tag key moments. The analysis produces a matchday plan and a training session.
           </p>
         </div>
         <p className="num text-[12px] text-ink-dim">
@@ -44,7 +44,7 @@ export default async function FilmPage() {
           {viewer.can("manage_film") ? (
             <AddFilmForm fixtures={games.fixtures} results={games.results} />
           ) : (
-            <p className=" bg-panel/60 px-5 py-4 text-[13px] text-ink-dim">Staff add film. Ask the gaffer.</p>
+            <p className=" bg-panel/60 px-5 py-4 text-[13px] text-ink-dim">Staff add film. Ask the manager.</p>
           )}
           {analysisConfigured() || veoConfigured() ? (
             <p className="annot mt-4 text-gold-dim">{[analysisConfigured() ? "analyst ready" : null, veoConfigured() ? "veo connected" : null].filter(Boolean).join(" · ")}</p>
