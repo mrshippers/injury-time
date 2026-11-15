@@ -35,7 +35,7 @@ jobs:
       - name: reseed kilburn athletic (fictional, anchored to today)
         run: |
           npx tsx scripts/gen-seed-sql.ts > /tmp/kilburn.sql
-          supabase db query --linked -f /tmp/kilburn.sql
+          supabase db query --linked --yes -f /tmp/kilburn.sql
       - name: refresh belstone season (snapshot unless a key is set)
         continue-on-error: true
         run: npx tsx scripts/refresh-season.ts
