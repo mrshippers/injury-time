@@ -18,24 +18,39 @@ import { SessionHeader } from "./SessionHeader";
 import { PlayerRow } from "./PlayerRow";
 import { StickyBar } from "./StickyBar";
 
+/** A scheduled training night the logger opens on: saving it confirms that night. */
+export type NightPrefill = {
+  scheduleId: string;
+  date: string;
+  label: string;
+  minutes: number;
+  rpe: number;
+  /** efforts that differ from the usual, by player */
+  rows: Record<string, number>;
+};
+
 export function SessionForm({
   club,
   players,
   today,
   suggestion = { kind: "training" },
+  prefill,
 }: {
   club: Club;
   players: RosterPlayer[];
   today: string;
   /** the session most likely to need logging: a match played in the last three days, else training */
   suggestion?: SessionSuggestion;
+  prefill?: NightPrefill;
 }) {
   const [kind, setKind] = useState<SessionKind>(suggestion.kind);
-  const [sessionDate, setSessionDate] = useState(suggestion.kind === "match" ? suggestion.date : today);
+  const [sessionDate, setSessionDate] = useState(suggestion.kind === "match" ? suggestion.date : (prefill?.date ?? today));
   const [opponent, setOpponent] = useState(suggestion.kind === "match" ? suggestion.opponent : "");
-  const [def, setDef] = useState<SessionDefault>({ rpe: null, minutes: defaultMinutesFor(suggestion.kind) });
+  const [def, setDef] = useState<SessionDefault>(
+    suggestion.kind === "training" && prefill ? { rpe: prefill.rpe, minutes: prefill.minutes } : { rpe: null, minutes: defaultMinutesFor(suggestion.kind) },
+  );
   const [rows, setRows] = useState<Record<string, RowState>>(() =>
-    Object.fromEntries(players.map((p) => [p.id, initialRowState()])),
+    Object.fromEntries(players.map((p) => [p.id, { ...initialRowState(), rpe: suggestion.kind === "training" ? (prefill?.rows[p.id] ?? null) : null }])),
   );
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -111,6 +126,8 @@ export function SessionForm({
           sessionDate,
           kind,
           opponent: kind === "match" && opponent.trim() ? opponent.trim() : undefined,
+          // saving the night as opened confirms it; change the kind or date and it is a different session
+          scheduleId: prefill && kind === "training" && sessionDate === prefill.date ? prefill.scheduleId : undefined,
           entries,
         });
       } catch {
@@ -124,6 +141,11 @@ export function SessionForm({
       {suggestion.kind === "match" && !fromMatchday ? (
         <p role="status" className="annot mx-auto w-full max-w-[1240px] px-4 pt-5 text-gold sm:px-8">
           {`// opened on the match v ${suggestion.opponent}, ${suggestion.date} · change the kind above if it is training`}
+        </p>
+      ) : null}
+      {suggestion.kind === "training" && prefill && !fromMatchday ? (
+        <p role="status" className="annot mx-auto w-full max-w-[1240px] px-4 pt-5 text-gold sm:px-8">
+          {`// opened on ${prefill.label}, ${prefill.date} · saving confirms that night`}
         </p>
       ) : null}
       {fromMatchday ? (

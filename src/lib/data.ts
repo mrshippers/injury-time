@@ -434,6 +434,9 @@ export async function logSession(input: {
   sessionDate: string;
   kind: SessionKind;
   opponent?: string;
+  /** the scheduled training night this confirms; one session per night */
+  scheduleId?: string;
+  minutesPlanned?: number;
   entries: LoadEntryInput[];
 }): Promise<{ sessionId: string }> {
   const club = await getActiveClub();
@@ -445,6 +448,8 @@ export async function logSession(input: {
       session_date: input.sessionDate,
       kind: input.kind,
       opponent: input.opponent ?? null,
+      schedule_id: input.scheduleId ?? null,
+      minutes_planned: input.minutesPlanned ?? null,
     })
     .select("id")
     .single();

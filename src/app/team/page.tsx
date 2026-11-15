@@ -11,6 +11,7 @@ import { CallBoard } from "@/components/team/call-board";
 import { CheckinsPanel } from "@/components/team/checkins-panel";
 import { NoticeBoard } from "@/components/team/notice-board";
 import { NotifyToggle } from "@/components/pwa/pwa";
+import { withDefaults } from "@/lib/push/prefs";
 import { createClient } from "@/lib/supabase/server";
 import type { PlayerCheckin } from "@/lib/types";
 import { longDate } from "@/components/squad/format";
@@ -39,10 +40,16 @@ export default async function TeamPage() {
     checkins = (data ?? []) as PlayerCheckin[];
   }
 
+  let prefs = undefined;
+  if (!viewer.guest && viewer.userId) {
+    const { data } = await (await createClient()).from("notification_prefs").select("*").eq("user_id", viewer.userId).eq("club_id", viewer.club.id).maybeSingle();
+    prefs = withDefaults(data);
+  }
+
   return (
     <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 py-7 sm:px-8 sm:py-9">
       <div className="mb-6 border-b border-line pb-4">
-        {viewer.guest ? null : <NotifyToggle />}
+        {viewer.guest ? null : <NotifyToggle prefs={prefs} />}
       </div>
       <header className="mb-6">
         <p className="annot">{`// matchday · ${viewer.club.name.toLowerCase()}`}</p>

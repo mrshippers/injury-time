@@ -253,6 +253,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
             "One tap fills answers for everyone who has not responded, using their last answers.",
             "The result form opens on the game awaiting a score.",
             "The match log opens on the game you played on Saturday.",
+            "Training nights repeat every week. Each one waits for a single tap to confirm.",
             "It remembers your formation, your filters and a side you haven't saved yet.",
             "Squad numbers and appearances come from the league's pages, so there is nothing to type.",
           ].map((t) => (
@@ -269,7 +270,7 @@ export default async function PilotPage({ params }: { params: Promise<Params> })
         <p className="annot" id="web-h">{"// on the web and on the phone"}</p>
         <h2 className={`${H2} mt-4`}>No app store, nothing to download</h2>
         <p className={`${P} mt-4`}>
-          It&apos;s a website that lives on the home screen like an app. Open the link, tap Share then Add to Home Screen on an iPhone (Android offers it itself). Match calls arrive as notifications. If clubs want a
+          It&apos;s a website that lives on the home screen like an app. Open the link, tap Share then Add to Home Screen on an iPhone (Android offers it itself). Match calls and training reminders arrive as notifications, and each person chooses which. If clubs want a
           store version later, it&apos;s the same thing in a wrapper.
         </p>
       </section>
